@@ -2,7 +2,7 @@ import './style.css';
 import './app.css';
 
 import { EventsOn } from '../wailsjs/runtime/runtime.js';
-import { SendMessage, GetServers, GetNick } from '../wailsjs/go/main/App.js';
+import { SendMessage, GetServers, GetNick, PartChannel } from '../wailsjs/go/main/App.js';
 
 // ── State ──────────────────────────────────────────────────
 const state = {
@@ -185,6 +185,28 @@ function renderNicklist() {
   }).join('');
 }
 
+// ── Context menu ────────────────────────────────────────────
+function showCtxMenu(x, y, items) {
+  removeCtxMenu();
+  const menu = document.createElement('div');
+  menu.id = 'ctx-menu';
+  menu.style.left = x + 'px';
+  menu.style.top  = y + 'px';
+  items.forEach(({ label, cls, action }) => {
+    const el = document.createElement('div');
+    el.className = 'ctx-item' + (cls ? ' ' + cls : '');
+    el.textContent = label;
+    el.addEventListener('click', () => { removeCtxMenu(); action(); });
+    menu.appendChild(el);
+  });
+  document.body.appendChild(menu);
+  document.addEventListener('mousedown', removeCtxMenu, { once: true });
+}
+
+function removeCtxMenu() {
+  document.getElementById('ctx-menu')?.remove();
+}
+
 // ── Events ─────────────────────────────────────────────────
 function bindEvents() {
   document.querySelectorAll('.channel-item').forEach(el => {
@@ -197,6 +219,31 @@ function bindEvents() {
       state.activeServer  = el.dataset.server;
       state.activeChannel = el.dataset.channel;
       render();
+    });
+
+    el.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      const server  = el.dataset.server;
+      const channel = el.dataset.channel;
+      showCtxMenu(e.clientX, e.clientY, [
+        {
+          label: 'Leave ' + channel,
+          cls: 'danger',
+          action: () => {
+            PartChannel(server, channel).catch(console.error);
+            const srv = state.servers.find(s => s.name === server);
+            if (srv) srv.channels = srv.channels.filter(c => c.name !== channel);
+            if (state.activeChannel === channel) {
+              const remaining = srv?.channels[0];
+              state.activeChannel = remaining?.name || '';
+              state.activeServer  = remaining ? server : '';
+              srv?.channels.forEach(c => c.active = false);
+              if (remaining) remaining.active = true;
+            }
+            render();
+          },
+        },
+      ]);
     });
   });
 

@@ -6,4 +6,6 @@ export function GetNick(arg1:string):Promise<string>;
 
 export function GetServers():Promise<Array<config.Server>>;
 
+export function PartChannel(arg1:string,arg2:string):Promise<void>;
+
 export function SendMessage(arg1:string,arg2:string,arg3:string):Promise<void>;

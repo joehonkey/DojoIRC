@@ -58,6 +58,13 @@ func (a *App) GetServers() []config.Server {
 	return a.cfg.Servers
 }
 
+// PartChannel sends PART to leave a channel.
+func (a *App) PartChannel(server, channel string) {
+	if c, ok := a.clients[server]; ok {
+		c.Part(channel)
+	}
+}
+
 // GetNick returns the nick for a given server.
 func (a *App) GetNick(server string) string {
 	if c, ok := a.clients[server]; ok {

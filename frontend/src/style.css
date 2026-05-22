@@ -242,6 +242,29 @@ html, body {
 #message-input::placeholder { color: var(--text-dim); }
 #message-input:focus { box-shadow: 0 0 0 1px var(--accent); }
 
+/* ── Context menu ─────────────────────────────────────────── */
+#ctx-menu {
+  position: fixed;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 0;
+  min-width: 140px;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.ctx-item {
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.ctx-item:hover { background: var(--bg-hover); }
+.ctx-item.danger { color: var(--mention); }
+.ctx-item.danger:hover { background: rgba(243,139,168,0.1); }
+
 /* ── Scrollbars ───────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }

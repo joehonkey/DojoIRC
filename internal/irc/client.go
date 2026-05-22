@@ -146,6 +146,13 @@ func (c *Client) Send(target, text string) {
 	})
 }
 
+func (c *Client) Part(channel string) {
+	c.irc.WriteMessage(&ircp.Message{
+		Command: "PART",
+		Params:  []string{channel},
+	})
+}
+
 func (c *Client) Nick() string {
 	return c.server.Nick
 }

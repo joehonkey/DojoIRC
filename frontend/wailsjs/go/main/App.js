@@ -10,6 +10,10 @@ export function GetServers() {
   return window['go']['main']['App']['GetServers']();
 }
 
+export function PartChannel(arg1, arg2) {
+  return window['go']['main']['App']['PartChannel'](arg1, arg2);
+}
+
 export function SendMessage(arg1, arg2, arg3) {
   return window['go']['main']['App']['SendMessage'](arg1, arg2, arg3);
 }
