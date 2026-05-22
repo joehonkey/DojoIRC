@@ -55,7 +55,7 @@ nick = "yournick"
 # realname = "DojoIRC User"
 
 # Channels to auto-join on connect
-channels = ["#dojoirc", "#linuxdojo"]
+channels = ["#dojoirc"]
 
 # Optional: auto-identify with NickServ after connect
 # nickserv_password = "yourpassword"
