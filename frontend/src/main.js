@@ -2,7 +2,7 @@ import './style.css';
 import './app.css';
 
 import { EventsOn } from '../wailsjs/runtime/runtime.js';
-import { SendMessage, GetServers, GetNick, PartChannel } from '../wailsjs/go/main/App.js';
+import { SendMessage, GetServers, GetNick, GetNickList, PartChannel } from '../wailsjs/go/main/App.js';
 
 // ── State ──────────────────────────────────────────────────
 const state = {
@@ -101,10 +101,7 @@ function handleEvent(ev) {
       break;
     }
     case 'names': {
-      const ch = ensureChannel(ev.server, ev.channel);
-      const incoming = ev.text.trim().split(' ').filter(Boolean);
-      ch.nicks = [...new Set([...(ch.nicks || []), ...incoming])].sort();
-      render();
+      refreshNickList(ev.server, ev.channel);
       break;
     }
     case 'disconnected': {
@@ -219,6 +216,7 @@ function bindEvents() {
       state.activeServer  = el.dataset.server;
       state.activeChannel = el.dataset.channel;
       render();
+      refreshNickList(el.dataset.server, el.dataset.channel);
     });
 
     el.addEventListener('contextmenu', e => {
@@ -269,6 +267,25 @@ function sendMessage(text) {
   render();
 }
 
+// ── Nick list ───────────────────────────────────────────────
+function refreshNickList(server, channel) {
+  GetNickList(server, channel).then(nicks => {
+    const ch = findChannel(server, channel);
+    if (ch && nicks) {
+      ch.nicks = nicks.sort((a, b) => {
+        const rank = n => n.startsWith('@') ? 0 : n.startsWith('+') ? 1 : 2;
+        return rank(a) - rank(b) || a.localeCompare(b);
+      });
+      renderNicklistOnly();
+    }
+  }).catch(() => {});
+}
+
+function renderNicklistOnly() {
+  const el = document.getElementById('nicklist');
+  if (el) el.innerHTML = renderNicklist();
+}
+
 // ── Helpers ─────────────────────────────────────────────────
 function scrollToBottom() {
   const msgs = document.getElementById('messages');
@@ -300,4 +317,7 @@ GetServers().then(servers => {
     });
   });
   render();
+  if (state.activeServer && state.activeChannel) {
+    setTimeout(() => refreshNickList(state.activeServer, state.activeChannel), 3000);
+  }
 }).catch(() => render());

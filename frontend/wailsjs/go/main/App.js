@@ -6,6 +6,10 @@ export function GetNick(arg1) {
   return window['go']['main']['App']['GetNick'](arg1);
 }
 
+export function GetNickList(arg1, arg2) {
+  return window['go']['main']['App']['GetNickList'](arg1, arg2);
+}
+
 export function GetServers() {
   return window['go']['main']['App']['GetServers']();
 }

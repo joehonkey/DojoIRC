@@ -4,6 +4,8 @@ import {config} from '../models';
 
 export function GetNick(arg1:string):Promise<string>;
 
+export function GetNickList(arg1:string,arg2:string):Promise<Array<string>>;
+
 export function GetServers():Promise<Array<config.Server>>;
 
 export function PartChannel(arg1:string,arg2:string):Promise<void>;
