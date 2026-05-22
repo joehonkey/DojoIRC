@@ -8,33 +8,89 @@ import (
 )
 
 type Config struct {
-	Servers []Server `toml:"server"`
-	Buffer  Buffer   `toml:"buffer"`
-	Theme   string   `toml:"theme"`
+	Theme      string     `toml:"theme"`
+	Font       string     `toml:"font"`
+	FontSize   int        `toml:"font_size"`
+	Behaviour  Behaviour  `toml:"behaviour"`
+	Servers    []Server   `toml:"server"`
+	Commands   Commands   `toml:"commands"`
+	Highlights Highlights `toml:"highlights"`
+	Logging    Logging    `toml:"logging"`
+}
+
+type Behaviour struct {
+	Tray           bool   `toml:"tray"`
+	Notifications  bool   `toml:"notifications"`
+	MentionSound   string `toml:"mention_sound"`
+	Scrollback     int    `toml:"scrollback"`
+	AutoReconnect  bool   `toml:"auto_reconnect"`
+	ReconnectDelay int    `toml:"reconnect_delay"`
 }
 
 type Server struct {
-	Name     string   `toml:"name"`
-	Host     string   `toml:"host"`
-	Port     int      `toml:"port"`
-	TLS      bool     `toml:"tls"`
-	Nick     string   `toml:"nick"`
-	Channels []string `toml:"channels"`
+	Name         string   `toml:"name"`
+	Host         string   `toml:"host"`
+	Port         int      `toml:"port"`
+	TLS          bool     `toml:"tls"`
+	Nick         string   `toml:"nick"`
+	AltNick      string   `toml:"alt_nick"`
+	Ident        string   `toml:"ident"`
+	RealName     string   `toml:"realname"`
+	Channels     []string `toml:"channels"`
+	NickServPass string   `toml:"nickserv_password"`
+	Password     string   `toml:"password"`
+	SASL         *SASL    `toml:"sasl"`
 }
 
-type Buffer struct {
-	Commands Commands `toml:"commands"`
+type SASL struct {
+	Mechanism string `toml:"mechanism"`
+	Username  string `toml:"username"`
+	Password  string `toml:"password"`
 }
 
 type Commands struct {
-	Aliases map[string]string `toml:"aliases"`
 	Exec    Exec              `toml:"exec"`
+	Aliases map[string]string `toml:"aliases"`
 }
 
 type Exec struct {
 	Enabled        bool `toml:"enabled"`
-	TimeoutSecs    int  `toml:"timeout"`
+	Timeout        int  `toml:"timeout"`
 	MaxOutputBytes int  `toml:"max_output_bytes"`
+}
+
+type Highlights struct {
+	Keywords []string `toml:"keywords"`
+}
+
+type Logging struct {
+	Enabled   bool   `toml:"enabled"`
+	Directory string `toml:"directory"`
+	Format    string `toml:"format"`
+}
+
+func defaults() *Config {
+	return &Config{
+		Theme:    "default",
+		FontSize: 13,
+		Behaviour: Behaviour{
+			Tray:           true,
+			Notifications:  true,
+			Scrollback:     5000,
+			AutoReconnect:  true,
+			ReconnectDelay: 10,
+		},
+		Commands: Commands{
+			Exec: Exec{
+				Enabled:        false,
+				Timeout:        5,
+				MaxOutputBytes: 512,
+			},
+		},
+		Logging: Logging{
+			Format: "text",
+		},
+	}
 }
 
 func Dir() string {
@@ -46,20 +102,8 @@ func Dir() string {
 }
 
 func Load() (*Config, error) {
+	cfg := defaults()
 	path := filepath.Join(Dir(), "config.toml")
-
-	cfg := &Config{
-		Theme: "default",
-		Buffer: Buffer{
-			Commands: Commands{
-				Exec: Exec{
-					Enabled:        false,
-					TimeoutSecs:    5,
-					MaxOutputBytes: 4096,
-				},
-			},
-		},
-	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return cfg, nil

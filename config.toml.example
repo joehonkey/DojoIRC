@@ -1,18 +1,124 @@
+# DojoIRC Configuration
+# Copy this file to ~/.config/dojoire/config.toml and edit to taste.
+# All sections are optional — DojoIRC will use defaults for anything not set.
+
+# ── Appearance ────────────────────────────────────────────────────────────────
+
+# Name of the theme file to load from your themes/ directory (no .toml needed)
 theme = "default"
 
+# Font used in the message buffer and input bar
+# Leave commented to use your system's default monospace font
+# font = "JetBrains Mono"
+# font_size = 13
+
+# ── Behaviour ─────────────────────────────────────────────────────────────────
+
+[behaviour]
+# Hide to system tray when window is closed instead of quitting
+tray = true
+
+# Show a desktop notification when your nick is mentioned
+notifications = true
+
+# Play a sound on mention (path to audio file, or leave commented for silent)
+# mention_sound = "~/.config/dojoire/sounds/mention.wav"
+
+# How many messages to keep in memory per buffer before trimming
+scrollback = 5000
+
+# Automatically reconnect on disconnect
+auto_reconnect = true
+reconnect_delay = 10  # seconds before reconnect attempt
+
+# ── Servers ───────────────────────────────────────────────────────────────────
+# Add one [[server]] block per IRC network. You can have as many as you want.
+
 [[server]]
+# Friendly name shown in the sidebar
 name = "linuxdojo"
+
+# Hostname or IP of the IRC server
 host = "linuxdojo.org"
+
+# Port — 6697 for TLS (recommended), 6667 for plain text
 port = 6697
+
+# Enable TLS encryption (strongly recommended)
 tls = true
+
+# Your IRC nickname
 nick = "yournick"
-channels = ["#general"]
 
-[buffer.commands.exec]
-enabled = true
-timeout = 5
-max_output_bytes = 4096
+# Alternate nick if your primary is taken
+# alt_nick = "yournick_"
 
-[buffer.commands.aliases]
-music = "playerctl metadata --format 'Now playing: {{ artist }} - {{ title }}'"
-sysinfo = "uname -a"
+# Ident / username shown in your hostmask
+# ident = "dojoire"
+
+# Real name shown in /whois
+# realname = "DojoIRC User"
+
+# Channels to auto-join on connect
+channels = ["#general", "#dojoire"]
+
+# Optional: auto-identify with NickServ after connect
+# nickserv_password = "yourpassword"
+
+# Optional: server password (rare)
+# password = ""
+
+# Optional: SASL authentication (more secure than NickServ)
+# [server.sasl]
+# mechanism = "PLAIN"   # PLAIN or EXTERNAL
+# username = "yournick"
+# password = "yourpassword"
+
+# ── Second server example (commented out) ─────────────────────────────────────
+# [[server]]
+# name = "libera"
+# host = "irc.libera.chat"
+# port = 6697
+# tls = true
+# nick = "yournick"
+# channels = ["#linux", "#go-nuts"]
+
+# ── Commands ──────────────────────────────────────────────────────────────────
+
+[commands]
+# /exec runs a shell command and sends the first line of output as a message.
+# Disabled by default for safety — enable only if you want this feature.
+[commands.exec]
+enabled = false
+timeout = 5           # seconds before the command is killed
+max_output_bytes = 512 # cap on output length sent to channel
+
+# Script aliases: map a short /command to a shell script or program.
+# The output of the script is sent as your message in the current buffer.
+# Requires commands.exec.enabled = true
+#
+# Usage: type /music in any channel to run the command below
+[commands.aliases]
+# music   = "playerctl metadata --format 'Now playing: {{ artist }} - {{ title }}'"
+# sysinfo = "uname -srm"
+# weather = "curl -s wttr.in/?format=3"
+# uptime  = "uptime -p"
+
+# ── Highlights ────────────────────────────────────────────────────────────────
+
+[highlights]
+# Words or phrases that trigger a mention highlight (in addition to your nick)
+# Case-insensitive. Your nick is always included automatically.
+# keywords = ["dojoire", "important", "urgent"]
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+
+[logging]
+# Save message history to disk
+enabled = false
+
+# Where to save logs — supports ~ for home directory
+# directory = "~/.local/share/dojoire/logs"
+
+# Log format: "text" (plain) or "json" (structured)
+# format = "text"
