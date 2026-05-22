@@ -44,6 +44,11 @@
 - [ ] `userhost-in-names` — full host in NAMES reply
 - [ ] `setname` — realname changes
 - [ ] `draft/chathistory` — bouncer/server history playback
+- [ ] `draft/typing` — typing indicators ("alice is typing...") shown above input bar
+  - Send `TAGMSG +typing=active` while user is typing (debounced)
+  - Send `TAGMSG +typing=done` on message send or input cleared
+  - Display incoming typing events subtly above the input bar
+  - Support multiple simultaneous typers ("alice and bob are typing...")
 
 ## Stage 4 — User Experience
 - [ ] Theme system (load from themes/*.toml, switch live)
@@ -102,3 +107,4 @@ Reference: https://ircv3.net/irc/
 | `draft/chathistory` | planned | Stage 3 |
 | `setname` | planned | Stage 3 |
 | `chghost` | planned | Stage 3 |
+| `draft/typing` | planned | Stage 3 — typing indicators above input bar |
