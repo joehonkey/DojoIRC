@@ -8,9 +8,8 @@
 theme = "default"
 
 # Font used in the message buffer and input bar
-# Leave commented to use your system's default monospace font
-# font = "JetBrains Mono"
-# font_size = 13
+font = "IBM Plex Mono"
+font_size = 13
 
 # ── Behaviour ─────────────────────────────────────────────────────────────────
 

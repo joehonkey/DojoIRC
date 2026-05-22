@@ -72,6 +72,7 @@ type Logging struct {
 func defaults() *Config {
 	return &Config{
 		Theme:    "default",
+		Font:     "IBM Plex Mono",
 		FontSize: 13,
 		Behaviour: Behaviour{
 			Tray:           true,

@@ -27,8 +27,8 @@ html, body {
   width: 100%;
   background: var(--bg);
   color: var(--text);
-  font-family: 'Segoe UI', 'Liberation Sans', sans-serif;
-  font-size: 14px;
+  font-family: 'IBM Plex Mono', 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 13px;
   overflow: hidden;
 }
 
