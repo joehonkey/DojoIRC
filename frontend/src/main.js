@@ -286,4 +286,18 @@ function escapeHtml(str) {
 
 // ── Boot ────────────────────────────────────────────────────
 EventsOn('irc:event', handleEvent);
-render();
+
+GetServers().then(servers => {
+  if (!servers) return;
+  servers.forEach(srv => {
+    (srv.Channels || srv.channels || []).forEach((ch, i) => {
+      const channel = ensureChannel(srv.Name || srv.name, ch);
+      if (i === 0 && !state.activeChannel) {
+        state.activeServer  = srv.Name || srv.name;
+        state.activeChannel = ch;
+        channel.active = true;
+      }
+    });
+  });
+  render();
+}).catch(() => render());
