@@ -96,10 +96,10 @@ func defaults() *Config {
 
 func Dir() string {
 	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" {
-		return filepath.Join(xdg, "dojoire")
+		return filepath.Join(xdg, "dojoirc")
 	}
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".config", "dojoire")
+	return filepath.Join(home, ".config", "dojoirc")
 }
 
 func Load() (*Config, error) {

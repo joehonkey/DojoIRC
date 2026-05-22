@@ -2,19 +2,31 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"embed"
+	"os"
 
 	"github.com/joehonkey/dojoire/internal/tray"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/linux"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 //go:embed all:frontend/dist
 var assets embed.FS
 
+//go:embed build/appicon.png
+var appIcon []byte
+
 func main() {
+	// webkit2gtk 2.52.x fails to spawn a GPU process on some AMD/Mesa setups,
+	// leaving the webview blank. Disabling the DMA-BUF renderer and compositing
+	// mode forces software compositing which renders correctly.
+	os.Setenv("WEBKIT_DISABLE_DMABUF_RENDERER", "1")
+	os.Setenv("WEBKIT_DISABLE_COMPOSITING_MODE", "1")
+
 	app := NewApp()
 
 	go tray.Run(tray.Callbacks{
@@ -32,6 +44,8 @@ func main() {
 		},
 		OnQuit: func() {
 			if app.ctx != nil {
+				app.quitting = true
+				app.shutdown()
 				runtime.Quit(app.ctx)
 			}
 		},
@@ -45,9 +59,15 @@ func main() {
 		AssetServer:      &assetserver.Options{Assets: assets},
 		OnStartup:        app.startup,
 		OnBeforeClose: func(ctx context.Context) bool {
+			if app.quitting {
+				return false
+			}
 			runtime.WindowHide(app.ctx)
 			tray.SetVisible(false)
 			return true
+		},
+		Linux: &linux.Options{
+			Icon: appIcon,
 		},
 		Bind: []interface{}{app},
 	})

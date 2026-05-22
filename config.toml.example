@@ -1,5 +1,5 @@
 # DojoIRC Configuration
-# Copy this file to ~/.config/dojoire/config.toml and edit to taste.
+# Copy this file to ~/.config/dojoirc/config.toml and edit to taste.
 # All sections are optional — DojoIRC will use defaults for anything not set.
 
 # ── Appearance ────────────────────────────────────────────────────────────────
@@ -21,7 +21,7 @@ tray = true
 notifications = true
 
 # Play a sound on mention (path to audio file, or leave commented for silent)
-# mention_sound = "~/.config/dojoire/sounds/mention.wav"
+# mention_sound = "~/.config/dojoirc/sounds/mention.wav"
 
 # How many messages to keep in memory per buffer before trimming
 scrollback = 5000
@@ -101,7 +101,7 @@ max_output_bytes = 512 # cap on output length sent to channel
 [highlights]
 # Words or phrases that trigger a mention highlight (in addition to your nick)
 # Case-insensitive. Your nick is always included automatically.
-# keywords = ["dojoire", "important", "urgent"]
+# keywords = ["dojoirc", "important", "urgent"]
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 
@@ -110,7 +110,7 @@ max_output_bytes = 512 # cap on output length sent to channel
 enabled = false
 
 # Where to save logs — supports ~ for home directory
-# directory = "~/.local/share/dojoire/logs"
+# directory = "~/.local/share/dojoirc/logs"
 
 # Log format: "text" (plain) or "json" (structured)
 # format = "text"

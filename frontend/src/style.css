@@ -5,6 +5,8 @@
 }
 
 :root {
+  --font-family: 'IBM Plex Mono', 'Cascadia Code', 'Fira Code', monospace;
+  --font-size:   13px;
   --bg:          #1e1e2e;
   --bg-sidebar:  #181825;
   --bg-input:    #313244;
@@ -27,8 +29,8 @@ html, body {
   width: 100%;
   background: var(--bg);
   color: var(--text);
-  font-family: 'IBM Plex Mono', 'Cascadia Code', 'Fira Code', monospace;
-  font-size: 13px;
+  font-family: var(--font-family);
+  font-size: var(--font-size);
   overflow: hidden;
 }
 
@@ -40,25 +42,49 @@ html, body {
 
 /* ── Sidebar ─────────────────────────────────────────────── */
 #sidebar {
-  width: 220px;
-  min-width: 160px;
+  /* width set via inline style; min/max enforced in JS */
+  min-width: 140px;
   background: var(--bg-sidebar);
-  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   user-select: none;
 }
 
+#sidebar-handle {
+  width: 4px;
+  flex-shrink: 0;
+  background: var(--border);
+  cursor: col-resize;
+  transition: background 0.15s;
+}
+#sidebar-handle:hover { background: var(--accent); }
+
 #sidebar-header {
-  padding: 12px 14px 8px;
+  padding: 8px 10px 8px 8px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-dim);
   border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+
+#hamburger {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+#hamburger:hover { background: var(--bg-hover); color: var(--text); }
 
 #server-list {
   flex: 1;
@@ -76,33 +102,35 @@ html, body {
   letter-spacing: 0.05em;
 }
 
-.server-name:hover { color: var(--text); }
+.server-name:hover  { color: var(--text); }
+.server-name.active { color: var(--text); background: var(--bg-active); border-radius: 4px; margin: 1px 4px; padding: 6px 10px 4px; }
+.server-name.unread { color: var(--unread); font-weight: 700; }
 
 .channel-item {
-  padding: 4px 14px 4px 22px;
+  padding: 4px 10px 4px 10px;
   cursor: pointer;
   color: var(--text-dim);
   font-size: 13px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 6px;
   border-radius: 4px;
   margin: 1px 4px;
 }
 
-.channel-item:hover { background: var(--bg-hover); color: var(--text); }
-.channel-item.active { background: var(--bg-active); color: var(--text); }
-.channel-item.unread { color: var(--unread); font-weight: 600; }
-.channel-item.mention { color: var(--mention); font-weight: 700; }
+.channel-item:hover   { background: var(--bg-hover); color: var(--text); }
+.channel-item.active  { background: var(--bg-active); color: var(--text); }
+.channel-item.unread  { color: var(--unread); font-weight: 600; }
+.channel-item.mention { color: #f9e2af; font-weight: 700; }
 
-.unread-badge {
-  font-size: 10px;
-  background: var(--mention);
-  color: #1e1e2e;
-  border-radius: 8px;
-  padding: 1px 5px;
-  font-weight: 700;
+.ch-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
+.unread-dot  { background: var(--unread); }
+.mention-dot { background: #f9e2af; }
 
 /* ── Main area ────────────────────────────────────────────── */
 #main {
@@ -125,7 +153,24 @@ html, body {
 
 #buffer-title { font-weight: 700; font-size: 14px; }
 
+#topic-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 10px;
+  padding: 1px 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+#topic-toggle:hover { color: var(--text); border-color: var(--accent); }
+#topic-toggle.active { color: var(--accent); border-color: var(--accent); }
+
 #buffer-topic {
+  flex: 1;
   font-size: 12px;
   color: var(--text-dim);
   overflow: hidden;
@@ -167,7 +212,6 @@ html, body {
 }
 
 .msg-nick {
-  min-width: 90px;
   max-width: 130px;
   text-align: right;
   font-weight: 600;
@@ -186,10 +230,19 @@ html, body {
 .message.mention .msg-text { color: var(--mention); }
 
 /* ── Nick list ────────────────────────────────────────────── */
-#nicklist {
-  width: 150px;
+#nicklist-handle {
+  width: 4px;
   flex-shrink: 0;
-  border-left: 1px solid var(--border);
+  background: var(--border);
+  cursor: col-resize;
+  transition: background 0.15s;
+}
+#nicklist-handle:hover { background: var(--accent); }
+
+#nicklist {
+  /* width set via inline style */
+  min-width: 80px;
+  flex-shrink: 0;
   background: var(--bg-sidebar);
   overflow-y: auto;
   padding: 4px 0;
@@ -199,15 +252,28 @@ html, body {
   padding: 3px 10px;
   font-size: 12px;
   color: var(--text-dim);
-  cursor: default;
+  cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.nick-item:hover  { color: var(--text); }
-.nick-item.op     { color: var(--accent); }
-.nick-item.voice  { color: var(--action); }
+.msg-nick.clickable { cursor: pointer; }
+
+.nick-item:hover    { color: var(--text); }
+.nick-prefix        { color: var(--text-dim); margin-right: 2px; }
+.action-nick        { color: var(--action); font-style: italic; }
+.message.notice .msg-nick { color: var(--action); }
+.message.server .msg-text { color: var(--text-server); }
+
+/* ── Typing indicator ─────────────────────────────────────── */
+#typing-bar {
+  padding: 0 16px 3px;
+  font-size: 11px;
+  color: var(--text-dim);
+  min-height: 16px;
+  font-style: italic;
+}
 
 /* ── Input bar ────────────────────────────────────────────── */
 #input-bar {
@@ -264,6 +330,79 @@ html, body {
 .ctx-item:hover { background: var(--bg-hover); }
 .ctx-item.danger { color: var(--mention); }
 .ctx-item.danger:hover { background: rgba(243,139,168,0.1); }
+
+.ctx-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+/* ── URL links ────────────────────────────────────────────── */
+a.msg-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+a.msg-link:hover { color: var(--text); }
+
+/* ── URL preview cards ────────────────────────────────────── */
+.url-preview {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 4px 16px 6px calc(44px + 8px + 90px + 8px);
+  padding: 8px 10px;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  max-width: 480px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.url-preview:hover { background: var(--bg-hover); }
+
+.preview-thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+  background: var(--bg-active);
+}
+.preview-img-only {
+  max-width: 320px;
+  max-height: 200px;
+  border-radius: 6px;
+  display: block;
+  object-fit: contain;
+}
+.preview-body  { flex: 1; min-width: 0; }
+.preview-domain {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+.preview-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+.preview-desc {
+  font-size: 11px;
+  color: var(--text-dim);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
 /* ── Scrollbars ───────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
