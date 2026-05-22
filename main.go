@@ -21,6 +21,13 @@ func main() {
 		OnShow: func() {
 			if app.ctx != nil {
 				runtime.WindowShow(app.ctx)
+				tray.SetVisible(true)
+			}
+		},
+		OnHide: func() {
+			if app.ctx != nil {
+				runtime.WindowHide(app.ctx)
+				tray.SetVisible(false)
 			}
 		},
 		OnQuit: func() {
@@ -39,6 +46,7 @@ func main() {
 		OnStartup:        app.startup,
 		OnBeforeClose: func(ctx context.Context) bool {
 			runtime.WindowHide(app.ctx)
+			tray.SetVisible(false)
 			return true
 		},
 		Bind: []interface{}{app},

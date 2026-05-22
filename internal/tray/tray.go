@@ -2,6 +2,7 @@ package tray
 
 import (
 	_ "embed"
+	"sync"
 
 	"fyne.io/systray"
 )
@@ -11,7 +12,19 @@ var icon []byte
 
 type Callbacks struct {
 	OnShow func()
+	OnHide func()
 	OnQuit func()
+}
+
+var (
+	mu      sync.Mutex
+	visible = true
+)
+
+func SetVisible(v bool) {
+	mu.Lock()
+	visible = v
+	mu.Unlock()
 }
 
 func Run(cb Callbacks) {
@@ -27,6 +40,24 @@ func onReady(cb Callbacks) {
 	systray.AddSeparator()
 	mQuit := systray.AddMenuItem("Quit", "Quit DojoIRC")
 
+	// Left click — toggle window
+	systray.SetOnTapped(func() {
+		mu.Lock()
+		v := visible
+		mu.Unlock()
+		if v {
+			if cb.OnHide != nil {
+				cb.OnHide()
+			}
+		} else {
+			if cb.OnShow != nil {
+				cb.OnShow()
+			}
+		}
+	})
+
+	// Right click menu is handled automatically by the systray lib.
+	// Menu items: Show / Quit
 	go func() {
 		for {
 			select {
