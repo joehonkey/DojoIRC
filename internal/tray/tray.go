@@ -3,7 +3,7 @@ package tray
 import (
 	_ "embed"
 
-	"github.com/getlantern/systray"
+	"fyne.io/systray"
 )
 
 //go:embed icon.png

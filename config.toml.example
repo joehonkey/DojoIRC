@@ -37,14 +37,10 @@ reconnect_delay = 10  # seconds before reconnect attempt
 # Friendly name shown in the sidebar
 name = "linuxdojo"
 
-# Hostname or IP of the IRC server
-host = "linuxdojo.org"
-
-# Port — 6697 for TLS (recommended), 6667 for plain text
+# LinuxDojo.org runs Ergo IRCd — TLS on 6697 only, plain text not accepted
+host = "irc.linuxdojo.org"
 port = 6697
-
-# Enable TLS encryption (strongly recommended)
-tls = true
+tls  = true
 
 # Your IRC nickname
 nick = "yournick"
@@ -53,23 +49,20 @@ nick = "yournick"
 # alt_nick = "yournick_"
 
 # Ident / username shown in your hostmask
-# ident = "dojoire"
+# ident = "dojoirc"
 
 # Real name shown in /whois
 # realname = "DojoIRC User"
 
 # Channels to auto-join on connect
-channels = ["#general", "#dojoire"]
+channels = ["#dojoirc", "#linuxdojo"]
 
 # Optional: auto-identify with NickServ after connect
 # nickserv_password = "yourpassword"
 
-# Optional: server password (rare)
-# password = ""
-
-# Optional: SASL authentication (more secure than NickServ)
+# Optional: SASL authentication (recommended on Ergo — more secure than NickServ)
 # [server.sasl]
-# mechanism = "PLAIN"   # PLAIN or EXTERNAL
+# mechanism = "PLAIN"   # PLAIN or EXTERNAL (EXTERNAL requires a client cert)
 # username = "yournick"
 # password = "yourpassword"
 
@@ -78,7 +71,7 @@ channels = ["#general", "#dojoire"]
 # name = "libera"
 # host = "irc.libera.chat"
 # port = 6697
-# tls = true
+# tls  = true
 # nick = "yournick"
 # channels = ["#linux", "#go-nuts"]
 
