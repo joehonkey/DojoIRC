@@ -1,0 +1,18 @@
+theme = "default"
+
+[[server]]
+name = "linuxdojo"
+host = "linuxdojo.org"
+port = 6697
+tls = true
+nick = "yournick"
+channels = ["#general"]
+
+[buffer.commands.exec]
+enabled = true
+timeout = 5
+max_output_bytes = 4096
+
+[buffer.commands.aliases]
+music = "playerctl metadata --format 'Now playing: {{ artist }} - {{ title }}'"
+sysinfo = "uname -a"

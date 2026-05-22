@@ -1,0 +1,24 @@
+[general]
+background = "#1e1e2e"
+text = "#cdd6f4"
+border = "#313244"
+
+[buffer]
+background = "#1e1e2e"
+timestamp = "#6c7086"
+server_message = "#585b70"
+action = "#cba6f7"
+
+[highlights]
+mention = "#f38ba8"
+keyword = "#fab387"
+
+[sidebar]
+background = "#181825"
+text = "#cdd6f4"
+unread = "#89b4fa"
+mention = "#f38ba8"
+
+[input]
+background = "#313244"
+text = "#cdd6f4"
