@@ -44,7 +44,7 @@
 - [x] Message logging to disk — ~/.config/dojoirc/logs/<server>/<channel>.log
 - [ ] Full IRCv3 CAP LS 302 negotiation (beyond message-tags and sasl)
 - [x] NickServ identify flow
-- [ ] Channel modes display
+- [x] Channel modes display
 - [ ] Away status
 - [ ] DCC SEND — file transfer (peer-to-peer TCP)
 - [ ] DCC chat (basic)
@@ -54,7 +54,7 @@
 ## Stage 3 — IRCv3 Capabilities
 - [x] `message-tags` — CAP negotiation + inbound tag parsing
 - [x] `typing` — outgoing TAGMSG typing indicators (debounced); incoming shown above input bar
-- [ ] `server-time` — display server-supplied message timestamps
+- [x] `server-time` — display server-supplied message timestamps
 - [ ] `batch` — batched message handling
 - [ ] `labeled-response` — correlate responses to requests
 - [ ] `multi-prefix` — show all mode prefixes per nick in nicklist
@@ -150,7 +150,7 @@ Reference: https://ircv3.net/irc/
 | `react` | planned | Emoji reactions to messages |
 | `read-marker` | planned | Sync read position across clients |
 | `sasl` | partial | SASL PLAIN done; EXTERNAL planned |
-| `server-time` | planned | Display server-supplied message timestamps |
+| `server-time` | done | Display server-supplied message timestamps |
 | `setname` | planned | Live REALNAME changes |
 | `Standard Replies` | planned | Structured error/info replies from server |
 | `typing` | done | Outgoing TAGMSG typing indicators; incoming shown above input bar |
