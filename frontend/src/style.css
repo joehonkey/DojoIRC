@@ -7,7 +7,7 @@
 :root {
   --font-family:            'IBM Plex Mono', 'Cascadia Code', 'Fira Code', monospace;
   --font-size:              13px;   /* main chat messages — also set via config.toml font_size */
-  --font-size-timestamp:    11px;   /* HH:MM timestamps in chat */
+  --font-size-timestamp:    13px;   /* HH:MM timestamps in chat */
   --font-size-sidebar-hdr:  11px;   /* "DOJOIRC" header + hamburger row */
   --font-size-hamburger:    14px;   /* ☰ button */
   --font-size-server:       11px;   /* server names in sidebar */
