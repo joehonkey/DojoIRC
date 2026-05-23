@@ -124,6 +124,7 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | **Scrollback limit** | Configurable per session (`scrollback` in `[behaviour]`); default 5000 messages per buffer |
 | **Emoji** | 😊 button opens a picker (7 categories, ~175 emoji, live search); `:shortcode:` converts on send; Tab completes `:word`; button toggleable from hamburger menu |
 | **Input history** | Up/Down arrows in the message input cycle through previously sent messages |
+| **Bot indicators** | Nicks with IRC `+B` user mode show a 🤖 or 👾 icon in the nick list — consistent per nick |
 | **Message logging** | All messages logged to `~/.config/dojoirc/logs/<server>/<channel>.log` automatically |
 
 ---
