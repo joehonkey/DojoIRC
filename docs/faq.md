@@ -127,33 +127,13 @@ font_size = 15
 
 ### How do I make the nick by the input box bigger?
 
-That size is controlled by a CSS variable, not config.toml. Edit `style.css` (in the source at `frontend/src/style.css`, or next to the binary in an installed build):
-
-```css
---font-size-input-nick: 15px;
-```
-
-Restart DojoIRC after saving.
+Open **Hamburger → Font Sizes** and use the + button next to **Input Nick Prefix**. Changes apply instantly — no restart needed.
 
 ### How do I change font sizes for specific UI elements?
 
-All per-element sizes are CSS variables in the `:root` block of `style.css`:
+Open **Hamburger → Font Sizes**. You get +/− controls for every UI zone: Sidebar Header, Hamburger Button, Server Names, Channel Names, Chat Messages, Timestamps, Nick List, Typing Indicator, Input Nick Prefix, and Input Field. Changes apply live and persist across restarts. Use **Reset to Defaults** to restore everything at once.
 
-```css
-:root {
-  --font-size:              13px;   /* main chat messages */
-  --font-size-timestamp:    13px;   /* HH:MM timestamps */
-  --font-size-sidebar-hdr:  11px;   /* DOJOIRC header + hamburger row */
-  --font-size-server:       11px;   /* server names in sidebar */
-  --font-size-channel:      13px;   /* channel names in sidebar */
-  --font-size-nicklist:     12px;   /* nick list */
-  --font-size-typing:       13px;   /* typing indicator */
-  --font-size-input-nick:   12px;   /* your nick left of the input box */
-  --font-size-input:        13px;   /* message input box */
-}
-```
-
-Edit, save, restart. See [Customization Guide](customization.md) for full examples.
+See [Font Sizes](font-sizes.md) for the full reference.
 
 ### How do I add a custom theme?
 
