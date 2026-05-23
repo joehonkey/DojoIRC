@@ -24,11 +24,12 @@ type Event struct {
 }
 
 type Client struct {
-	server config.Server
-	conn   net.Conn
-	irc    *ircp.Client
-	emit   func(Event)
-	quitCh chan struct{}
+	server      config.Server
+	conn        net.Conn
+	irc         *ircp.Client
+	emit        func(Event)
+	quitCh      chan struct{}
+	currentNick string
 }
 
 func NewClient(server config.Server, emit func(Event)) *Client {
@@ -186,6 +187,7 @@ func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 		c.emit(Event{Server: srv, Type: "typing", Channel: target, Nick: msg.Prefix.Name, Text: string(typingVal), Time: now})
 
 	case "001":
+		c.currentNick = c.server.Nick
 		c.emit(Event{Server: srv, Type: "connected", Nick: c.server.Nick, Time: now})
 		for _, ch := range c.server.Channels {
 			client.Write("JOIN " + ch)
@@ -226,6 +228,9 @@ func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 		if strings.HasPrefix(text, "\x01ACTION ") && strings.HasSuffix(text, "\x01") {
 			text = strings.TrimSuffix(strings.TrimPrefix(text, "\x01ACTION "), "\x01")
 			typ = "action"
+		} else if strings.HasPrefix(text, "\x01") && strings.HasSuffix(text, "\x01") {
+			c.handleCTCPRequest(client, msg.Prefix.Name, strings.TrimSuffix(strings.TrimPrefix(text, "\x01"), "\x01"), now, srv)
+			return
 		}
 		// DMs arrive with our nick as target — use sender as channel
 		if !strings.HasPrefix(target, "#") && !strings.HasPrefix(target, "&") {
@@ -264,6 +269,9 @@ func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 
 	case "NICK":
 		newNick := msg.Params[0]
+		if msg.Prefix.Name == c.currentNick {
+			c.currentNick = newNick
+		}
 		c.emit(Event{Server: srv, Type: "nick", Nick: msg.Prefix.Name, Text: newNick, Time: now})
 
 	case "MODE":
@@ -287,6 +295,12 @@ func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 		text := ""
 		if len(msg.Params) > 1 {
 			text = msg.Params[1]
+		}
+		// CTCP reply (e.g. VERSION or PING response)
+		if strings.HasPrefix(text, "\x01") && strings.HasSuffix(text, "\x01") {
+			reply := strings.TrimSuffix(strings.TrimPrefix(text, "\x01"), "\x01")
+			c.emit(Event{Server: srv, Type: "ctcp_reply", Channel: "server", Nick: msg.Prefix.Name, Text: reply, Time: now})
+			return
 		}
 		ch := target
 		if !strings.HasPrefix(target, "#") && !strings.HasPrefix(target, "&") {
@@ -390,5 +404,55 @@ func (c *Client) Quit(reason string) {
 }
 
 func (c *Client) Nick() string {
+	if c.currentNick != "" {
+		return c.currentNick
+	}
 	return c.server.Nick
+}
+
+func (c *Client) handleCTCPRequest(client *ircp.Client, from, payload, now, srv string) {
+	cmd := payload
+	param := ""
+	if i := strings.IndexByte(payload, ' '); i >= 0 {
+		cmd = payload[:i]
+		param = payload[i+1:]
+	}
+	cmd = strings.ToUpper(cmd)
+
+	switch cmd {
+	case "VERSION":
+		client.WriteMessage(&ircp.Message{
+			Command: "NOTICE",
+			Params:  []string{from, "\x01VERSION DojoIRC v0.1.0 (https://github.com/joehonkey/DojoIRC)\x01"},
+		})
+		c.emit(Event{Server: srv, Type: "ctcp", Channel: "server", Nick: from, Text: "CTCP VERSION from " + from, Time: now})
+	case "PING":
+		if param == "" {
+			param = fmt.Sprintf("%d", time.Now().Unix())
+		}
+		client.WriteMessage(&ircp.Message{
+			Command: "NOTICE",
+			Params:  []string{from, "\x01PING " + param + "\x01"},
+		})
+		c.emit(Event{Server: srv, Type: "ctcp", Channel: "server", Nick: from, Text: "CTCP PING from " + from, Time: now})
+	case "TIME":
+		t := time.Now().Format("Mon Jan 02 15:04:05 MST 2006")
+		client.WriteMessage(&ircp.Message{
+			Command: "NOTICE",
+			Params:  []string{from, "\x01TIME " + t + "\x01"},
+		})
+		c.emit(Event{Server: srv, Type: "ctcp", Channel: "server", Nick: from, Text: "CTCP TIME from " + from, Time: now})
+	}
+}
+
+func (c *Client) SendCTCP(target, cmd, param string) {
+	text := "\x01" + strings.ToUpper(cmd)
+	if param != "" {
+		text += " " + param
+	}
+	text += "\x01"
+	c.irc.WriteMessage(&ircp.Message{
+		Command: "PRIVMSG",
+		Params:  []string{target, text},
+	})
 }

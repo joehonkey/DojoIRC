@@ -82,6 +82,10 @@ export function SendAction(arg1, arg2, arg3) {
   return window['go']['main']['App']['SendAction'](arg1, arg2, arg3);
 }
 
+export function SendCTCP(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['SendCTCP'](arg1, arg2, arg3, arg4);
+}
+
 export function SendMessage(arg1, arg2, arg3) {
   return window['go']['main']['App']['SendMessage'](arg1, arg2, arg3);
 }

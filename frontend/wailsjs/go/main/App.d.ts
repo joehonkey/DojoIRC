@@ -45,6 +45,8 @@ export function SaveTheme(arg1:string):Promise<void>;
 
 export function SendAction(arg1:string,arg2:string,arg3:string):Promise<void>;
 
+export function SendCTCP(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
+
 export function SendMessage(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function SendNick(arg1:string,arg2:string):Promise<void>;

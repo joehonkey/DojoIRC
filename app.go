@@ -145,6 +145,13 @@ func (a *App) SendAction(server, target, text string) {
 	}
 }
 
+// SendCTCP sends a CTCP request (VERSION, PING, TIME, etc.).
+func (a *App) SendCTCP(server, target, cmd, param string) {
+	if c, ok := a.clients[server]; ok {
+		c.SendCTCP(target, cmd, param)
+	}
+}
+
 // GetNickList returns the stored nick list for a channel.
 func (a *App) GetNickList(server, channel string) []string {
 	a.mu.RLock()

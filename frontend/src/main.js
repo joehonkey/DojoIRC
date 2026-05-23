@@ -3,7 +3,7 @@ import './app.css';
 
 import { EventsOn } from '../wailsjs/runtime/runtime.js';
 import {
-  SendMessage, SendAction, SendNick, SendWhois, SendRaw,
+  SendMessage, SendAction, SendCTCP, SendNick, SendWhois, SendRaw,
   GetServers, GetNick, GetNickList, PartChannel, JoinChannel,
   FetchURLPreview, BrowserOpen, GetThemeByName, GetThemeNames,
   OpenConfig, AppQuit, RestartApp, SendTyping, ReadClipboard,
@@ -274,6 +274,18 @@ function handleEvent(ev) {
       render();
       break;
     }
+    case 'ctcp': {
+      const ch = ensureChannel(ev.server, 'server');
+      ch.messages.push({ time: ev.time, nick: '', text: `[CTCP] ${ev.text}`, type: 'server' });
+      render();
+      break;
+    }
+    case 'ctcp_reply': {
+      const ch = ensureChannel(ev.server, 'server');
+      ch.messages.push({ time: ev.time, nick: ev.nick, text: `[CTCP] ${ev.text}`, type: 'notice' });
+      render();
+      break;
+    }
     case 'topic': {
       const ch = findChannel(ev.server, ev.channel);
       if (ch) {
@@ -371,6 +383,16 @@ function handleSlash(text) {
       if (args[0] && state.activeChannel)
         SendRaw(state.activeServer, `INVITE ${args[0]} ${state.activeChannel}`).catch(console.error);
       break;
+    case 'ctcp': {
+      // /ctcp <nick> <command> [param]
+      if (args.length >= 2) {
+        const ctcpTarget = args[0];
+        const ctcpCmd = args[1].toUpperCase();
+        const ctcpParam = args.slice(2).join(' ');
+        SendCTCP(state.activeServer, ctcpTarget, ctcpCmd, ctcpParam).catch(console.error);
+      }
+      break;
+    }
     case 'raw':
     case 'quote':
       if (args.length) SendRaw(state.activeServer, args.join(' ')).catch(console.error);
