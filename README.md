@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="build/icons/DojoIRC-Chat-Client.png" width="120" alt="DojoIRC">
+  <img src="build/icons/DojoIRC-Chat-Client.png" width="200" alt="DojoIRC">
   <h1>DojoIRC</h1>
   <p>A fast, cross-platform IRC client built with Go and Wails v2.</p>
   <p>
