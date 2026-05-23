@@ -205,12 +205,25 @@ func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 		if len(msg.Params) > 1 {
 			c.emit(Event{Server: srv, Type: "server", Channel: "server", Text: msg.Params[len(msg.Params)-1], Time: now})
 		}
-	case "375", "376":
+	case "375":
 		text := ""
 		if len(msg.Params) > 1 {
 			text = msg.Params[len(msg.Params)-1]
 		}
 		c.emit(Event{Server: srv, Type: "server", Channel: "server", Text: text, Time: now})
+
+	case "376", "422": // end of MOTD / no MOTD
+		text := ""
+		if len(msg.Params) > 1 {
+			text = msg.Params[len(msg.Params)-1]
+		}
+		if text != "" {
+			c.emit(Event{Server: srv, Type: "server", Channel: "server", Text: text, Time: now})
+		}
+		if c.server.NickServPass != "" {
+			c.emit(Event{Server: srv, Type: "server", Channel: "server", Text: "Identifying with NickServ...", Time: now})
+			client.Write("PRIVMSG NickServ :IDENTIFY " + c.server.NickServPass)
+		}
 
 	// Server stats
 	case "251", "252", "253", "254", "255", "265", "266":

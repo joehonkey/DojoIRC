@@ -19,7 +19,12 @@ tls      = true
 nick     = "yournick"        # ← change this to your IRC nick
 channels = ["#dojoirc"]
 
-# Optional SASL authentication (recommended if you have a registered account):
+# Optional authentication — use one or the other, not both:
+#
+# NickServ (legacy, works on most networks):
+# nickserv_password = "yourpassword"
+#
+# SASL PLAIN (preferred if your server supports it):
 # [server.sasl]
 # mechanism = "PLAIN"
 # username  = "yournick"
