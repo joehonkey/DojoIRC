@@ -1535,6 +1535,27 @@ username  = "youraccountname"
 password  = "yourpassword"</code></pre>
         <p>SASL negotiation happens during the CAP handshake. A success or failure message appears in the server buffer.</p>
 
+        <h2>Bouncer Support (ZNC / soju)</h2>
+        <p>Set <code>password</code> in the server block. DojoIRC sends <code>PASS</code> before <code>NICK</code>/<code>USER</code> during the connection handshake — which is what bouncers require.</p>
+        <p><b>ZNC</b> — use <code>user/network:password</code>:</p>
+        <pre><code>[[server]]
+name     = "ZNC"
+host     = "znc.example.com"
+port     = 6697
+tls      = true
+nick     = "yournick"
+password = "joe/libera:mysecretpassword"
+channels = ["#linux"]</code></pre>
+        <p><b>soju</b> — use <code>user:password</code> (or SASL PLAIN, which also works):</p>
+        <pre><code>[[server]]
+name     = "soju"
+host     = "soju.example.com"
+port     = 6697
+tls      = true
+nick     = "yournick"
+password = "joe:mysecretpassword"
+channels = ["#linux"]</code></pre>
+
         <h2>Themes</h2>
         <p>Switch themes via <b>Hamburger → Theme picker</b>. The active theme is highlighted. Selection persists across restarts.</p>
         <p>Bundled themes: <code>default</code> (Catppuccin Mocha), <code>dark</code>, <code>light</code>, <code>BreezeDarkPlus</code>.</p>
