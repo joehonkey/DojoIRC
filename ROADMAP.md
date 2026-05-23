@@ -116,7 +116,7 @@
 - [ ] FreeBSD system tray via D-Bus/ksni
 - [ ] macOS native notifications
 - [ ] Windows toast notifications
-- [ ] .desktop file installer (Linux)
+- [x] .desktop file installer (Linux)
 - [ ] macOS .app bundle
 - [ ] Windows installer (NSIS, already scaffolded by Wails)
 - [ ] Flatpak / AppImage (Linux distribution)
