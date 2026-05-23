@@ -114,7 +114,7 @@ nickserv_password = "yourpassword"
 
 ### Open Config doesn't do anything on Windows
 
-This was a bug — fixed in v0.4.9. On Windows, DojoIRC now opens the config in Notepad (always available, no dialogs). If you have `$EDITOR` or `$VISUAL` set in your environment, that is used instead.
+This was a bug — fixed in v0.4.10. On Windows, DojoIRC now opens the config in Notepad (always available, no dialogs). If you have `$EDITOR` or `$VISUAL` set in your environment, that is used instead.
 
 ### Does DojoIRC support the Windows touch keyboard?
 

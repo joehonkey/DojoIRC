@@ -1,10 +1,11 @@
 # DojoIRC Changelog
 
-## Session 21 — 2026-05-23 (v0.4.9 — bug fixes + Windows improvements)
+## Session 21 — 2026-05-23 (v0.4.10 — bug fixes + Windows improvements)
 
 ### What Was Fixed / Added
 - **Input draft preserved on re-render** — incoming messages triggered a full DOM rebuild that silently wiped whatever you were typing. The message-input value and cursor position are now snapshotted before each rebuild and restored after.
 - **Windows Open Config fixed** — `openInEditor()` was Linux-only (fell through to `xdg-open`, `xdg-mime`, and a hardcoded list of Linux GUI editors). Now opens directly in `notepad.exe` on Windows (honors `$EDITOR`/`$VISUAL` first); `open` on macOS. An earlier attempt using `rundll32 url.dll,FileProtocolHandler` was dropped — it triggered an "Open with" dialog on systems with no `.toml` association, which caused the app window to flash repeatedly.
+- **Windows focus-restore flash fixed** — the tablet keyboard feature used a `focus` event listener on the message input. When Windows restores focus to the app, WebView2 re-focuses the input, firing the listener and spawning `reg query` (a console process) — causing the window to flash on every focus restore. Switched to `pointerdown`, which only fires on actual user tap/click.
 - **Windows tablet mode keyboard** — new `MaybeShowKeyboard()` backend method reads the `TabletMode` registry key under `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ImmersiveShell`; if tablet mode is active, focusing the message input launches `TabTip.exe` (touch keyboard) with an `osk.exe` fallback. No-op on Linux and macOS.
 
 ### Files Changed
