@@ -2,7 +2,9 @@
 
 All themes are included in the `themes/` directory. Copy any `.toml` file to `~/.config/dojoirc/themes/` and select it from **Hamburger → Theme picker**.
 
-Download the full themes bundle: [themes.zip](https://github.com/joehonkey/DojoIRC/releases/latest)
+Download all 54 themes as a zip: **[themes.zip](https://github.com/joehonkey/DojoIRC/releases/latest/download/themes.zip)**
+
+Extract and drop the `.toml` files into `~/.config/dojoirc/themes/`, then use **Hamburger → Reload Config** to load them.
 
 ---
 

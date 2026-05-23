@@ -96,8 +96,21 @@ jobs:
           name: DojoIRC-macos-arm64
           path: DojoIRC-macos-arm64.tar.gz
 
+  package-themes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package themes
+        run: zip -r themes.zip themes/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: themes
+          path: themes.zip
+
   release:
-    needs: [build-linux, build-windows, build-macos]
+    needs: [build-linux, build-windows, build-macos, package-themes]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -114,3 +127,4 @@ jobs:
             DojoIRC-linux-amd64.tar.gz
             DojoIRC-windows-amd64.zip
             DojoIRC-macos-arm64.tar.gz
+            themes.zip
