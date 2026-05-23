@@ -9,38 +9,47 @@
 
   <br>
 
+  <a href="https://github.com/joehonkey/DojoIRC/releases/latest">
+    <img src="https://img.shields.io/github/v/release/joehonkey/DojoIRC?label=Latest+Release&style=for-the-badge&color=89b4fa" alt="Latest Release">
+  </a>
+
+  <br><br>
+
+  <p><b>Click your OS to download the pre-built binary:</b></p>
+
   <table>
     <tr>
       <td align="center">
-        <img src="build/icons/linux/128x128/apps/dojoirc.png" width="72" alt="Linux"><br>
-        <b>Linux</b>
+        <a href="https://github.com/joehonkey/DojoIRC/releases/latest/download/DojoIRC-linux-amd64.tar.gz">
+          <img src="build/icons/linux/128x128/apps/dojoirc.png" width="72" alt="Linux"><br>
+          <b>Linux</b><br>
+          <sub>.tar.gz · x86_64</sub>
+        </a>
       </td>
       <td align="center">
-        <img src="build/icons/freebsd/128x128/apps/dojoirc.png" width="72" alt="FreeBSD"><br>
-        <b>FreeBSD</b>
+        <a href="https://github.com/joehonkey/DojoIRC/releases/latest/download/DojoIRC-windows-amd64.zip">
+          <img src="build/icons/windows/128x128/apps/dojoirc.png" width="72" alt="Windows"><br>
+          <b>Windows</b><br>
+          <sub>.zip · x86_64</sub>
+        </a>
       </td>
       <td align="center">
-        <img src="build/icons/mac/mac-128x128.png" width="72" alt="macOS"><br>
-        <b>macOS</b>
-      </td>
-      <td align="center">
-        <img src="build/icons/windows/128x128/apps/dojoirc.png" width="72" alt="Windows"><br>
-        <b>Windows</b>
+        <a href="https://github.com/joehonkey/DojoIRC/releases/latest/download/DojoIRC-macos-arm64.tar.gz">
+          <img src="build/icons/mac/mac-128x128.png" width="72" alt="macOS"><br>
+          <b>macOS</b><br>
+          <sub>.tar.gz · Apple Silicon</sub>
+        </a>
       </td>
     </tr>
   </table>
 
+  <p><sub>All releases: <a href="https://github.com/joehonkey/DojoIRC/releases">github.com/joehonkey/DojoIRC/releases</a></sub></p>
+
   <br>
 
-  <a href="https://github.com/joehonkey/DojoIRC/releases/latest">
-    <img src="https://img.shields.io/github/v/release/joehonkey/DojoIRC?label=Download&style=for-the-badge&color=89b4fa" alt="Download latest release">
+  <a href="docs/themes-gallery.md">
+    <img src="https://img.shields.io/badge/54%20Themes-Browse%20Gallery-cba6f7?style=for-the-badge" alt="Browse Theme Gallery">
   </a>
-
-  <p>
-    <a href="https://github.com/joehonkey/DojoIRC/releases/latest">Linux (x86_64)</a> &nbsp;·&nbsp;
-    <a href="https://github.com/joehonkey/DojoIRC/releases/latest">Windows (x86_64)</a> &nbsp;·&nbsp;
-    <a href="https://github.com/joehonkey/DojoIRC/releases/latest">macOS (arm64)</a>
-  </p>
 </div>
 
 ---
