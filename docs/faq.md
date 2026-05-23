@@ -60,7 +60,7 @@ cp -r themes/ /path/to/your/DojoIRC/
 | Linux / macOS | `~/.config/dojoirc/config.toml` |
 | Windows | `%APPDATA%\dojoirc\config.toml` |
 
-Use **Hamburger → Open Config** to open it directly in your system editor.
+Use **Hamburger → Open Config** to open it directly in your system editor. On Windows this uses `cmd /c start`; on macOS `open`; on Linux it tries `$VISUAL`/`$EDITOR`, then common GUI editors, then `xdg-open`.
 
 ### Config changes aren't applying
 
@@ -111,6 +111,14 @@ tls               = true
 nick              = "yournick"
 nickserv_password = "yourpassword"
 ```
+
+### Open Config doesn't do anything on Windows
+
+This was a bug — fixed as of v0.4.7+. DojoIRC now uses `cmd /c start` to open the config in your default `.toml` editor. If no editor is associated with `.toml` files, Windows will prompt you to choose one (Notepad works fine).
+
+### Does DojoIRC support the Windows touch keyboard?
+
+Yes. When Windows tablet mode is active, focusing the message input automatically raises the touch keyboard (`TabTip.exe`). If `TabTip.exe` is not present (some Windows 11 builds removed it), the on-screen keyboard (`osk.exe`) is used as a fallback. On desktop Windows where tablet mode is off, nothing happens.
 
 ---
 

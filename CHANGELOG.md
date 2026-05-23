@@ -1,5 +1,18 @@
 # DojoIRC Changelog
 
+## Session 21 — 2026-05-23 (bug fixes + Windows improvements)
+
+### What Was Fixed / Added
+- **Input draft preserved on re-render** — incoming messages triggered a full DOM rebuild that silently wiped whatever you were typing. The message-input value and cursor position are now snapshotted before each rebuild and restored after.
+- **Windows Open Config fixed** — `openInEditor()` was Linux-only (fell through to `xdg-open`, `xdg-mime`, and a hardcoded list of Linux GUI editors). Now dispatches to `cmd /c start` on Windows and `open` on macOS before hitting the Linux path.
+- **Windows tablet mode keyboard** — new `MaybeShowKeyboard()` backend method reads the `TabletMode` registry key under `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ImmersiveShell`; if tablet mode is active, focusing the message input launches `TabTip.exe` (touch keyboard) with an `osk.exe` fallback. No-op on Linux and macOS.
+
+### Files Changed
+- `app.go` — `MaybeShowKeyboard()` method; `openInEditor()` gains Windows/macOS dispatch; `goruntime` alias added for platform detection
+- `frontend/src/main.js` — `render()` saves/restores input value and cursor; `MaybeShowKeyboard` imported and wired to input `focus` event in `bindEvents()`
+
+---
+
 ## Session 20 — 2026-05-23 (v0.4.7 — release checklist + type declarations)
 
 ### What Was Added

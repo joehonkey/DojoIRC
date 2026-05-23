@@ -1629,7 +1629,7 @@ function showDocs() {
       <div class="docs-body">
 
         <h2>Config File</h2>
-        <p>Location: <code>~/.config/dojoirc/config.toml</code> — use <b>Hamburger → Open Config</b> to open it in your editor, then <b>Hamburger → Reload Config</b> to apply changes without restarting.</p>
+        <p>Location: <code>~/.config/dojoirc/config.toml</code> (Linux/macOS) or <code>%APPDATA%\dojoirc\config.toml</code> (Windows) — use <b>Hamburger → Open Config</b> to open it in your system editor, then <b>Hamburger → Reload Config</b> to apply changes without restarting.</p>
         <pre><code>theme     = "default"   # theme name (see Themes)
 font      = "IBM Plex Mono"
 font_size = 13          # main chat font size in px
@@ -1816,6 +1816,11 @@ channels = ["#linux"]</code></pre>
         <h2>Sidebar &amp; Panels</h2>
         <p>Drag the handle between the sidebar and chat area to resize the sidebar. Drag the handle between chat and the nick list to resize the nick list. Both widths are remembered across restarts.</p>
         <p>Click a server name to view the server buffer (MOTD and connection messages). Click a channel name to switch to it. The topic bar under the channel name can be toggled with the <b>Topic</b> pill button.</p>
+
+        <h2>Windows Notes</h2>
+        <p><b>Open Config</b> uses your default <code>.toml</code> file association (usually Notepad). To use a different editor, right-click the file in Explorer and choose "Open with", or set a <code>.toml</code> association in Windows Settings.</p>
+        <p><b>Tablet / touch mode</b> — when Windows tablet mode is active, tapping the message input automatically raises the touch keyboard (<code>TabTip.exe</code>). If that is not present on your system, the on-screen keyboard (<code>osk.exe</code>) is used instead.</p>
+        <p><b>Config location</b> — <code>%APPDATA%\dojoirc\config.toml</code>. You can paste that path directly into Explorer's address bar.</p>
 
         <h2>System Tray</h2>
         <p>Closing the window hides DojoIRC to the system tray — it stays connected. Left-click the tray icon to show or hide the window. Right-click for Show / Quit.</p>
