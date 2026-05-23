@@ -3,15 +3,39 @@
 ## v0.2.0 — 2026-05-22
 
 ### Added
-- **CTCP** — auto-replies to `VERSION`, `PING`, `TIME` requests from other clients; `/ctcp <nick> <cmd>` to query others; replies shown in server buffer
+- **CTCP** — auto-replies to `VERSION`, `PING`, `TIME` from other clients; `/ctcp <nick> <cmd>` to query others; replies appear in server buffer
 - **54 themes** — ported all themes from themes.halloy.chat (Dracula, Nord, Gruvbox, One Dark, Tokyo Night Storm, Catppuccin variants, Rose Piné variants, Kanagawa, Solarized Dark, Zenburn, Cyberpunk, Matrix, and 38 more)
-- **Theme gallery** — `docs/themes-gallery.md` with color swatches for all 54 themes
-- **Direct download links** — README OS icons now link directly to platform binaries; `themes.zip` available as a standalone release asset
-- **Nick tracking** — client now tracks nick changes from `/nick` so CTCP replies always use the current nick
+- **Theme gallery** — `docs/themes-gallery.md` showing every theme with live hex color swatches
+- **Nick list op/voice colors** — `@` ops, `+` voice, `%` halfop prefixes colored per theme (`[nicklist] op/voice/halfop` keys); CSS variables `--nick-op`, `--nick-voice`, `--nick-halfop` wired through `applyTheme`
+- **Live nick list updates** — JOIN adds nick immediately; PART/QUIT/KICK remove it in real time; `/nick` renames in place preserving prefix; no longer waits for the next NAMES refresh
+- **Message logging** — all messages, actions, and notices written to `~/.config/dojoirc/logs/<server>/<channel>.log`; appended across restarts; handles flushed cleanly on quit
+- **Nick tracking** — `currentNick` field on IRC client updated on 001 and NICK so CTCP VERSION always replies with the current nick
+- **Direct OS download links** — README OS icons link directly to platform-specific release assets; `themes.zip` as a standalone release asset
+- **GitHub Actions release workflow** — Linux (ubuntu-24.04), Windows, macOS build jobs; produces `DojoIRC-linux-amd64.tar.gz`, `DojoIRC-windows-amd64.zip`, `DojoIRC-macos-arm64.tar.gz`, `themes.zip`
+- **Full documentation** — `docs/` folder with 7 files: installation, configuration, commands, themes, font-sizes, ircv3, building; linked from README
 
 ### Fixed
-- Theme TOML structure corrected — generated themes now use the proper `[general]`, `[sidebar]`, `[buffer]`, `[highlights]`, `[nicklist]`, `[input]` sections so they actually apply in the picker
+- Theme TOML structure corrected — ported themes now use the proper `[general]`, `[sidebar]`, `[buffer]`, `[highlights]`, `[nicklist]`, `[input]` sections
 - Timestamp font size matched to chat text (13px)
+- CSS font-size variables wired into all selectors (were declared in `:root` but not applied)
+
+---
+
+## Session 6 — 2026-05-22 (Themes, CTCP, Logging, Docs)
+
+### What Was Built
+- **Nick mention detection** — regex match on incoming messages; mention rows get `.mention` class (red tint); `ch.mentions` counter drives yellow unread dot in sidebar
+- **Desktop notifications** — Web Notifications API; fires on mention if channel is not active + focused; permission requested at boot
+- **CSS font-size variables fully wired** — all selectors now use `var(--font-size-*)` instead of hardcoded px; timestamp bumped from 11px to 13px to match chat
+- **Complete docs/ folder** — 7 Markdown files covering all features; docs bar added to README
+- **README overhaul** — centered logo, platform icon table, features table, IRCv3 capability table, roadmap summary, download badge
+- **ROADMAP.md additions** — added `sts`, `utf8only`, `draft/message-redaction`, `draft/account-registration`, `draft/channel-rename`, `WHOX` to Stage 3
+- **54 themes from themes.halloy.chat** — decoded binary color format from halloy:// URLs; converted all 50 themes to DojoIRC TOML; placed in `themes/` and `~/.config/dojoirc/themes/`; theme gallery page generated with shields.io color swatches
+- **CTCP** — `handleCTCPRequest` in `client.go` for VERSION/PING/TIME; NOTICE handler detects CTCP replies; `SendCTCP` method + `app.go` binding + `/ctcp` slash command in frontend
+- **Nick list role colors** — op/voice/halfop prefix symbols colored by `[nicklist]` theme keys; `.op .nick-prefix`, `.voice .nick-prefix` CSS rules added
+- **Live nick list** — JOIN/PART/QUIT/KICK/NICK all update `ch.nicks` in the frontend directly; `sortNicks()` helper extracted and reused
+- **Message logging** — `internal/logger/logger.go`; keyed file handles per server+channel; `onEvent()` dispatcher in `app.go` centralizes emit + logging; `logger.CloseAll()` on shutdown
+- **GitHub Actions CI** — `release.yml` triggered on `v*` tags; three parallel build jobs + `package-themes` job; `themes.zip` uploaded as standalone asset; v0.2.0 tag pushed and release published
 
 ---
 
