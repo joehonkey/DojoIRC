@@ -1,5 +1,18 @@
 # DojoIRC Changelog
 
+## Session 16 — 2026-05-23 (full-height nicklist, unified input bar, bot icon alignment)
+
+### What Was Built
+- **Full-height nicklist column** — nicklist moved from inside `#content` to a sibling of `#main` at the `#app` flex level. It now stretches the full window height alongside the sidebar and input bar, matching the Halloy-style layout.
+- **Unified input bar** — the entire input row is now one solid color strip (`--bg-input` applied directly to `#input-bar`). The nick prefix sits inline at the left with a vertical `border-right` separator; the text input is transparent against the bar. No separate rounded box.
+- **Bot icon alignment** — `.nick-item` is now `display: flex; align-items: center`. Nick text is wrapped in `.nick-text` (`flex: 0 1 auto; min-width: 0`) so it only takes natural width, and `.bot-icon` (`flex-shrink: 0`) sits immediately after the text rather than at the far right edge.
+
+### Files Changed
+- `frontend/src/main.js` — nicklist moved to `#app`-level HTML (sibling of `#main`); nick items wrap text in `.nick-text` span
+- `frontend/src/style.css` — `.nick-item` flex layout; `.nick-text` / `.bot-icon` rules; `#input-bar` full-width strip; `#input-nick` with `border-right` separator; `#message-input` transparent background
+
+---
+
 ## Session 15 — 2026-05-23 (per-platform icons + Extra Icons gallery)
 
 ### What Was Built

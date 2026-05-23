@@ -98,6 +98,9 @@
 - [x] Keyboard shortcuts (Alt+↑↓ channels, Alt+←→ servers, Ctrl+F search)
 - [x] Command autocomplete (Tab)
 - [x] Nick autocomplete (Tab)
+- [x] Full-height nicklist column (spans full window height alongside input bar)
+- [x] Unified input bar (full-width color strip with inline nick prefix + vertical separator)
+- [x] Bot icon alignment (inline flex layout — icon sits next to nick text, not at edge)
 
 ## Stage 5 — Power Features
 - [x] Bouncer support (ZNC, soju) — `password` field sends `PASS` before registration
