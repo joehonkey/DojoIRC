@@ -771,7 +771,6 @@ function render() {
       ${ch?.topic && state.topicVisible ? `<div id="buffer-topic">${renderText(ch.topic)}</div>` : ''}
       <div id="content">
         <div id="messages" data-channel="${state.activeServer}/${state.activeChannel}">${renderMessages()}</div>
-        ${isServerBuf ? '' : `<div id="nicklist-handle" title="Drag to resize"></div><div id="nicklist" style="width:${state.nicklistWidth}px">${renderNicklist()}</div>`}
       </div>
       <div id="typing-bar"></div>
       <div id="input-bar">
@@ -780,6 +779,7 @@ function render() {
         <button id="emoji-btn" title="Emoji">😊</button>
       </div>
     </div>
+    ${isServerBuf ? '' : `<div id="nicklist-handle" title="Drag to resize"></div><div id="nicklist" style="width:${state.nicklistWidth}px">${renderNicklist()}</div>`}
   `;
   bindEvents();
   if (atBottom) { scrollToBottom(); setTimeout(scrollToBottom, 0); }
@@ -854,7 +854,7 @@ function renderNicklist() {
     const color = nickColor(n);
     const isBot = !!botNicks[state.activeServer + '\0' + bare];
     const botBadge = isBot ? `<span class="bot-icon" title="Bot">${botIcon(bare)}</span>` : '';
-    return `<div class="nick-item ${cls}" data-nick="${escapeAttr(bare)}" data-server="${escapeAttr(state.activeServer)}" style="color:${color}">${prefix ? `<span class="nick-prefix">${prefix}</span>` : ''}${escapeHtml(bare)}${botBadge}</div>`;
+    return `<div class="nick-item ${cls}" data-nick="${escapeAttr(bare)}" data-server="${escapeAttr(state.activeServer)}" style="color:${color}"><span class="nick-text">${prefix ? `<span class="nick-prefix">${prefix}</span>` : ''}${escapeHtml(bare)}</span>${botBadge}</div>`;
   }).join('');
 }
 

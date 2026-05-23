@@ -22,6 +22,10 @@ export function FetchURLPreview(arg1) {
   return window['go']['main']['App']['FetchURLPreview'](arg1);
 }
 
+export function GetAppIcon() {
+  return window['go']['main']['App']['GetAppIcon']();
+}
+
 export function GetNick(arg1) {
   return window['go']['main']['App']['GetNick'](arg1);
 }
@@ -36,10 +40,6 @@ export function GetScrollback() {
 
 export function GetServers() {
   return window['go']['main']['App']['GetServers']();
-}
-
-export function GetAppIcon() {
-  return window['go']['main']['App']['GetAppIcon']();
 }
 
 export function GetSysInfo() {

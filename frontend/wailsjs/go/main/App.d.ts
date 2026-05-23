@@ -15,6 +15,8 @@ export function DisconnectServer(arg1:string):Promise<void>;
 
 export function FetchURLPreview(arg1:string):Promise<preview.Result>;
 
+export function GetAppIcon():Promise<string>;
+
 export function GetNick(arg1:string):Promise<string>;
 
 export function GetNickList(arg1:string,arg2:string):Promise<Array<string>>;
