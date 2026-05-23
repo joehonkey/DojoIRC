@@ -1,5 +1,22 @@
 # DojoIRC Changelog
 
+## Session 12 — 2026-05-23 (v0.4.0 — emoji, input history, version bump)
+
+### What Was Built
+- **Emoji shortcodes** — type `:shortcode:` in any message and it converts to the emoji on send (`:fire:` → 🔥, `:thumbsup:` → 👍, `:heart:` → ❤️, 67 shortcodes total); `applyShortcodes()` runs a regex replace before the message is dispatched.
+- **Emoji picker** — 😊 button to the right of the message input opens an overlay picker: 7 categories (Smileys, Gestures, Hearts, Animals, Food, Objects, Symbols), ~175 emoji total, live name-search, active category tab highlight; clicking inserts at cursor and closes.
+- **Tab shortcode completion** — typing `:word` and pressing Tab completes to the first matching emoji character (e.g. `:fir` + Tab → 🔥); cycles through multiple matches.
+- **Input history navigation** — Up/Down arrows in the message input cycle through previously sent messages; draft is preserved so Down from the oldest entry restores whatever you were typing.
+- **Version bumped to v0.4.0** — About panel updated; ROADMAP Stage 4 emoji checkbox checked.
+
+### Key Decisions
+- History stored as raw text (pre-shortcode) so pressing Up shows what you typed, not the converted form.
+- Emoji picker closes on outside click via a one-shot `click` listener added with `setTimeout` to avoid the button click that opened it.
+- Picker repositions left-edge to stay on-screen for narrow windows.
+- Tab shortcode completion inserts the emoji character directly (not the shortcode name) so the result in the input matches what will be sent.
+
+---
+
 ## Session 11 — 2026-05-23 (Stage 4 UX — search, keyboard shortcuts, scrollback)
 
 ### What Was Built

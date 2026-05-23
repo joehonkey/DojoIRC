@@ -39,7 +39,18 @@ Closing search (Escape or ✕) restores all messages to full opacity.
 |---|---|
 | **Tab** | Complete nick at cursor (cycles through matches; adds `: ` at line start) |
 | **Tab** (after `/`) | Complete slash command name |
+| **Tab** (after `:word`) | Complete emoji shortcode — inserts the matching emoji |
+| **↑ Arrow** | Recall previous sent message (cycles back through history) |
+| **↓ Arrow** | Scroll forward through history; returns to draft at end |
 | **Enter** | Send message |
+
+---
+
+## Emoji
+
+Type `:shortcode:` in any message and it converts to the emoji on send (e.g. `:fire:` → 🔥, `:thumbsup:` → 👍, `:heart:` → ❤️).
+
+Click the **😊** button to the right of the input to open the emoji picker. Browse by category or search by name. Click any emoji to insert it at the cursor.
 
 ---
 
@@ -47,4 +58,5 @@ Closing search (Escape or ✕) restores all messages to full opacity.
 
 - Alt+arrow navigation does not interfere with typing — Alt+key combinations do not produce text characters.
 - Ctrl+F is intercepted even when the message input is focused.
+- Up/Down history navigation only activates when the cursor is in the message input.
 - Keyboard shortcuts are registered once at startup and remain active for the entire session.

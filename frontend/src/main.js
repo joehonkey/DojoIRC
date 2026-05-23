@@ -31,6 +31,128 @@ const state = {
   scrollback: 5000,
 };
 
+// ── Emoji data ──────────────────────────────────────────────
+const EMOJI_CATS = [
+  { icon: '😀', name: 'Smileys',  emoji: [['😀','grinning'],['😁','beaming'],['😂','joy'],['🤣','rofl'],['😃','smiley'],['😄','smile'],['😅','sweat_smile'],['😆','laughing'],['😊','blush'],['😇','innocent'],['🙂','slightly_smiling'],['🙃','upside_down'],['😉','wink'],['😋','yum'],['😎','sunglasses'],['😍','heart_eyes'],['🥰','smiling_hearts'],['😘','kissing_heart'],['🤗','hugging'],['🤔','thinking'],['😤','triumph'],['😭','sob'],['😢','cry'],['😱','scream'],['😠','angry'],['😡','rage'],['🤬','swearing'],['😴','sleeping'],['🤢','nauseated'],['🥺','pleading']] },
+  { icon: '👋', name: 'Gestures', emoji: [['👋','wave'],['🤚','raised_back_hand'],['✋','raised_hand'],['👌','ok_hand'],['✌️','peace'],['🤞','crossed_fingers'],['🤟','love_you'],['🤘','horns'],['👍','thumbsup'],['👎','thumbsdown'],['👊','fist'],['👏','clap'],['🙌','raised_hands'],['🙏','pray'],['💪','muscle'],['🤝','handshake'],['👀','eyes'],['👂','ear'],['👃','nose'],['✍️','writing'],['🤜','right_fist'],['🤛','left_fist'],['☝️','point_up'],['👆','point_up2'],['👇','point_down']] },
+  { icon: '❤️', name: 'Hearts',   emoji: [['❤️','heart'],['🧡','orange_heart'],['💛','yellow_heart'],['💚','green_heart'],['💙','blue_heart'],['💜','purple_heart'],['🖤','black_heart'],['🤍','white_heart'],['🤎','brown_heart'],['💔','broken_heart'],['💕','two_hearts'],['💖','sparkling_heart'],['💘','cupid'],['💗','growing_heart'],['🔥','fire'],['✨','sparkles'],['💥','boom'],['⭐','star'],['🌟','star2'],['💯','100'],['🌈','rainbow'],['❄️','snowflake'],['☀️','sun'],['🌙','moon'],['⚡','zap']] },
+  { icon: '🐶', name: 'Animals',  emoji: [['🐶','dog'],['🐱','cat'],['🐭','mouse'],['🐹','hamster'],['🐰','rabbit'],['🦊','fox'],['🐻','bear'],['🐼','panda'],['🐨','koala'],['🐯','tiger'],['🦁','lion'],['🐮','cow'],['🐷','pig'],['🐸','frog'],['🐵','monkey'],['🦄','unicorn'],['🐝','bee'],['🦋','butterfly'],['🐢','turtle'],['🦈','shark'],['🐬','dolphin'],['🦀','crab'],['🐙','octopus'],['🦉','owl'],['🦊','fox2']] },
+  { icon: '🍕', name: 'Food',     emoji: [['🍕','pizza'],['🍔','hamburger'],['🌮','taco'],['🍟','fries'],['🍿','popcorn'],['🍞','bread'],['🥚','egg'],['🍳','fried_egg'],['🧀','cheese'],['🌭','hotdog'],['🥪','sandwich'],['🍜','ramen'],['🍣','sushi'],['🍦','icecream'],['🍩','doughnut'],['🍪','cookie'],['🎂','birthday'],['🍰','cake'],['🧁','cupcake'],['☕','coffee'],['🍵','tea'],['🍺','beer'],['🍷','wine'],['🍸','cocktail'],['🥤','cup']] },
+  { icon: '💡', name: 'Objects',  emoji: [['💡','bulb'],['📱','phone'],['💻','laptop'],['🖥️','desktop'],['⌨️','keyboard'],['📷','camera'],['📺','tv'],['🎵','music'],['🎶','notes'],['🎮','video_game'],['🎲','game_die'],['🏆','trophy'],['🥇','first_place'],['🎯','dart'],['🔑','key'],['🔒','lock'],['⚙️','gear'],['🔧','wrench'],['🔬','microscope'],['🚀','rocket'],['💰','moneybag'],['📚','books'],['📝','memo'],['🎨','art'],['🎸','guitar']] },
+  { icon: '🎉', name: 'Symbols',  emoji: [['🎉','tada'],['🎊','confetti'],['🎈','balloon'],['✅','check'],['❌','x'],['❓','question'],['❗','exclamation'],['💬','speech'],['🔔','bell'],['⚠️','warning'],['🚫','no_entry'],['🚧','construction'],['♻️','recycle'],['🆕','new'],['🆗','ok'],['🆘','sos'],['💤','zzz'],['🌀','cyclone'],['🔎','search'],['📌','pushpin'],['🏳️','white_flag'],['🏴','black_flag'],['🎀','ribbon'],['🏅','medal'],['🎗️','reminder_ribbon']] },
+];
+
+const SHORTCODES = {
+  ':smile:':'😊', ':grinning:':'😀', ':joy:':'😂', ':rofl:':'🤣', ':smiley:':'😃',
+  ':laughing:':'😆', ':blush:':'😊', ':innocent:':'😇', ':wink:':'😉', ':yum:':'😋',
+  ':sunglasses:':'😎', ':heart_eyes:':'😍', ':smiling_hearts:':'🥰', ':kissing_heart:':'😘',
+  ':hugging:':'🤗', ':thinking:':'🤔', ':triumph:':'😤', ':sob:':'😭', ':cry:':'😢',
+  ':scream:':'😱', ':angry:':'😠', ':rage:':'😡', ':sleeping:':'😴',
+  ':wave:':'👋', ':ok_hand:':'👌', ':peace:':'✌️', ':thumbsup:':'👍', ':thumbsdown:':'👎',
+  ':clap:':'👏', ':pray:':'🙏', ':muscle:':'💪', ':eyes:':'👀', ':handshake:':'🤝',
+  ':heart:':'❤️', ':orange_heart:':'🧡', ':yellow_heart:':'💛', ':green_heart:':'💚',
+  ':blue_heart:':'💙', ':purple_heart:':'💜', ':broken_heart:':'💔', ':two_hearts:':'💕',
+  ':sparkling_heart:':'💖', ':fire:':'🔥', ':sparkles:':'✨', ':100:':'💯', ':boom:':'💥',
+  ':star:':'⭐', ':star2:':'🌟', ':rainbow:':'🌈', ':snowflake:':'❄️', ':sun:':'☀️',
+  ':moon:':'🌙', ':zap:':'⚡', ':dog:':'🐶', ':cat:':'🐱', ':panda:':'🐼',
+  ':unicorn:':'🦄', ':bee:':'🐝', ':butterfly:':'🦋', ':pizza:':'🍕', ':hamburger:':'🍔',
+  ':taco:':'🌮', ':coffee:':'☕', ':beer:':'🍺', ':cake:':'🎂', ':bulb:':'💡',
+  ':computer:':'💻', ':phone:':'📱', ':music:':'🎵', ':game:':'🎮', ':trophy:':'🏆',
+  ':rocket:':'🚀', ':tada:':'🎉', ':balloon:':'🎈', ':check:':'✅', ':x:':'❌',
+  ':warning:':'⚠️', ':recycle:':'♻️', ':bell:':'🔔',
+};
+
+function applyShortcodes(text) {
+  return text.replace(/:([a-z0-9_]+):/g, m => SHORTCODES[m] || m);
+}
+
+// ── Input history ────────────────────────────────────────────
+const inputHistory = [];
+let historyIdx = -1;
+let inputDraft  = '';
+
+// ── Emoji picker ─────────────────────────────────────────────
+function showEmojiPicker(anchorEl) {
+  document.getElementById('emoji-picker')?.remove();
+  let catIdx = 0;
+
+  function emojiList(q) {
+    if (q) {
+      const r = [];
+      EMOJI_CATS.forEach(cat => cat.emoji.forEach(([e, n]) => { if (n.includes(q)) r.push([e, n]); }));
+      return r;
+    }
+    return EMOJI_CATS[catIdx].emoji;
+  }
+
+  function renderGrid(q) {
+    const grid = document.getElementById('emoji-grid');
+    if (!grid) return;
+    grid.innerHTML = emojiList(q.toLowerCase()).map(([e, n]) =>
+      `<button class="emoji-item" title="${escapeAttr(n)}" data-emoji="${escapeAttr(e)}">${e}</button>`
+    ).join('');
+    grid.querySelectorAll('.emoji-item').forEach(btn => {
+      btn.addEventListener('click', ev => {
+        ev.stopPropagation();
+        const inp = document.getElementById('message-input');
+        if (inp) {
+          const s = inp.selectionStart, end = inp.selectionEnd;
+          inp.value = inp.value.slice(0, s) + btn.dataset.emoji + inp.value.slice(end);
+          const p = s + btn.dataset.emoji.length;
+          inp.setSelectionRange(p, p);
+          inp.focus();
+        }
+        document.getElementById('emoji-picker')?.remove();
+      });
+    });
+  }
+
+  const picker = document.createElement('div');
+  picker.id = 'emoji-picker';
+  const rect = anchorEl.getBoundingClientRect();
+  picker.style.left   = Math.max(0, rect.left) + 'px';
+  picker.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+
+  const tabsHtml = EMOJI_CATS.map((cat, i) =>
+    `<button class="emoji-tab${i === 0 ? ' active' : ''}" data-cat="${i}" title="${cat.name}">${cat.icon}</button>`
+  ).join('');
+
+  picker.innerHTML = `
+    <div id="emoji-search-wrap"><input id="emoji-search" type="text" placeholder="Search emoji…" autocomplete="off"></div>
+    <div id="emoji-tabs">${tabsHtml}</div>
+    <div id="emoji-grid"></div>
+  `;
+  document.body.appendChild(picker);
+
+  const r = picker.getBoundingClientRect();
+  if (r.right > window.innerWidth) picker.style.left = Math.max(0, window.innerWidth - r.width - 8) + 'px';
+
+  renderGrid('');
+
+  document.getElementById('emoji-search').addEventListener('input', e => renderGrid(e.target.value.trim()));
+
+  picker.querySelectorAll('.emoji-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      catIdx = parseInt(btn.dataset.cat);
+      picker.querySelectorAll('.emoji-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('emoji-search').value = '';
+      renderGrid('');
+    });
+  });
+
+  setTimeout(() => {
+    const closer = ev => {
+      const p = document.getElementById('emoji-picker');
+      if (p && !p.contains(ev.target) && ev.target !== anchorEl) {
+        p.remove();
+        document.removeEventListener('click', closer);
+      }
+    };
+    document.addEventListener('click', closer);
+  }, 0);
+}
+
 // Typing indicator state (not part of render state)
 const typingNicks = {};       // "server\0channel" → Set<nick>
 const typingClearTimers = {}; // "server\0channel\0nick" → timerId
@@ -568,10 +690,17 @@ function handleTab(input) {
     const after   = val.slice(pos);
 
     let matches = [];
+    let isShortcode = false;
     if (partial.startsWith('/') && prefix === '') {
       matches = SLASH_COMMANDS
         .filter(c => ('/' + c).startsWith(partial.toLowerCase()))
         .map(c => '/' + c);
+    } else if (partial.startsWith(':') && partial.length > 1) {
+      const lp = partial.toLowerCase();
+      matches = Object.entries(SHORTCODES)
+        .filter(([k]) => k.startsWith(lp))
+        .map(([, v]) => v);
+      isShortcode = true;
     } else {
       const srv = state.servers.find(s => s.name === state.activeServer);
       const ch  = srv?.channels.find(c => c.name === state.activeChannel);
@@ -580,12 +709,12 @@ function handleTab(input) {
       matches = nicks.filter(n => n.toLowerCase().startsWith(lp));
     }
     if (!matches.length) return;
-    tabComp = { matches, idx: 0, prefix, after, atStart: prefix.trim() === '' };
+    tabComp = { matches, idx: 0, prefix, after, atStart: prefix.trim() === '', isShortcode };
   }
 
   const match  = tabComp.matches[tabComp.idx];
   const isCmd  = match.startsWith('/');
-  const suffix = (!isCmd && tabComp.atStart) ? ': ' : ' ';
+  const suffix = (tabComp.isShortcode || isCmd) ? ' ' : (tabComp.atStart ? ': ' : ' ');
   const newVal = tabComp.prefix + match + suffix + tabComp.after.trimStart();
   input.value  = newVal;
   const newPos = tabComp.prefix.length + match.length + suffix.length;
@@ -628,6 +757,7 @@ function render() {
       <div id="input-bar">
         <span id="input-nick">${state.nick}${state.awayServer === state.activeServer ? '<span class="away-badge">away</span>' : ''}</span>
         <input id="message-input" type="text" placeholder="${state.activeChannel ? 'Message ' + state.activeChannel : 'Not connected'}" autocomplete="off" />
+        <button id="emoji-btn" title="Emoji">😊</button>
       </div>
     </div>
   `;
@@ -866,7 +996,30 @@ function bindEvents() {
         handleTab(input);
         return;
       }
-      tabComp = null; // any other key resets completion cycle
+      tabComp = null; // any other key resets tab completion
+
+      if (e.key === 'ArrowUp' && !e.altKey && !e.ctrlKey && !e.metaKey) {
+        if (!inputHistory.length) return;
+        e.preventDefault();
+        if (historyIdx === -1) { inputDraft = input.value; historyIdx = inputHistory.length - 1; }
+        else if (historyIdx > 0) { historyIdx--; }
+        input.value = inputHistory[historyIdx];
+        input.setSelectionRange(input.value.length, input.value.length);
+        return;
+      }
+      if (e.key === 'ArrowDown' && !e.altKey && !e.ctrlKey && !e.metaKey) {
+        if (historyIdx === -1) return;
+        e.preventDefault();
+        if (historyIdx < inputHistory.length - 1) {
+          historyIdx++;
+          input.value = inputHistory[historyIdx];
+        } else {
+          historyIdx = -1;
+          input.value = inputDraft;
+        }
+        input.setSelectionRange(input.value.length, input.value.length);
+        return;
+      }
 
       if (e.key === 'Enter') {
         const val = input.value.trim();
@@ -1064,10 +1217,25 @@ function bindEvents() {
     render();
     document.getElementById('message-input')?.focus();
   });
+
+  // Emoji picker button
+  document.getElementById('emoji-btn')?.addEventListener('click', e => {
+    e.stopPropagation();
+    showEmojiPicker(e.currentTarget);
+  });
 }
 
 function sendMessage(text) {
-  if (!text || !state.activeChannel) return;
+  if (!text) return;
+
+  if (text.trim()) {
+    inputHistory.push(text);
+    if (inputHistory.length > 100) inputHistory.shift();
+  }
+  historyIdx = -1;
+  inputDraft  = '';
+
+  if (!state.activeChannel) return;
 
   if (text.startsWith('/')) {
     handleSlash(text);
@@ -1079,10 +1247,11 @@ function sendMessage(text) {
   const ch = activeChannel();
   if (!ch) return;
 
-  SendMessage(state.activeServer, state.activeChannel, text)
+  const converted = applyShortcodes(text);
+  SendMessage(state.activeServer, state.activeChannel, converted)
     .catch(err => console.error('send failed:', err));
 
-  ch.messages.push({ time: timestamp(), nick: state.nick, text, type: 'message' });
+  ch.messages.push({ time: timestamp(), nick: state.nick, text: converted, type: 'message' });
   render();
 }
 
@@ -1220,7 +1389,7 @@ function showAbout() {
           <img src="${DOJOIRC_ICON}" alt="DojoIRC" style="width:80px;height:80px;border-radius:16px;display:block;margin:0 auto 10px">
           <div style="font-size:12px;color:var(--text-dim)">IRC client for LinuxDojo.org</div>
           <div style="margin-top:16px;display:inline-block;background:var(--bg-sidebar);border:1px solid var(--border);border-radius:4px;padding:6px 18px;font-size:13px">
-            Version <strong>v0.3.1</strong>
+            Version <strong>v0.4.0</strong>
           </div>
         </div>
         <table style="width:100%;border-collapse:collapse;font-size:12px">

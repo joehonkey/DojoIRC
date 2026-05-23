@@ -100,6 +100,8 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | **Message search** | Ctrl+F opens an in-buffer search bar; matching messages stay bright, others dim |
 | **Keyboard shortcuts** | Alt+↑↓ navigate channels, Alt+←→ switch servers, Ctrl+F search, Escape close |
 | **Scrollback limit** | Configurable per session (`scrollback` in `[behaviour]`); default 5000 messages per buffer |
+| **Emoji** | 😊 button opens a picker (7 categories, ~175 emoji, live search); `:shortcode:` converts on send; Tab completes `:word` |
+| **Input history** | Up/Down arrows in the message input cycle through previously sent messages |
 
 ---
 
@@ -233,7 +235,8 @@ Tab-completes nicks and commands. Press Tab repeatedly to cycle through matches.
 | **Escape** | Close search |
 | **Alt+↑ / Alt+↓** | Navigate previous / next channel or buffer |
 | **Alt+← / Alt+→** | Jump to previous / next server |
-| **Tab** | Complete nick or slash command |
+| **Tab** | Complete nick, slash command, or `:emoji` shortcode |
+| **↑ / ↓** | Cycle through input history (when focused in message input) |
 | **Enter** | Send message |
 
 ---
@@ -278,7 +281,7 @@ Project scaffold, IRC engine, UI layout, system tray, themes, multi-server, slas
 ~~server-time~~ ✅ — remaining: batch, labeled-response, chathistory, echo-message, msgid, Monitor, multiline, react, read-marker.
 
 **Stage 4 — UX** (in progress)  
-~~message search~~ ✅ ~~keyboard shortcuts~~ ✅ ~~scrollback limit~~ ✅ — remaining: emoji, message search pagination.
+~~message search~~ ✅ ~~keyboard shortcuts~~ ✅ ~~scrollback limit~~ ✅ ~~emoji~~ ✅ ~~input history~~ ✅ — remaining: message search pagination.
 
 **Stage 5 — Power Features**  
 Bouncer support (ZNC/soju), SOCKS5 proxy, mTLS, split view, drag-to-reorder, flood protection, plugin hooks.
