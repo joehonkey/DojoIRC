@@ -1818,7 +1818,7 @@ channels = ["#linux"]</code></pre>
         <p>Click a server name to view the server buffer (MOTD and connection messages). Click a channel name to switch to it. The topic bar under the channel name can be toggled with the <b>Topic</b> pill button.</p>
 
         <h2>Windows Notes</h2>
-        <p><b>Open Config</b> uses your default <code>.toml</code> file association (usually Notepad). To use a different editor, right-click the file in Explorer and choose "Open with", or set a <code>.toml</code> association in Windows Settings.</p>
+        <p><b>Open Config</b> opens the config in Notepad. To use a different editor, set the <code>EDITOR</code> or <code>VISUAL</code> environment variable before launching DojoIRC (e.g. <code>set EDITOR=code</code> for VS Code).</p>
         <p><b>Tablet / touch mode</b> — when Windows tablet mode is active, tapping the message input automatically raises the touch keyboard (<code>TabTip.exe</code>). If that is not present on your system, the on-screen keyboard (<code>osk.exe</code>) is used instead.</p>
         <p><b>Config location</b> — <code>%APPDATA%\dojoirc\config.toml</code>. You can paste that path directly into Explorer's address bar.</p>
 

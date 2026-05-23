@@ -467,11 +467,18 @@ func (a *App) MaybeShowKeyboard() {
 func openInEditor(path string) {
 	switch goruntime.GOOS {
 	case "windows":
-		// rundll32 url.dll,FileProtocolHandler is the same mechanism Explorer
-		// uses — handles any path including spaces, no cmd.exe quoting issues.
-		if err := exec.Command("rundll32.exe", "url.dll,FileProtocolHandler", path).Start(); err != nil {
-			exec.Command("cmd", "/c", "start", "", path).Start()
+		// Avoid rundll32/shell open — if no .toml association exists Windows
+		// shows an "Open with" dialog that flashes the app window repeatedly.
+		// Honor $VISUAL/$EDITOR if set, otherwise fall back to notepad.exe
+		// which is always present and opens any text file without a dialog.
+		for _, env := range []string{"VISUAL", "EDITOR"} {
+			if val := os.Getenv(env); val != "" {
+				if err := exec.Command(val, path).Start(); err == nil {
+					return
+				}
+			}
 		}
+		exec.Command("notepad.exe", path).Start()
 		return
 	case "darwin":
 		exec.Command("open", path).Start()

@@ -114,7 +114,7 @@ nickserv_password = "yourpassword"
 
 ### Open Config doesn't do anything on Windows
 
-This was a bug — fixed in v0.4.8. DojoIRC now uses `rundll32 url.dll,FileProtocolHandler` (the same mechanism Windows Explorer uses) to open the config in your default `.toml` editor. If no editor is associated with `.toml` files, Windows will prompt you to choose one (Notepad works fine).
+This was a bug — fixed in v0.4.8. On Windows, DojoIRC now opens the config in Notepad (always available, no dialogs). If you have `$EDITOR` or `$VISUAL` set in your environment, that is used instead.
 
 ### Does DojoIRC support the Windows touch keyboard?
 
