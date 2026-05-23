@@ -1,6 +1,6 @@
 # DojoIRC Changelog
 
-## Session 21 — 2026-05-23 (v0.4.8 — bug fixes + Windows improvements)
+## Session 21 — 2026-05-23 (v0.4.9 — bug fixes + Windows improvements)
 
 ### What Was Fixed / Added
 - **Input draft preserved on re-render** — incoming messages triggered a full DOM rebuild that silently wiped whatever you were typing. The message-input value and cursor position are now snapshotted before each rebuild and restored after.
