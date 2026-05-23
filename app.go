@@ -336,6 +336,41 @@ func (a *App) connectNewServers(cfg *config.Config) {
 	}
 }
 
+// NeedsNickSetup returns true if any server still has the default placeholder nick.
+func (a *App) NeedsNickSetup() bool {
+	if a.cfg == nil {
+		return false
+	}
+	for _, s := range a.cfg.Servers {
+		if s.Nick == "yournick" {
+			return true
+		}
+	}
+	return false
+}
+
+// SetNick replaces the placeholder nick in config.toml and updates the in-memory config.
+func (a *App) SetNick(nick string) bool {
+	if a.cfg == nil || nick == "" {
+		return false
+	}
+	path := filepath.Join(config.Dir(), "config.toml")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+	updated := strings.ReplaceAll(string(data), `"yournick"`, fmt.Sprintf("%q", nick))
+	if err := os.WriteFile(path, []byte(updated), 0o644); err != nil {
+		return false
+	}
+	for i := range a.cfg.Servers {
+		if a.cfg.Servers[i].Nick == "yournick" {
+			a.cfg.Servers[i].Nick = nick
+		}
+	}
+	return true
+}
+
 // SaveTheme writes the chosen theme name back into config.toml so it persists.
 func (a *App) SaveTheme(name string) {
 	if a.cfg == nil {

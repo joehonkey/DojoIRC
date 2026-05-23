@@ -54,6 +54,10 @@ export function JoinChannel(arg1, arg2) {
   return window['go']['main']['App']['JoinChannel'](arg1, arg2);
 }
 
+export function NeedsNickSetup() {
+  return window['go']['main']['App']['NeedsNickSetup']();
+}
+
 export function OpenConfig() {
   return window['go']['main']['App']['OpenConfig']();
 }
@@ -104,4 +108,8 @@ export function SendTyping(arg1, arg2, arg3) {
 
 export function SendWhois(arg1, arg2) {
   return window['go']['main']['App']['SendWhois'](arg1, arg2);
+}
+
+export function SetNick(arg1) {
+  return window['go']['main']['App']['SetNick'](arg1);
 }

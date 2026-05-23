@@ -512,3 +512,67 @@ a.msg-link:hover { color: var(--text); }
 }
 .docs-table td:first-child { color: var(--accent); white-space: nowrap; }
 .docs-table tr:last-child td { border-bottom: none; }
+
+/* ── First-run nick setup modal ─────────────────────────────────────────── */
+#nick-setup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+#nick-setup-modal {
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  min-width: 340px;
+}
+#nick-setup-logo {
+  font-size: 26px;
+  font-weight: bold;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+#nick-setup-subtitle {
+  color: var(--text-dim);
+  font-size: 13px;
+  text-align: center;
+}
+#nick-setup-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--font-family);
+  font-size: 15px;
+  outline: none;
+  text-align: center;
+}
+#nick-setup-input:focus { border-color: var(--accent); }
+#nick-setup-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+#nick-setup-btn {
+  margin-top: 6px;
+  padding: 8px 32px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+}
+#nick-setup-btn:hover { opacity: 0.85; }
+#nick-setup-btn:disabled { opacity: 0.5; cursor: default; }

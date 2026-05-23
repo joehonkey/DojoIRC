@@ -8,6 +8,7 @@ import {
   FetchURLPreview, BrowserOpen, GetThemeByName, GetThemeNames,
   OpenConfig, AppQuit, RestartApp, SendTyping, ReadClipboard,
   ReloadConfig, SaveTheme, ConnectServer, DisconnectServer, GetSysInfo,
+  NeedsNickSetup, SetNick,
 } from '../wailsjs/go/main/App.js';
 
 // ── State ──────────────────────────────────────────────────
@@ -1253,6 +1254,47 @@ password  = "yourpassword"</code></pre>
 // ── Boot ────────────────────────────────────────────────────
 render(); // show connecting state immediately
 
+function showNickSetup(onDone) {
+  const overlay = document.createElement('div');
+  overlay.id = 'nick-setup-overlay';
+  overlay.innerHTML = `
+    <div id="nick-setup-modal">
+      <div id="nick-setup-logo">DojoIRC</div>
+      <p id="nick-setup-subtitle">Choose your IRC nickname to get started</p>
+      <input id="nick-setup-input" type="text" maxlength="16" placeholder="yournick" autocomplete="off" spellcheck="false">
+      <p id="nick-setup-hint">Letters, numbers, _ and - only. Max 16 characters.</p>
+      <button id="nick-setup-btn">Connect</button>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  const input = document.getElementById('nick-setup-input');
+  const btn   = document.getElementById('nick-setup-btn');
+  const hint  = document.getElementById('nick-setup-hint');
+  input.focus();
+
+  function trySubmit() {
+    const nick = input.value.trim();
+    if (!/^[a-zA-Z][a-zA-Z0-9_\-]{0,15}$/.test(nick)) {
+      hint.textContent = 'Invalid nick — must start with a letter, 1–16 chars.';
+      hint.style.color = 'var(--mention, #f38ba8)';
+      input.focus();
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Connecting…';
+    SetNick(nick).then(() => {
+      overlay.remove();
+      onDone();
+    }).catch(() => {
+      btn.disabled = false;
+      btn.textContent = 'Connect';
+    });
+  }
+
+  btn.addEventListener('click', trySubmit);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') trySubmit(); });
+}
+
 function boot() {
   try { EventsOn('irc:event', handleEvent); } catch (_) {}
   if ('Notification' in window && Notification.permission === 'default') {
@@ -1262,6 +1304,16 @@ function boot() {
   Promise.resolve()
     .then(() => ReloadConfig())
     .then(applyUIConfig)
+    .catch(() => {});
+
+  Promise.resolve()
+    .then(() => NeedsNickSetup())
+    .then(needs => {
+      if (needs) {
+        showNickSetup(() => boot());
+        return;
+      }
+    })
     .catch(() => {});
 
   Promise.resolve()

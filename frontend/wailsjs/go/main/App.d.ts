@@ -31,6 +31,8 @@ export function GetThemeNames():Promise<Array<string>>;
 
 export function JoinChannel(arg1:string,arg2:string):Promise<void>;
 
+export function NeedsNickSetup():Promise<boolean>;
+
 export function OpenConfig():Promise<void>;
 
 export function PartChannel(arg1:string,arg2:string):Promise<void>;
@@ -56,3 +58,5 @@ export function SendRaw(arg1:string,arg2:string):Promise<void>;
 export function SendTyping(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function SendWhois(arg1:string,arg2:string):Promise<void>;
+
+export function SetNick(arg1:string):Promise<boolean>;
