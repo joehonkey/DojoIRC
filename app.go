@@ -483,6 +483,10 @@ func (a *App) GetAppIcon() string {
 	return "data:image/png;base64," + base64.StdEncoding.EncodeToString(appIcon)
 }
 
+func (a *App) GetVersion() string {
+	return Version
+}
+
 // GetSysInfo returns a one-line system info string for /sysinfo.
 func (a *App) GetSysInfo() string {
 	os := sysInfoOS()

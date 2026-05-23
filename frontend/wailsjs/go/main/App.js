@@ -58,6 +58,10 @@ export function GetThemeNames() {
   return window['go']['main']['App']['GetThemeNames']();
 }
 
+export function GetVersion() {
+  return window['go']['main']['App']['GetVersion']();
+}
+
 export function JoinChannel(arg1, arg2) {
   return window['go']['main']['App']['JoinChannel'](arg1, arg2);
 }

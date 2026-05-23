@@ -20,6 +20,9 @@ var (
 	winPosMu     sync.Mutex
 )
 
+// Version is set at build time via -ldflags "-X main.Version=vX.Y.Z"
+var Version = "dev"
+
 func saveWinPos(ctx context.Context) {
 	x, y := runtime.WindowGetPosition(ctx)
 	winPosMu.Lock()
