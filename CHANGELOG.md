@@ -1,5 +1,24 @@
 # DojoIRC Changelog
 
+## Session 8 — 2026-05-22 (NickServ, Modes, server-time, About, v0.3.0)
+
+### What Was Built
+- **NickServ identify flow** — if `nickserv_password` is set in config, sends `PRIVMSG NickServ :IDENTIFY <password>` after end-of-MOTD (376) or no-MOTD (422); status shown in server buffer; documented in `config.toml.example`
+- **Channel modes display** — `+modes` pill appears in the buffer header next to the channel name; updated in real time as MODE messages arrive; modes that take parameters (op, voice, ban, key, etc.) are excluded from the display so only true channel flags show (e.g. `+nst`); auto-requests `MODE #channel` after 366 (end of NAMES) so modes populate on join without a manual `/mode` command; handles 324 RPL_CHANNELMODEIS for initial mode state
+- **IRCv3 `server-time`** — added `server-time` to CAP negotiation; incoming `time` tag on messages overrides the local clock timestamp; message timestamps now reflect server time when the server supports it
+- **About DojoIRC panel** — Hamburger → About DojoIRC shows app icon, version, stack, IRCv3 capabilities, license, author, and a clickable GitHub link
+- **Hamburger menu reorder** — About DojoIRC, Theme, Documentation, Open Config, Reload Config, Restart, Quit
+- **Linux `.desktop` file** — `build/linux/DojoIRC.desktop` added to the repo; baked into the Wails Linux build; installed to `~/.local/share/applications/` for KDE/freedesktop app recognition; includes `StartupWMClass=DojoIRC`
+- **v0.3.0** — CTCP VERSION string bumped; v0.3.0 tag pushed; GitHub Actions release workflow produced Linux/Windows/macOS artifacts
+
+### Key Decisions
+- NickServ identify fires after 376/422 (not 001) — the connection is fully established at that point and SASL has already completed
+- Channel mode tracker uses a `Set` per channel; modes that consume a parameter are skipped so user-targeted modes (op, voice, ban) don't pollute the channel flags display
+- App icon embedded in About panel as a base64 data URL — avoids path dependencies in the Vite/Wails bundle
+- `.desktop` file uses full binary path for `Exec=` (matching how Halloy's desktop file works) so KDE's plasma-systemmonitor recognizes DojoIRC as an Application rather than a raw process
+
+---
+
 ## Session 7 — 2026-05-22 (Code Review Fixes)
 
 ### What Was Fixed

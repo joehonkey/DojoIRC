@@ -59,6 +59,7 @@ Each server is defined with a `[[server]]` block. You can have as many as you ne
 | `tls` | bool | yes | Use TLS. Strongly recommended — always use `true` |
 | `nick` | string | yes | Your preferred nickname |
 | `channels` | array of strings | no | Channels to join automatically on connect |
+| `nickserv_password` | string | no | If set, sends `IDENTIFY` to NickServ after connecting. Use this **or** SASL — not both |
 
 ### Example — minimal server block
 
@@ -102,6 +103,25 @@ password  = "mypassword"
 ```
 
 SASL negotiation happens during the CAP handshake at connect time. A success or failure message appears in the server buffer. If authentication fails, the connection continues but without being identified.
+
+---
+
+## NickServ authentication
+
+For servers that use NickServ instead of (or in addition to) SASL, add `nickserv_password` to the server block. DojoIRC sends `PRIVMSG NickServ :IDENTIFY <password>` after the server's MOTD completes.
+
+```toml
+[[server]]
+name              = "LinuxDojo"
+host              = "irc.linuxdojo.org"
+port              = 6697
+tls               = true
+nick              = "yournick"
+channels          = ["#dojoirc"]
+nickserv_password = "yourpassword"
+```
+
+Use NickServ **or** SASL — if the server supports SASL PLAIN, prefer that since authentication happens before JOIN.
 
 ---
 

@@ -15,12 +15,12 @@ Outgoing typing indicators are sent automatically while you type (debounced — 
 ### `sasl` (PLAIN)
 SASL PLAIN authentication is supported per server via `[server.sasl]` in config. The full CAP LS 302 handshake is used. Authentication happens before JOIN so your nick is identified before entering channels. SASL EXTERNAL (certificate-based) is planned.
 
+### `server-time`
+CAP negotiated. When the server supplies a `time` tag on incoming messages, DojoIRC uses that timestamp instead of the local clock. Message timestamps in the chat window reflect server time on supporting servers. Important for accurate logs and bouncer history replay.
+
 ---
 
 ## Planned
-
-### `server-time`
-Allows the server to supply the real timestamp for each message rather than using the client's local clock. Important for accurate logs and for replaying history from a bouncer. When implemented, timestamps in the chat window will reflect server time.
 
 ### `batch`
 Groups related messages together so the client can handle them atomically. Required for `chathistory` replay and other bulk operations. Low-level plumbing that other features depend on.
