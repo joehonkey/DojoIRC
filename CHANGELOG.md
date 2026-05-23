@@ -1,5 +1,20 @@
 # DojoIRC Changelog
 
+## v0.2.0 — 2026-05-22
+
+### Added
+- **CTCP** — auto-replies to `VERSION`, `PING`, `TIME` requests from other clients; `/ctcp <nick> <cmd>` to query others; replies shown in server buffer
+- **54 themes** — ported all themes from themes.halloy.chat (Dracula, Nord, Gruvbox, One Dark, Tokyo Night Storm, Catppuccin variants, Rose Piné variants, Kanagawa, Solarized Dark, Zenburn, Cyberpunk, Matrix, and 38 more)
+- **Theme gallery** — `docs/themes-gallery.md` with color swatches for all 54 themes
+- **Direct download links** — README OS icons now link directly to platform binaries; `themes.zip` available as a standalone release asset
+- **Nick tracking** — client now tracks nick changes from `/nick` so CTCP replies always use the current nick
+
+### Fixed
+- Theme TOML structure corrected — generated themes now use the proper `[general]`, `[sidebar]`, `[buffer]`, `[highlights]`, `[nicklist]`, `[input]` sections so they actually apply in the picker
+- Timestamp font size matched to chat text (13px)
+
+---
+
 ## Session 1 — 2026-05-22 (Initial Build)
 
 ### Decisions
