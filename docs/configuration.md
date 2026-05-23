@@ -13,6 +13,12 @@ theme     = "default"
 font      = "IBM Plex Mono"
 font_size = 13
 
+[behaviour]
+scrollback      = 5000   # max messages kept per buffer
+notifications   = true
+auto_reconnect  = true
+reconnect_delay = 10
+
 [[server]]
 name     = "LinuxDojo"
 host     = "irc.linuxdojo.org"
@@ -45,6 +51,30 @@ password  = "yourpassword"
 | `theme` | string | `"default"` | Theme name to load. Matches the filename in `themes/` without `.toml` |
 | `font` | string | `"IBM Plex Mono"` | Font family for the UI. Must be installed on your system |
 | `font_size` | integer | `13` | Main chat font size in pixels. Applied at runtime via Reload Config |
+
+---
+
+## Behaviour options
+
+The `[behaviour]` block controls connection and UI behaviour. All keys are optional and fall back to the defaults shown.
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `scrollback` | integer | `5000` | Maximum number of messages kept in memory per buffer. Older messages are discarded once the limit is reached |
+| `notifications` | bool | `true` | Enable OS desktop notifications on nick mention |
+| `auto_reconnect` | bool | `true` | Automatically reconnect on unexpected disconnect |
+| `reconnect_delay` | integer | `10` | Seconds to wait before each reconnect attempt |
+| `tray` | bool | `true` | Enable system tray integration |
+
+### Example
+
+```toml
+[behaviour]
+scrollback      = 10000
+notifications   = true
+auto_reconnect  = true
+reconnect_delay = 5
+```
 
 ---
 

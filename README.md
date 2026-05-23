@@ -56,7 +56,7 @@
 
 ## Documentation
 
-**[Installation](docs/installation.md)** — [Configuration](docs/configuration.md) — [Commands](docs/commands.md) — [Themes](docs/themes.md) — [**Theme Gallery (50 themes)**](docs/themes-gallery.md) — [Font Sizes](docs/font-sizes.md) — [IRCv3](docs/ircv3.md) — [Building from Source](docs/building.md)
+**[Installation](docs/installation.md)** — [Configuration](docs/configuration.md) — [Commands](docs/commands.md) — [Keyboard Shortcuts](docs/keyboard-shortcuts.md) — [Themes](docs/themes.md) — [**Theme Gallery (54 themes)**](docs/themes-gallery.md) — [Font Sizes](docs/font-sizes.md) — [IRCv3](docs/ircv3.md) — [Building from Source](docs/building.md)
 
 ---
 
@@ -97,6 +97,9 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | **Channel list** | `/list` streams all public channels with user counts and topics; filter and click to join |
 | **Away status** | `/away` and `/back` toggle an **away** badge in the input bar; `away-notify` tracks other users |
 | **Ignore list** | Per-server `ignore = [...]` in config silently drops messages from unwanted nicks |
+| **Message search** | Ctrl+F opens an in-buffer search bar; matching messages stay bright, others dim |
+| **Keyboard shortcuts** | Alt+↑↓ navigate channels, Alt+←→ switch servers, Ctrl+F search, Escape close |
+| **Scrollback limit** | Configurable per session (`scrollback` in `[behaviour]`); default 5000 messages per buffer |
 
 ---
 
@@ -222,6 +225,19 @@ Tab-completes nicks and commands. Press Tab repeatedly to cycle through matches.
 
 ---
 
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| **Ctrl+F** | Open / close message search |
+| **Escape** | Close search |
+| **Alt+↑ / Alt+↓** | Navigate previous / next channel or buffer |
+| **Alt+← / Alt+→** | Jump to previous / next server |
+| **Tab** | Complete nick or slash command |
+| **Enter** | Send message |
+
+---
+
 ## Building from Source
 
 ### Requirements
@@ -261,8 +277,8 @@ Project scaffold, IRC engine, UI layout, system tray, themes, multi-server, slas
 **Stage 3 — IRCv3 Capabilities**  
 ~~server-time~~ ✅ — remaining: batch, labeled-response, chathistory, echo-message, msgid, Monitor, multiline, react, read-marker.
 
-**Stage 4 — UX**  
-Emoji, message search, keyboard shortcuts, buffer scrollback.
+**Stage 4 — UX** (in progress)  
+~~message search~~ ✅ ~~keyboard shortcuts~~ ✅ ~~scrollback limit~~ ✅ — remaining: emoji, message search pagination.
 
 **Stage 5 — Power Features**  
 Bouncer support (ZNC/soju), SOCKS5 proxy, mTLS, split view, drag-to-reorder, flood protection, plugin hooks.

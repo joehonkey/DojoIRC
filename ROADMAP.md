@@ -42,14 +42,14 @@
 - [x] Highlight/mention detection — regex match, red row tint, yellow unread dot
 - [x] Desktop notifications — Web Notifications API on mention
 - [x] Message logging to disk — ~/.config/dojoirc/logs/<server>/<channel>.log
-- [ ] Full IRCv3 CAP LS 302 negotiation (beyond message-tags and sasl)
+- [x] Full IRCv3 CAP LS 302 negotiation (multiline accumulation, dynamic cap requesting)
 - [x] NickServ identify flow
 - [x] Channel modes display
-- [ ] Away status
+- [x] Away status (305/306 numerics + away badge in input bar)
 - [ ] DCC SEND — file transfer (peer-to-peer TCP)
 - [ ] DCC chat (basic)
-- [ ] Channel list (/LIST)
-- [ ] Ignore list
+- [x] Channel list (/LIST — streaming overlay panel with filter)
+- [x] Ignore list (per-server ignore = [...] in config)
 
 ## Stage 3 — IRCv3 Capabilities
 - [x] `message-tags` — CAP negotiation + inbound tag parsing
@@ -60,7 +60,7 @@
 - [ ] `multi-prefix` — show all mode prefixes per nick in nicklist
 - [ ] `extended-join` — account name on join
 - [ ] `account-notify` — track account changes live
-- [ ] `away-notify` — live away status updates in nicklist
+- [x] `away-notify` — AWAY messages tracked; 305/306 handled; away badge in input bar
 - [ ] `invite-notify` — channel-wide notification on /INVITE
 - [ ] `chghost` — host change without reconnect
 - [ ] `userhost-in-names` — full user@host in NAMES reply
@@ -92,11 +92,11 @@
 - [x] Font + font size selection in config (applied via Reload Config)
 - [x] Context menu overflow fix (flips upward/leftward at screen edges)
 - [ ] Emoji support
-- [ ] Message search in buffer
-- [ ] Buffer scrollback limit + pagination
-- [ ] Keyboard shortcuts (configurable)
-- [ ] Command autocomplete (Tab)
-- [ ] Nick autocomplete (Tab)
+- [x] Message search in buffer (Ctrl+F, live highlight, Escape to close)
+- [x] Buffer scrollback limit (configurable via [behaviour] scrollback, default 5000)
+- [x] Keyboard shortcuts (Alt+↑↓ channels, Alt+←→ servers, Ctrl+F search)
+- [x] Command autocomplete (Tab)
+- [x] Nick autocomplete (Tab)
 
 ## Stage 5 — Power Features
 - [ ] Bouncer support (ZNC, soju/sojuctl)

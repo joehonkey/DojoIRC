@@ -1,5 +1,25 @@
 # DojoIRC Changelog
 
+## Session 11 — 2026-05-23 (Stage 4 UX — search, keyboard shortcuts, scrollback)
+
+### What Was Built
+- **Message search (Ctrl+F)** — search bar appears in the buffer header; messages matching the query stay at full opacity, non-matching dim to 20%; first match scrolls into view; Escape or ✕ closes search and refocuses the message input; a ⌕ icon button also opens search.
+- **Keyboard shortcuts** — registered once at boot (not re-bound on every render):
+  - Alt+↑ / Alt+↓ — navigate previous/next channel or DM buffer in sidebar order
+  - Alt+← / Alt+→ — jump to previous/next server's first channel
+  - Ctrl+F — toggle message search
+  - Escape — close search
+- **Scrollback limit** — `renderMessages()` slices the message array to the last `state.scrollback` entries (default 5000); `GetScrollback()` Go method reads `config.toml [behaviour] scrollback`; prevents DOM from growing unbounded on busy channels.
+- **Topic bar pop-out** (committed last session) — full-width wrapping bar below the header; links in topics are clickable.
+
+### Key Decisions
+- Search updates `#messages` innerHTML in-place (not a full render) so the search input keeps focus while typing — no re-bind tricks needed.
+- `rebindMessageNicks()` helper re-attaches nick click/contextmenu handlers after the in-place messages update.
+- Navigation helpers (`navigateChannel`, `navigateServer`, `switchToBuffer`) extracted from inline event handlers so both click and keyboard paths call the same code.
+- Scrollback enforced at render time (slice), not at push time — simpler, zero refactor of all push sites, and good enough for the DOM performance goal.
+
+---
+
 ## Session 10 — 2026-05-23 (Stage 2 completion + fixes)
 
 ### What Was Fixed
