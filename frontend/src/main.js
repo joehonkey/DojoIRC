@@ -90,6 +90,23 @@ function nickColor(nick) {
   return NICK_COLORS[h % NICK_COLORS.length];
 }
 
+// ── Channel mode tracking ──────────────────────────────────
+const MODE_TAKES_PARAM = new Set(['o','v','h','a','q','b','e','I','k']);
+function applyModes(modeSet, modeStr) {
+  const parts = modeStr.trim().split(/\s+/);
+  const flags = parts[0] || '';
+  let adding = true;
+  let paramIdx = 1;
+  for (const c of flags) {
+    if (c === '+') { adding = true; continue; }
+    if (c === '-') { adding = false; continue; }
+    const takesParam = MODE_TAKES_PARAM.has(c) || (adding && c === 'l');
+    if (takesParam) { paramIdx++; continue; }
+    if (adding) modeSet.add(c);
+    else modeSet.delete(c);
+  }
+}
+
 // ── URL preview ────────────────────────────────────────────
 const URL_RE = /https?:\/\/[^\s<>"']+[^\s<>"'.,:;!?)]/g;
 const previewCache = new Map(); // url → result or 'pending'
@@ -284,8 +301,15 @@ function handleEvent(ev) {
       break;
     }
     case 'mode': {
-      const ch = findChannel(ev.server, ev.channel) || findChannel(ev.server, 'server');
-      if (ch) ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick || 'server'} sets mode ${ev.text}`, type: 'server' });
+      const isChannelTarget = ev.channel.startsWith('#') || ev.channel.startsWith('&');
+      const ch = isChannelTarget ? findChannel(ev.server, ev.channel) : null;
+      if (ch) {
+        if (!ch.modeSet) ch.modeSet = new Set();
+        applyModes(ch.modeSet, ev.text);
+        ch.modes = ch.modeSet.size ? '+' + [...ch.modeSet].sort().join('') : '';
+      }
+      const displayCh = ch || findChannel(ev.server, 'server');
+      if (displayCh) displayCh.messages.push({ time: ev.time, nick: '', text: `${ev.nick || 'server'} sets mode ${ev.text}`, type: 'server' });
       render();
       break;
     }
@@ -534,6 +558,7 @@ function render() {
     <div id="main">
       <div id="buffer-header">
         <span id="buffer-title">${state.activeChannel || 'DojoIRC'}</span>
+        ${ch?.modes ? `<span id="buffer-modes">${escapeHtml(ch.modes)}</span>` : ''}
         ${ch?.topic ? `<button id="topic-toggle" class="${state.topicVisible ? 'active' : ''}" title="${state.topicVisible ? 'Hide topic' : 'Show topic'}">topic</button>` : ''}
         ${ch?.topic && state.topicVisible ? `<span id="buffer-topic">${escapeHtml(ch.topic)}</span>` : ''}
       </div>

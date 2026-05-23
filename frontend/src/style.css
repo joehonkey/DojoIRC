@@ -178,6 +178,17 @@ html, body {
 #topic-toggle:hover { color: var(--text); border-color: var(--accent); }
 #topic-toggle.active { color: var(--accent); border-color: var(--accent); }
 
+#buffer-modes {
+  font-size: 11px;
+  color: var(--text-dim);
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 6px;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+
 #buffer-topic {
   flex: 1;
   font-size: 12px;

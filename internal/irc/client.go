@@ -106,6 +106,11 @@ func (c *Client) runLoop() {
 
 func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 	now := time.Now().Format("15:04")
+	if t, ok := msg.Tags["time"]; ok && string(t) != "" {
+		if parsed, err := time.Parse(time.RFC3339Nano, string(t)); err == nil {
+			now = parsed.Local().Format("15:04")
+		}
+	}
 	srv := c.server.Name
 
 	switch msg.Command {
@@ -123,7 +128,7 @@ func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 			} else if len(msg.Params) >= 3 {
 				caps = msg.Params[2]
 			}
-			req := "message-tags"
+			req := "message-tags server-time"
 			if c.server.SASL != nil && strings.EqualFold(c.server.SASL.Mechanism, "PLAIN") &&
 				strings.Contains(caps, "sasl") {
 				req += " sasl"
@@ -353,6 +358,18 @@ func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 		if len(msg.Params) >= 3 {
 			c.emit(Event{Server: srv, Type: "whois", Channel: "server", Text: fmt.Sprintf("%s is on: %s", msg.Params[1], msg.Params[2]), Time: now})
 		}
+
+	case "366": // RPL_ENDOFNAMES — request channel modes now that we've fully joined
+		if len(msg.Params) >= 2 {
+			client.Write("MODE " + msg.Params[1])
+		}
+
+	case "324": // RPL_CHANNELMODEIS
+		if len(msg.Params) >= 3 {
+			channel := msg.Params[1]
+			modes := strings.Join(msg.Params[2:], " ")
+			c.emit(Event{Server: srv, Type: "mode", Channel: channel, Text: modes, Time: now})
+		}
 	}
 }
 
@@ -436,7 +453,7 @@ func (c *Client) handleCTCPRequest(client *ircp.Client, from, payload, now, srv 
 	case "VERSION":
 		client.WriteMessage(&ircp.Message{
 			Command: "NOTICE",
-			Params:  []string{from, "\x01VERSION DojoIRC v0.2.0 (https://github.com/joehonkey/DojoIRC)\x01"},
+			Params:  []string{from, "\x01VERSION DojoIRC v0.3.0 (https://github.com/joehonkey/DojoIRC)\x01"},
 		})
 		c.emit(Event{Server: srv, Type: "ctcp", Channel: "server", Nick: from, Text: "CTCP VERSION from " + from, Time: now})
 	case "PING":
