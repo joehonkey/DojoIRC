@@ -1,5 +1,15 @@
 # DojoIRC Changelog
 
+## Session 7 — 2026-05-22 (Code Review Fixes)
+
+### What Was Fixed
+- **wails.json** — removed duplicate `outputfilename` key
+- **CTCP VERSION string** — updated reply from `v0.1.0` to `v0.2.0`
+- **ROADMAP.md** — checked off WHOIS, nick list, CTCP, highlights, notifications, logging in Stage 2
+- **URL preview SSRF hardening** — `internal/preview/preview.go` now uses a custom `safeDial` function that resolves the hostname via DNS first, checks every resolved IP against private/loopback ranges before connecting; extracted `isPrivateIP(net.IP)` used by both the dialer and the pre-fetch hostname check
+
+---
+
 ## v0.2.0 — 2026-05-22
 
 ### Added
