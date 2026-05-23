@@ -60,7 +60,7 @@ cp -r themes/ /path/to/your/DojoIRC/
 | Linux / macOS | `~/.config/dojoirc/config.toml` |
 | Windows | `%APPDATA%\dojoirc\config.toml` |
 
-Use **Hamburger → Open Config** to open it directly in your system editor. On Windows this uses `cmd /c start`; on macOS `open`; on Linux it tries `$VISUAL`/`$EDITOR`, then common GUI editors, then `xdg-open`.
+Use **Hamburger → Open Config** to open it directly in your system editor. On Windows this opens in `notepad.exe` (set `EDITOR` or `VISUAL` to use a different editor); on macOS `open`; on Linux it tries `$VISUAL`/`$EDITOR`, then common GUI editors, then `xdg-open`.
 
 ### Config changes aren't applying
 
