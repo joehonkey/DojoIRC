@@ -619,8 +619,10 @@ function handleSlash(text) {
     }
     case 'sysinfo':
       GetSysInfo().then(info => {
-        if (info && state.activeServer && state.activeChannel && state.activeChannel !== 'server')
-          SendMessage(state.activeServer, state.activeChannel, info).catch(console.error);
+        if (!info || !state.activeServer || !state.activeChannel || state.activeChannel === 'server') return;
+        SendMessage(state.activeServer, state.activeChannel, info).catch(console.error);
+        const ch = activeChannel();
+        if (ch) { ch.messages.push({ time: timestamp(), nick: state.nick, text: info, type: 'message' }); render(); }
       }).catch(console.error);
       break;
     case 'list':
