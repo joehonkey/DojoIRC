@@ -30,10 +30,21 @@ type Client struct {
 	emit        func(Event)
 	quitCh      chan struct{}
 	currentNick string
+	capAccum    string // accumulates CAP LS multiline lines
+	ignoreSet   map[string]struct{}
 }
 
 func NewClient(server config.Server, emit func(Event)) *Client {
-	return &Client{server: server, emit: emit, quitCh: make(chan struct{})}
+	ig := make(map[string]struct{}, len(server.Ignore))
+	for _, n := range server.Ignore {
+		ig[strings.ToLower(n)] = struct{}{}
+	}
+	return &Client{server: server, emit: emit, quitCh: make(chan struct{}), ignoreSet: ig}
+}
+
+func (c *Client) isIgnored(nick string) bool {
+	_, ok := c.ignoreSet[strings.ToLower(nick)]
+	return ok
 }
 
 func (c *Client) dial() error {
@@ -47,6 +58,7 @@ func (c *Client) dial() error {
 	if err != nil {
 		return fmt.Errorf("dial: %w", err)
 	}
+	c.capAccum = ""
 	// Kick off CAP negotiation before the library sends NICK/USER.
 	fmt.Fprintf(c.conn, "CAP LS 302\r\n")
 	c.irc = ircp.NewClient(c.conn, ircp.ClientConfig{
@@ -121,19 +133,33 @@ func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 		}
 		switch msg.Params[1] {
 		case "LS":
-			// Params: [nick, "LS", caps] or [nick, "LS", "*", caps] (multiline 302)
-			caps := ""
+			// Accumulate multiline 302 responses (params: [nick, "LS", "*", caps])
 			if len(msg.Params) >= 4 && msg.Params[2] == "*" {
-				caps = msg.Params[3]
-			} else if len(msg.Params) >= 3 {
-				caps = msg.Params[2]
+				c.capAccum += " " + msg.Params[3]
+				return // more lines coming
 			}
-			req := "message-tags server-time"
+			caps := c.capAccum
+			if len(msg.Params) >= 3 {
+				caps += " " + msg.Params[2]
+			}
+			c.capAccum = ""
+
+			// Only request caps the server actually advertises.
+			want := []string{}
+			for _, cap := range []string{"message-tags", "server-time", "away-notify"} {
+				if strings.Contains(caps, cap) {
+					want = append(want, cap)
+				}
+			}
 			if c.server.SASL != nil && strings.EqualFold(c.server.SASL.Mechanism, "PLAIN") &&
 				strings.Contains(caps, "sasl") {
-				req += " sasl"
+				want = append(want, "sasl")
 			}
-			client.Write("CAP REQ :" + req)
+			if len(want) > 0 {
+				client.Write("CAP REQ :" + strings.Join(want, " "))
+			} else {
+				client.Write("CAP END")
+			}
 		case "ACK":
 			acked := ""
 			if len(msg.Params) >= 3 {
@@ -145,6 +171,9 @@ func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 			} else {
 				client.Write("CAP END")
 			}
+		case "NAK":
+			// Server refused our CAP REQ batch; proceed without those caps.
+			client.Write("CAP END")
 		}
 
 	case "AUTHENTICATE":
@@ -237,7 +266,7 @@ func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 		}
 
 	case "PRIVMSG":
-		if len(msg.Params) < 2 {
+		if len(msg.Params) < 2 || c.isIgnored(msg.Prefix.Name) {
 			return
 		}
 		target := msg.Params[0]
@@ -309,6 +338,9 @@ func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 		c.emit(Event{Server: srv, Type: "topic", Channel: channel, Text: topic, Time: now})
 
 	case "NOTICE":
+		if c.isIgnored(msg.Prefix.Name) {
+			return
+		}
 		target := msg.Params[0]
 		text := ""
 		if len(msg.Params) > 1 {
@@ -370,6 +402,47 @@ func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 			modes := strings.Join(msg.Params[2:], " ")
 			c.emit(Event{Server: srv, Type: "mode", Channel: channel, Text: modes, Time: now})
 		}
+
+	case "305": // RPL_UNAWAY
+		text := "You are no longer marked as away"
+		if len(msg.Params) > 1 {
+			text = msg.Params[len(msg.Params)-1]
+		}
+		c.emit(Event{Server: srv, Type: "away_off", Channel: "server", Text: text, Time: now})
+
+	case "306": // RPL_NOWAWAY
+		text := "You have been marked as away"
+		if len(msg.Params) > 1 {
+			text = msg.Params[len(msg.Params)-1]
+		}
+		c.emit(Event{Server: srv, Type: "away_on", Channel: "server", Text: text, Time: now})
+
+	case "AWAY": // away-notify: another user's away status changed
+		nick := msg.Prefix.Name
+		if nick == "" || c.isIgnored(nick) {
+			return
+		}
+		reason := ""
+		if len(msg.Params) > 0 {
+			reason = msg.Params[0]
+		}
+		c.emit(Event{Server: srv, Type: "away", Nick: nick, Text: reason, Time: now})
+
+	case "321": // RPL_LISTSTART — ignore, just signals start of list
+	case "322": // RPL_LIST — channel list entry
+		if len(msg.Params) < 3 {
+			return
+		}
+		channel := msg.Params[1]
+		users := msg.Params[2]
+		topic := ""
+		if len(msg.Params) > 3 {
+			topic = msg.Params[3]
+		}
+		c.emit(Event{Server: srv, Type: "list_entry", Channel: channel, Nick: users, Text: topic, Time: now})
+
+	case "323": // RPL_LISTEND
+		c.emit(Event{Server: srv, Type: "list_end", Channel: "server", Time: now})
 	}
 }
 

@@ -555,6 +555,13 @@ func sysInfoKernel() string {
 	return strings.TrimSpace(string(out))
 }
 
+// ListChannels sends a LIST request to the server.
+func (a *App) ListChannels(server string) {
+	if c, ok := a.clients[server]; ok {
+		c.Raw("LIST")
+	}
+}
+
 // ReadClipboard reads the system clipboard via the Wails runtime.
 func (a *App) ReadClipboard() string {
 	text, err := runtime.ClipboardGetText(a.ctx)

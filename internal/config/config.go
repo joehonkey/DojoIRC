@@ -40,6 +40,7 @@ type Server struct {
 	NickServPass string   `toml:"nickserv_password"`
 	Password     string   `toml:"password"`
 	SASL         *SASL    `toml:"sasl"`
+	Ignore       []string `toml:"ignore"`
 }
 
 type SASL struct {
