@@ -93,6 +93,7 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | **Server buffer** | MOTD, connection events, WHOIS output per server |
 | **Context menus** | Right-click channels to leave, servers to connect/disconnect |
 | **In-app docs** | Full documentation panel via Hamburger → Documentation |
+| **About panel** | Hamburger → About DojoIRC — app icon, version, stack, IRCv3 caps, GitHub link |
 
 ---
 
@@ -263,7 +264,7 @@ Emoji, message search, keyboard shortcuts, buffer scrollback.
 Bouncer support (ZNC/soju), SOCKS5 proxy, mTLS, split view, drag-to-reorder, flood protection, plugin hooks.
 
 **Stage 6 — Platform Polish**  
-Flatpak/AppImage, .app bundle, Windows installer, FreeBSD port, GitHub Actions CI, auto-update.
+~~GitHub Actions CI~~ ✅ — remaining: Flatpak/AppImage, .app bundle, Windows installer, FreeBSD port, auto-update.
 
 See [ROADMAP.md](ROADMAP.md) for the full detailed list.
 

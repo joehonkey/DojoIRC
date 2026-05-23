@@ -121,7 +121,7 @@
 - [ ] Windows installer (NSIS, already scaffolded by Wails)
 - [ ] Flatpak / AppImage (Linux distribution)
 - [ ] FreeBSD port skeleton
-- [ ] GitHub Actions CI (build matrix: linux/freebsd/mac/windows)
+- [x] GitHub Actions CI (build matrix: linux/windows/macos; v* tag triggers release with platform artifacts)
 - [ ] Auto-update check
 
 ## IRCv3 Capabilities

@@ -1,5 +1,19 @@
 # DojoIRC Changelog
 
+## Session 9 — 2026-05-22 (v0.3.1 hotfix release)
+
+### What Was Done
+- **Discovered release gap** — the v0.3.0 tag was created at commit `9c73b77` (channel modes / server-time), before the About DojoIRC panel (b39fe39) and hamburger menu reorder (ef2bc28) were committed; release binaries were therefore missing those features
+- **Bumped version string** — `frontend/src/main.js` About panel updated from v0.3.0 → v0.3.1
+- **Tagged and pushed v0.3.1** — tag pushed to origin; GitHub Actions CI triggered and built fresh Linux / Windows / macOS artifacts
+- **Rebuilt local binary** — `wails build -tags webkit2_41`; local `build/bin/DojoIRC` now shows v0.3.1 in About panel
+
+### Key Decisions
+- Chose v0.3.1 patch bump (not a re-tag of v0.3.0) to keep release history clean and avoid force-pushing tags
+- `releases/latest/download/` links in README are dynamic — no README change required for the download links themselves
+
+---
+
 ## Session 8 — 2026-05-22 (NickServ, Modes, server-time, About, v0.3.0)
 
 ### What Was Built
