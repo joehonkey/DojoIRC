@@ -61,6 +61,9 @@ func (c *Client) dial() error {
 	c.capAccum = ""
 	// Kick off CAP negotiation before the library sends NICK/USER.
 	fmt.Fprintf(c.conn, "CAP LS 302\r\n")
+	if c.server.Password != "" {
+		fmt.Fprintf(c.conn, "PASS %s\r\n", c.server.Password)
+	}
 	c.irc = ircp.NewClient(c.conn, ircp.ClientConfig{
 		Nick:    c.server.Nick,
 		User:    c.server.Nick,

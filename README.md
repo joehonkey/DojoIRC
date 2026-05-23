@@ -76,6 +76,7 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | Feature | Details |
 |---|---|
 | **Multi-server** | Connect to as many servers as you want; each has its own sidebar entry |
+| **Bouncer support** | ZNC and soju via `password` in config — sends `PASS` before registration; use `user/network:password` for ZNC |
 | **TLS** | All connections use TLS by default (port 6697) |
 | **SASL PLAIN** | Per-server SASL authentication via `[server.sasl]` config block |
 | **NickServ identify** | Auto-identifies with NickServ on connect via `nickserv_password` in config |
@@ -170,6 +171,23 @@ mechanism = "PLAIN"
 username  = "youraccountname"
 password  = "yourpassword"
 ```
+
+### Bouncer (ZNC / soju)
+
+Set `password` in the server block. For ZNC use `user/network:password`:
+
+```toml
+[[server]]
+name     = "ZNC"
+host     = "znc.example.com"
+port     = 6697
+tls      = true
+nick     = "yournick"
+password = "joe/libera:mysecretpassword"
+channels = ["#linux"]
+```
+
+For soju use `user:password` (or SASL PLAIN, which also works).
 
 ### NickServ Authentication
 
@@ -284,7 +302,7 @@ Project scaffold, IRC engine, UI layout, system tray, themes, multi-server, slas
 ~~message search~~ ✅ ~~keyboard shortcuts~~ ✅ ~~scrollback limit~~ ✅ ~~emoji~~ ✅ ~~input history~~ ✅ — remaining: message search pagination.
 
 **Stage 5 — Power Features**  
-Bouncer support (ZNC/soju), SOCKS5 proxy, mTLS, split view, drag-to-reorder, flood protection, plugin hooks.
+~~Bouncer support (ZNC/soju)~~ ✅ — remaining: SOCKS5 proxy, mTLS, split view, drag-to-reorder, flood protection, plugin hooks.
 
 **Stage 6 — Platform Polish**  
 ~~GitHub Actions CI~~ ✅ ~~FreeBSD build~~ ✅ (patched Wails v2; system tray + full UI confirmed on FreeBSD 15 / KDE Plasma 6) — remaining: FreeBSD port skeleton, Flatpak/AppImage, .app bundle, Windows installer, auto-update.

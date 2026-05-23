@@ -1,5 +1,21 @@
 # DojoIRC Changelog
 
+## Session 14 — 2026-05-23 (bouncer support)
+
+### What Was Built
+- **Bouncer support (ZNC / soju)** — added `password` field to the server block config. When set, DojoIRC sends `PASS <password>` immediately after `CAP LS 302` during connection, before `NICK`/`USER`. This is the standard handshake bouncers require. ZNC users set `password = "user/network:password"`; soju users set `password = "user:password"` (or continue using SASL PLAIN, which also works).
+
+### Docs Updated
+- `docs/configuration.md` — added `password` to the server options table; added full Bouncer section with ZNC and soju config examples
+- `README.md` — added Bouncer support row to features table; added Bouncer quick-start section; Stage 5 roadmap updated
+- `ROADMAP.md` — bouncer support checked off in Stage 5
+
+### Key Decisions
+- Three-line Go change: `PASS` sent raw after `CAP LS 302` in `dial()` — no new config types, no special bouncer mode, just the password field wired up.
+- soju SASL PLAIN already worked; `password` field gives an alternative that also covers ZNC.
+
+---
+
 ## Session 13 — 2026-05-23 (post-v0.4.0 fixes + docs overhaul)
 
 ### What Was Fixed

@@ -100,7 +100,7 @@
 - [x] Nick autocomplete (Tab)
 
 ## Stage 5 — Power Features
-- [ ] Bouncer support (ZNC, soju/sojuctl)
+- [x] Bouncer support (ZNC, soju) — `password` field sends `PASS` before registration
 - [ ] MONITOR / WATCH (notify when nick comes online)
 - [ ] Proxy support (SOCKS5)
 - [ ] mTLS client certificates

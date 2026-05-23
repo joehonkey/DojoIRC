@@ -90,6 +90,7 @@ Each server is defined with a `[[server]]` block. You can have as many as you ne
 | `tls` | bool | yes | Use TLS. Strongly recommended — always use `true` |
 | `nick` | string | yes | Your preferred nickname |
 | `channels` | array of strings | no | Channels to join automatically on connect |
+| `password` | string | no | Server password sent as `PASS` during connection. Use this for bouncers (ZNC, soju) — set to `user/network:password` for ZNC |
 | `nickserv_password` | string | no | If set, sends `IDENTIFY` to NickServ after connecting. Use this **or** SASL — not both |
 | `ignore` | array of strings | no | Nicks to silently ignore. Messages, notices, and actions from these nicks are dropped |
 
@@ -150,6 +151,40 @@ password  = "mypassword"
 ```
 
 SASL negotiation happens during the CAP handshake at connect time. A success or failure message appears in the server buffer. If authentication fails, the connection continues but without being identified.
+
+---
+
+## Bouncer support (ZNC / soju)
+
+Set `password` in the server block to send a `PASS` command during connection. This is how ZNC and soju authenticate.
+
+**ZNC** — use `username/network:password` as the password:
+
+```toml
+[[server]]
+name     = "ZNC"
+host     = "znc.example.com"
+port     = 6697
+tls      = true
+nick     = "yournick"
+password = "joe/libera:mysecretpassword"
+channels = ["#linux"]
+```
+
+**soju** — use `username:password` or configure SASL PLAIN (both work):
+
+```toml
+[[server]]
+name     = "soju"
+host     = "soju.example.com"
+port     = 6697
+tls      = true
+nick     = "yournick"
+password = "joe:mysecretpassword"
+channels = ["#linux"]
+```
+
+`PASS` is sent before `NICK`/`USER` during the connection handshake, which is what bouncers require.
 
 ---
 
