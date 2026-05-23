@@ -341,6 +341,7 @@ html, body {
 .nick-item.op   .nick-prefix  { color: var(--nick-op,     #89b4fa); }
 .nick-item.halfop .nick-prefix { color: var(--nick-halfop, #cba6f7); }
 .nick-item.voice .nick-prefix { color: var(--nick-voice,  #a6e3a1); }
+.bot-icon { font-size: 11px; margin-left: 4px; opacity: 0.7; }
 .action-nick                  { color: var(--action); font-style: italic; }
 .message.notice .msg-nick { color: var(--action); }
 .message.server .msg-text { color: var(--text-server); }

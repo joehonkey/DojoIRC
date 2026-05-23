@@ -161,6 +161,16 @@ const typingNicks = {};       // "server\0channel" → Set<nick>
 const typingClearTimers = {}; // "server\0channel\0nick" → timerId
 let outgoingTypingTimer = null;
 
+// Bot nick tracking — populated when MODE <nick> +B is seen
+const botNicks = {}; // "server\0nick" → true
+
+function botIcon(nick) {
+  const icons = ['🤖', '👾'];
+  let h = 0;
+  for (let i = 0; i < nick.length; i++) h = (h * 31 + nick.charCodeAt(i)) & 0xffff;
+  return icons[h % icons.length];
+}
+
 function findServer(serverName) {
   return state.servers.find(s => s.name === serverName);
 }
@@ -435,6 +445,11 @@ function handleEvent(ev) {
     }
     case 'mode': {
       const isChannelTarget = ev.channel.startsWith('#') || ev.channel.startsWith('&');
+      if (!isChannelTarget) {
+        const key = ev.server + '\0' + ev.channel;
+        if (/\+[^-]*B/.test(ev.text)) botNicks[key] = true;
+        if (/-[^+]*B/.test(ev.text)) delete botNicks[key];
+      }
       const ch = isChannelTarget ? findChannel(ev.server, ev.channel) : null;
       if (ch) {
         if (!ch.modeSet) ch.modeSet = new Set();
@@ -837,7 +852,9 @@ function renderNicklist() {
     const prefix = n.match(/^[@+~&]/)?.[0] || '';
     const cls = n.startsWith('@') || n.startsWith('~') || n.startsWith('&') ? 'op' : n.startsWith('+') ? 'voice' : '';
     const color = nickColor(n);
-    return `<div class="nick-item ${cls}" data-nick="${escapeAttr(bare)}" data-server="${escapeAttr(state.activeServer)}" style="color:${color}">${prefix ? `<span class="nick-prefix">${prefix}</span>` : ''}${escapeHtml(bare)}</div>`;
+    const isBot = !!botNicks[state.activeServer + '\0' + bare];
+    const botBadge = isBot ? `<span class="bot-icon" title="Bot">${botIcon(bare)}</span>` : '';
+    return `<div class="nick-item ${cls}" data-nick="${escapeAttr(bare)}" data-server="${escapeAttr(state.activeServer)}" style="color:${color}">${prefix ? `<span class="nick-prefix">${prefix}</span>` : ''}${escapeHtml(bare)}${botBadge}</div>`;
   }).join('');
 }
 
