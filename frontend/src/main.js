@@ -71,6 +71,9 @@ const inputHistory = [];
 let historyIdx = -1;
 let inputDraft  = '';
 
+// ── Emoji button toggle ───────────────────────────────────────
+let emojiBtnEnabled = localStorage.getItem('emojiBtnEnabled') !== 'false';
+
 // ── Emoji picker ─────────────────────────────────────────────
 function showEmojiPicker(anchorEl) {
   document.getElementById('emoji-picker')?.remove();
@@ -1160,6 +1163,12 @@ function bindEvents() {
       { label: 'About DojoIRC',  action: () => showAbout() },
       { label: `Theme: ${state.currentTheme}`, action: () => showThemePicker(mx, my) },
       { label: 'Documentation', action: () => showDocs() },
+      { label: emojiBtnEnabled ? 'Emoji Button: On ✓' : 'Emoji Button: Off', action: () => {
+          emojiBtnEnabled = !emojiBtnEnabled;
+          localStorage.setItem('emojiBtnEnabled', emojiBtnEnabled);
+          const btn = document.getElementById('emoji-btn');
+          if (btn) btn.style.display = emojiBtnEnabled ? '' : 'none';
+      }},
       { label: 'Open Config',   action: () => OpenConfig().catch(console.error) },
       { label: 'Reload Config', action: () =>
         ReloadConfig()
@@ -1221,10 +1230,14 @@ function bindEvents() {
   });
 
   // Emoji picker button
-  document.getElementById('emoji-btn')?.addEventListener('click', e => {
-    e.stopPropagation();
-    showEmojiPicker(e.currentTarget);
-  });
+  const emojiBtn = document.getElementById('emoji-btn');
+  if (emojiBtn) {
+    emojiBtn.style.display = emojiBtnEnabled ? '' : 'none';
+    emojiBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      showEmojiPicker(e.currentTarget);
+    });
+  }
 }
 
 function sendMessage(text) {
@@ -1600,13 +1613,18 @@ channels = ["#linux"]</code></pre>
         <p>Press <b>Ctrl+F</b> to open the search bar in the buffer header. As you type, messages matching by text or nick stay at full opacity — non-matching messages dim. The first match scrolls into view automatically. Press <b>Escape</b> or click <b>✕</b> to close and restore all messages.</p>
 
         <h2>Emoji</h2>
-        <p>Click the <b>😊</b> button to the right of the input to open the emoji picker. Browse by category or search by name. Click any emoji to insert it at the cursor.</p>
-        <p>You can also type a <b>:shortcode:</b> directly — it converts to the emoji when you send the message:</p>
+        <p><b>Picker:</b> Click the <b>😊</b> button to the right of the input to open the emoji picker. Browse by category or search by name. Click any emoji to insert it at the cursor.</p>
+        <p>The emoji button can be shown or hidden via <b>Hamburger → Emoji Button: On/Off</b>. The setting persists across restarts.</p>
+        <p><b>Shortcodes:</b> Type a <code>:shortcode:</code> directly in your message — it converts to the emoji automatically when you send:</p>
         <pre><code>:fire:       → 🔥    :thumbsup:   → 👍    :heart:      → ❤️
 :joy:        → 😂    :sob:        → 😭    :thinking:   → 🤔
 :rocket:     → 🚀    :sparkles:   → ✨    :100:        → 💯
-:tada:       → 🎉    :check:      → ✅    :warning:    → ⚠️</code></pre>
-        <p>Tab-complete shortcodes: type <code>:fir</code> and press Tab → 🔥. Press Tab again to cycle matches.</p>
+:tada:       → 🎉    :check:      → ✅    :warning:    → ⚠️
+:smile:      → 😄    :wave:       → 👋    :clap:       → 👏
+:eyes:       → 👀    :pray:       → 🙏    :muscle:     → 💪
+:pizza:      → 🍕    :beer:       → 🍺    :coffee:     → ☕
+:star:       → ⭐    :zap:        → ⚡    :rainbow:    → 🌈</code></pre>
+        <p>67 shortcodes total. Tab-complete shortcodes: type <code>:fir</code> and press Tab → 🔥. Press Tab again to cycle matches.</p>
 
         <h2>Input History</h2>
         <p>Press <b>↑</b> in the message input to recall the previous sent message. Keep pressing to go further back. Press <b>↓</b> to move forward — reaching the end restores whatever you were drafting before you started scrolling.</p>
