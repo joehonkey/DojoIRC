@@ -1039,7 +1039,7 @@ function bindEvents() {
   const input = document.getElementById('message-input');
   if (input) {
     input.focus();
-    input.addEventListener('focus', () => MaybeShowKeyboard().catch(() => {}));
+    input.addEventListener('pointerdown', () => MaybeShowKeyboard().catch(() => {}));
     input.addEventListener('keydown', e => {
       if (e.key === 'Tab') {
         e.preventDefault();
