@@ -65,7 +65,7 @@
 DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wails.io). The backend is a full IRC engine in Go; the frontend is HTML/CSS/JS rendered in a webkit2gtk webview. Inspired by Halloy, built without restrictions.
 
 - **IRC engine** — TLS, SASL PLAIN, multi-server, auto-reconnect
-- **IRCv3** — `message-tags`, `draft/typing`, CAP LS 302 negotiation
+- **IRCv3** — `message-tags`, `draft/typing`, `server-time`, CAP LS 302 negotiation
 - **Theming** — Catppuccin Mocha default, live switching, custom TOML themes
 - **Desktop integration** — system tray, OS notifications, URL previews
 
@@ -78,6 +78,8 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | **Multi-server** | Connect to as many servers as you want; each has its own sidebar entry |
 | **TLS** | All connections use TLS by default (port 6697) |
 | **SASL PLAIN** | Per-server SASL authentication via `[server.sasl]` config block |
+| **NickServ identify** | Auto-identifies with NickServ on connect via `nickserv_password` in config |
+| **Channel modes** | Live `+modes` pill in the buffer header; auto-requested on join |
 | **Auto-reconnect** | Retries every 10s on unexpected disconnect; right-click to cancel |
 | **System tray** | Close to tray, left-click to toggle, right-click to quit |
 | **Mentions & highlights** | Nick mentions highlighted in chat with red tint + OS desktop notification |
@@ -101,7 +103,7 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | `message-tags` | **Done** — CAP negotiation wired; tags parsed on all inbound messages |
 | `draft/typing` | **Done** — outgoing TAGMSG typing indicators (debounced); incoming shown above input |
 | `sasl` | **Done** — SASL PLAIN; EXTERNAL planned |
-| `server-time` | Planned |
+| `server-time` | **Done** — server-supplied timestamps used when available |
 | `batch` | Planned |
 | `labeled-response` | Planned |
 | `multi-prefix` | Planned |
@@ -159,6 +161,23 @@ mechanism = "PLAIN"
 username  = "youraccountname"
 password  = "yourpassword"
 ```
+
+### NickServ Authentication
+
+For servers that use NickServ instead of SASL:
+
+```toml
+[[server]]
+name              = "LinuxDojo"
+host              = "irc.linuxdojo.org"
+port              = 6697
+tls               = true
+nick              = "yournick"
+channels          = ["#dojoirc"]
+nickserv_password = "yourpassword"
+```
+
+DojoIRC identifies automatically after the server's MOTD completes.
 
 ### Themes
 
@@ -232,10 +251,10 @@ DISPLAY=:1 GDK_BACKEND=x11 ./build/bin/DojoIRC
 Project scaffold, IRC engine, UI layout, system tray, themes, multi-server, slash commands, nick colorization, tab completion, URL previews, typing indicators, SASL, auto-reconnect, mention highlights, desktop notifications.
 
 **Stage 2 — Core IRC Features** (in progress)  
-Full IRCv3 CAP negotiation, NickServ, CTCP, DCC, channel list, ignore list, message logging.
+~~NickServ~~ ✅ ~~CTCP~~ ✅ ~~message logging~~ ✅ ~~channel modes~~ ✅ — remaining: full IRCv3 CAP negotiation, DCC, channel list, ignore list.
 
 **Stage 3 — IRCv3 Capabilities**  
-server-time, batch, labeled-response, chathistory, echo-message, msgid, Monitor, multiline, react, read-marker.
+~~server-time~~ ✅ — remaining: batch, labeled-response, chathistory, echo-message, msgid, Monitor, multiline, react, read-marker.
 
 **Stage 4 — UX**  
 Emoji, message search, keyboard shortcuts, buffer scrollback.
