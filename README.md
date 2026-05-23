@@ -117,6 +117,7 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | **Context menus** | Right-click channels to leave, servers to connect/disconnect |
 | **In-app docs** | Full searchable documentation panel via Hamburger → Documentation |
 | **About panel** | Hamburger → About DojoIRC — app icon, version, stack, IRCv3 caps, GitHub link |
+| **Windows tablet keyboard** | Tablet mode auto-raises the touch keyboard (`TabTip.exe`) when the message input is focused; falls back to `osk.exe` |
 | **Channel list** | `/list` streams all public channels with user counts and topics; filter and click to join |
 | **Away status** | `/away` and `/back` toggle an **away** badge in the input bar; `away-notify` tracks other users |
 | **Ignore list** | Per-server `ignore = [...]` in config silently drops messages from unwanted nicks |
