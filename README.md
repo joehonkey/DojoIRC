@@ -64,8 +64,8 @@
 
 DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wails.io). The backend is a full IRC engine in Go; the frontend is HTML/CSS/JS rendered in a webkit2gtk webview. Inspired by Halloy, built without restrictions.
 
-- **IRC engine** — TLS, SASL PLAIN, multi-server, auto-reconnect
-- **IRCv3** — `message-tags`, `draft/typing`, `server-time`, CAP LS 302 negotiation
+- **IRC engine** — TLS, SASL PLAIN, multi-server, auto-reconnect, ignore list
+- **IRCv3** — `message-tags`, `draft/typing`, `server-time`, `away-notify`, CAP LS 302 multiline negotiation
 - **Theming** — Catppuccin Mocha default, live switching, custom TOML themes
 - **Desktop integration** — system tray, OS notifications, URL previews
 
@@ -94,6 +94,9 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | **Context menus** | Right-click channels to leave, servers to connect/disconnect |
 | **In-app docs** | Full documentation panel via Hamburger → Documentation |
 | **About panel** | Hamburger → About DojoIRC — app icon, version, stack, IRCv3 caps, GitHub link |
+| **Channel list** | `/list` streams all public channels with user counts and topics; filter and click to join |
+| **Away status** | `/away` and `/back` toggle an **away** badge in the input bar; `away-notify` tracks other users |
+| **Ignore list** | Per-server `ignore = [...]` in config silently drops messages from unwanted nicks |
 
 ---
 
@@ -110,7 +113,7 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | `multi-prefix` | Planned |
 | `extended-join` | Planned |
 | `account-notify` | Planned |
-| `away-notify` | Planned |
+| `away-notify` | **Done** — AWAY messages tracked; 305/306 update the away badge in the input bar |
 | `invite-notify` | Planned |
 | `chghost` | Planned |
 | `userhost-in-names` | Planned |
@@ -202,7 +205,8 @@ Drop a `.toml` file in `~/.config/dojoirc/themes/` to add your own — it appear
 | `/msg <nick> <text>` | Send a private message |
 | `/query <nick>` | Open a DM buffer |
 | `/whois <nick>` | Show user info |
-| `/away [message]` | Set away status |
+| `/list` | Open channel list browser — streams public channels, click to join |
+| `/away [message]` | Set away status (shows away badge in input bar) |
 | `/back` | Clear away status |
 | `/topic <text>` | Set channel topic |
 | `/kick <nick> [reason]` | Kick a user (ops only) |
@@ -251,8 +255,8 @@ DISPLAY=:1 GDK_BACKEND=x11 ./build/bin/DojoIRC
 **Stage 1 — Foundation** ✅  
 Project scaffold, IRC engine, UI layout, system tray, themes, multi-server, slash commands, nick colorization, tab completion, URL previews, typing indicators, SASL, auto-reconnect, mention highlights, desktop notifications.
 
-**Stage 2 — Core IRC Features** (in progress)  
-~~NickServ~~ ✅ ~~CTCP~~ ✅ ~~message logging~~ ✅ ~~channel modes~~ ✅ — remaining: full IRCv3 CAP negotiation, DCC, channel list, ignore list.
+**Stage 2 — Core IRC Features** ✅  
+~~NickServ~~ ✅ ~~CTCP~~ ✅ ~~message logging~~ ✅ ~~channel modes~~ ✅ ~~CAP LS 302 negotiation~~ ✅ ~~away status~~ ✅ ~~channel list~~ ✅ ~~ignore list~~ ✅ — remaining: DCC.
 
 **Stage 3 — IRCv3 Capabilities**  
 ~~server-time~~ ✅ — remaining: batch, labeled-response, chathistory, echo-message, msgid, Monitor, multiline, react, read-marker.

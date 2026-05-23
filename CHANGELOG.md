@@ -1,5 +1,25 @@
 # DojoIRC Changelog
 
+## Session 10 — 2026-05-23 (Stage 2 completion + fixes)
+
+### What Was Fixed
+- **Right-click copy broken** — `document.execCommand('copy')` ran after the context menu click had already cleared the selection. Fixed by capturing `sel.toString()` at `contextmenu` event time and passing it as a closure into the menu action. Switched from `navigator.clipboard.writeText` to Wails-native `ClipboardSetText` for reliable clipboard access in the WebKit2GTK webview.
+- **Ghost tray icon on kill** — killing DojoIRC with `pkill`/`kill` skipped `systray.Quit()`, leaving the DBus StatusNotifierItem registered. Fixed by adding a SIGTERM/SIGINT signal handler in `startup()` that routes to `AppQuit()` for a clean shutdown.
+
+### What Was Built
+- **CAP LS 302 multiline negotiation** — CAP LS response accumulator waits for the full server capability list before building the REQ batch; only requests caps the server actually advertises, preventing all-or-nothing NAK failures.
+- **Away status** — `305`/`306` numerics update an **away** badge shown next to your nick in the input bar. `/away` and `/back` work as before; the badge confirms server acknowledgment.
+- **`away-notify`** — added to CAP negotiation; incoming AWAY messages from users in shared channels are processed.
+- **`/list` channel browser** — opens a streaming overlay panel that populates in real time as 322 entries arrive. Filter by name, topic, or user count. Click any row to join. Shows live "Loading… N channels" count while the LIST response is in flight.
+- **Ignore list** — per-server `ignore = ["nick1", "nick2"]` in config.toml. Messages, actions, and notices from ignored nicks are silently dropped.
+
+### Key Decisions
+- `ClipboardSetText` (Wails runtime, Go-backed) preferred over Web Clipboard API — WebKit2GTK in a non-browser context cannot reliably access `navigator.clipboard` without additional permissions plumbing.
+- SIGTERM handler placed in `startup()` next to the existing lifecycle hooks; `AppQuit()` already handles `systray.Quit()` + `logger.CloseAll()` + `runtime.Quit()`.
+- Channel list panel uses streaming model (renders each 322 as it arrives) rather than buffering all entries and rendering once — feels faster on large servers.
+
+---
+
 ## Session 9 — 2026-05-22 (v0.3.1 hotfix release)
 
 ### What Was Done

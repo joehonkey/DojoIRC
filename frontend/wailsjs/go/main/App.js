@@ -54,6 +54,10 @@ export function JoinChannel(arg1, arg2) {
   return window['go']['main']['App']['JoinChannel'](arg1, arg2);
 }
 
+export function ListChannels(arg1) {
+  return window['go']['main']['App']['ListChannels'](arg1);
+}
+
 export function NeedsNickSetup() {
   return window['go']['main']['App']['NeedsNickSetup']();
 }

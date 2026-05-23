@@ -11,6 +11,7 @@ Type any of these in the message input box. Tab completes both command names and
 | `/j #channel` | Join a channel (short alias for `/join`) |
 | `/join #channel` | Join a channel |
 | `/part [#channel]` | Leave a channel. Defaults to the current channel if omitted |
+| `/list` | Open the channel list browser. Streams all public channels from the server with user counts and topics. Click a channel to join it |
 | `/topic <text>` | Set the channel topic (requires channel operator status) |
 | `/invite <nick>` | Invite a user to the current channel |
 | `/kick <nick> [reason]` | Kick a user from the channel (requires channel operator status) |
@@ -34,8 +35,8 @@ Type any of these in the message input box. Tab completes both command names and
 |---|---|
 | `/nick <name>` | Change your nickname |
 | `/whois <nick>` | Look up info about a user — shown in the server buffer |
-| `/away [message]` | Mark yourself as away with an optional message |
-| `/back` | Clear your away status |
+| `/away [message]` | Mark yourself as away with an optional message. An **away** badge appears next to your nick in the input bar while away |
+| `/back` | Clear your away status and remove the away badge |
 
 ---
 
@@ -88,6 +89,7 @@ Any key other than Tab resets the completion cycle.
 /kick spammer flooding the channel
 /mode +m
 /raw PRIVMSG #dojoirc :hello world
+/list
 /away grabbing coffee
 /back
 /clear

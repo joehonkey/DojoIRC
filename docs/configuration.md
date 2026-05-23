@@ -20,6 +20,7 @@ port     = 6697
 tls      = true
 nick     = "yournick"
 channels = ["#dojoirc", "#linuxdojo"]
+ignore   = ["spambot"]
 
 [[server]]
 name     = "Libera"
@@ -60,6 +61,7 @@ Each server is defined with a `[[server]]` block. You can have as many as you ne
 | `nick` | string | yes | Your preferred nickname |
 | `channels` | array of strings | no | Channels to join automatically on connect |
 | `nickserv_password` | string | no | If set, sends `IDENTIFY` to NickServ after connecting. Use this **or** SASL — not both |
+| `ignore` | array of strings | no | Nicks to silently ignore. Messages, notices, and actions from these nicks are dropped |
 
 ### Example — minimal server block
 
@@ -72,6 +74,21 @@ tls      = true
 nick     = "yournick"
 channels = ["#general"]
 ```
+
+### Example — with ignore list
+
+```toml
+[[server]]
+name     = "LinuxDojo"
+host     = "irc.linuxdojo.org"
+port     = 6697
+tls      = true
+nick     = "yournick"
+channels = ["#dojoirc"]
+ignore   = ["spambot", "annoyinguser"]
+```
+
+Nicks in `ignore` are matched case-insensitively. Messages, actions, and notices from ignored nicks are silently dropped — they do not appear in any buffer.
 
 ---
 

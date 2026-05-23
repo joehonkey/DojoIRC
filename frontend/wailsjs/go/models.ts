@@ -29,6 +29,7 @@ export namespace config {
 	    NickServPass: string;
 	    Password: string;
 	    SASL?: SASL;
+	    Ignore: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Server(source);
@@ -48,6 +49,7 @@ export namespace config {
 	        this.NickServPass = source["NickServPass"];
 	        this.Password = source["Password"];
 	        this.SASL = this.convertValues(source["SASL"], SASL);
+	        this.Ignore = source["Ignore"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

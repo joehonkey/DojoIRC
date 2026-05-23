@@ -15,8 +15,13 @@ Outgoing typing indicators are sent automatically while you type (debounced — 
 ### `sasl` (PLAIN)
 SASL PLAIN authentication is supported per server via `[server.sasl]` in config. The full CAP LS 302 handshake is used. Authentication happens before JOIN so your nick is identified before entering channels. SASL EXTERNAL (certificate-based) is planned.
 
+DojoIRC uses CAP LS 302 with multiline accumulation: it waits for the full capability list before deciding what to request, and only requests capabilities the server actually advertises. This avoids all-or-nothing NAK failures when batching multiple caps.
+
 ### `server-time`
 CAP negotiated. When the server supplies a `time` tag on incoming messages, DojoIRC uses that timestamp instead of the local clock. Message timestamps in the chat window reflect server time on supporting servers. Important for accurate logs and bouncer history replay.
+
+### `away-notify`
+CAP negotiated. When a user in a shared channel sets or clears their away status, the server sends an AWAY message with or without a reason. DojoIRC tracks this and can surface it in future nick list UI. Numerics 305 (RPL_UNAWAY) and 306 (RPL_NOWAWAY) are also handled — when you `/away` or `/back`, the away badge next to your nick in the input bar updates immediately.
 
 ---
 
@@ -36,9 +41,6 @@ Includes the joining user's account name in JOIN messages. Makes it possible to 
 
 ### `account-notify`
 Notifies the client when a user's account association changes (logs in or out of services). Useful for showing account status in the nick list.
-
-### `away-notify`
-Sends AWAY updates for users in shared channels so the client can show live away status in the nick list without polling.
 
 ### `invite-notify`
 Broadcasts INVITE messages to all members of a channel (not just the inviter), so the channel can see who is being invited.
