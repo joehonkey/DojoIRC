@@ -96,3 +96,42 @@
 - Clipboard via Wails runtime avoids a hard dependency on clipboard CLI tools (none were installed)
 - `localStorage` chosen for panel widths — no Go backend needed, survives restarts, zero config
 - Theme state tracked as `currentTheme` string instead of an index into a hardcoded array — works with arbitrary user-added themes
+
+---
+
+## Session 4 — 2026-05-22 (Icon Clean Redo)
+
+### What Was Done
+- **Complete icon redo** — wiped all previous build icons and reinstalled from `/home/joe/icons/DojoIRC/DojoIRC-scalable-os-icons/`
+  - `build/appicon.png` ← `recommended/linux/linux-512x512.png` (embedded in binary via `//go:embed`)
+  - `build/darwin/AppIcon.icns` ← `mac/wails/mac.icns`
+  - `build/windows/icon.ico` ← `recommended/windows/windows.ico`
+  - `build/icons/linux/NxN/apps/dojoirc.png` ← `recommended/linux/` (16–1024px)
+  - `build/icons/freebsd/NxN/apps/dojoirc.png` ← `recommended/freebsd/` (16–1024px)
+  - `~/.local/share/icons/hicolor/NxN/apps/dojoirc.png` ← `recommended/linux/` (16–1024px)
+- **KDE icon cache cleared** — `~/.cache/icon-cache.kcache`, `~/.cache/ksycoca6*` removed; `kbuildsycoca6 --noincremental` run
+- **Binary rebuilt** and themes re-copied to `build/bin/`
+
+---
+
+## Session 5 — 2026-05-22 (Multi-server, SASL, Polish)
+
+### What Was Built
+- **SASL PLAIN authentication** — CAP negotiation expanded; if `[server.sasl]` is configured, requests `sasl` capability, sends `AUTHENTICATE PLAIN`, handles 903/904/905 responses, then sends `CAP END`
+- **Multi-server Reload Config** — `ReloadConfig` now calls `connectNewServers()` which diffs the config against live clients and connects any new servers; JS reload chain also calls `GetServers()` and updates the sidebar
+- **Startup double-connect fix** — `startup()`'s `time.AfterFunc` now uses `connectNewServers()` instead of an inline loop, so JS boot's `ReloadConfig()` call can't race and double-connect
+- **Auto-reconnect** — IRC client `runLoop()` replaces the one-shot goroutine; on unexpected disconnect shows "Reconnecting in 10s..." in server buffer, retries until success; `Quit()` signals a quit channel to interrupt the sleep instantly
+- **Right-click server → Connect / Disconnect** — context menu on server names; connected state tracked from `connected`/`disconnected` IRC events
+- **Tab completion** — Tab completes nicks from current channel (cycles on repeated Tab, adds `: ` at line start); also completes slash commands after `/`; resets on any non-Tab keypress
+- **Smart auto-scroll** — channel switch always scrolls to bottom; new messages scroll only if already at bottom; two-pass scroll (immediate + `setTimeout(0)`) works around webkit2gtk layout timing
+- **Quit/nick event routing fix** — `quit` and `nick` events were broadcasting to all channels across all servers; now scoped to the correct server only
+- **`/j` alias** — `/j #channel` works as shorthand for `/join`
+- **`/clear`** — clears the current buffer
+- **`/sysinfo`** — sends OS, kernel, CPU, RAM info to the current channel; reads `/proc/cpuinfo`, `/proc/meminfo`, `/etc/os-release`, `uname -r`
+- **Hamburger menu additions** — Documentation (in-app panel), Restart, moved separator above Restart/Quit
+- **In-app documentation panel** — styled overlay with config format, SASL setup, themes, full command table, UI tips; closes on ✕ or click outside
+- **Icon redo** — wiped all icons, reinstalled from `/home/joe/Downloads/DojoIRC-scalable-os-icons/`: linux/variant-a, freebsd/variant-b, windows/variant-a; hicolor trees renamed to `dojoirc.png`; tray icon updated to linux/variant-a 32x32
+
+### Fixes
+- **Window position not remembered** — `runtime.WindowGetPosition` saved before hide, `runtime.WindowSetPosition` restored after show; bypasses GTK/WM re-centering on unmap/remap
+- **Libera config format** — corrected `[servers.libera]` (Halloy format) to `[[server]]` / `[server.sasl]` (DojoIRC format) in `~/.config/dojoirc/config.toml`
