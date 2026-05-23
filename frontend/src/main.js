@@ -6,8 +6,8 @@ import {
   SendMessage, SendAction, SendNick, SendWhois, SendRaw,
   GetServers, GetNick, GetNickList, PartChannel, JoinChannel,
   FetchURLPreview, BrowserOpen, GetThemeByName, GetThemeNames,
-  OpenConfig, AppQuit, SendTyping, ReadClipboard,
-  ReloadConfig, SaveTheme,
+  OpenConfig, AppQuit, RestartApp, SendTyping, ReadClipboard,
+  ReloadConfig, SaveTheme, ConnectServer, DisconnectServer, GetSysInfo,
 } from '../wailsjs/go/main/App.js';
 
 // ── State ──────────────────────────────────────────────────
@@ -186,7 +186,9 @@ function handleEvent(ev) {
   switch (ev.type) {
     case 'connected': {
       state.nick = ev.nick;
-      ensureChannel(ev.server, 'server');
+      const csrv = ensureChannel(ev.server, 'server');
+      const cparent = state.servers.find(s => s.name === ev.server);
+      if (cparent) cparent.connected = true;
       render();
       break;
     }
@@ -235,9 +237,10 @@ function handleEvent(ev) {
       break;
     }
     case 'quit': {
-      state.servers.forEach(srv => srv.channels.forEach(ch => {
+      const qsrv = state.servers.find(s => s.name === ev.server);
+      if (qsrv) qsrv.channels.forEach(ch => {
         ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} quit${ev.text ? ': ' + ev.text : ''}`, type: 'server' });
-      }));
+      });
       render();
       break;
     }
@@ -249,9 +252,10 @@ function handleEvent(ev) {
     }
     case 'nick': {
       if (ev.nick === state.nick) state.nick = ev.text;
-      state.servers.forEach(srv => srv.channels.forEach(ch => {
+      const nsrv = state.servers.find(s => s.name === ev.server);
+      if (nsrv) nsrv.channels.forEach(ch => {
         ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} is now known as ${ev.text}`, type: 'server' });
-      }));
+      });
       render();
       break;
     }
@@ -281,10 +285,13 @@ function handleEvent(ev) {
       break;
     }
     case 'disconnected': {
-      const srv = state.servers.find(s => s.name === ev.server);
-      if (srv) srv.channels.forEach(ch => {
-        ch.messages.push({ time: ev.time, nick: '', text: 'Disconnected from server', type: 'server' });
-      });
+      const dsrv = state.servers.find(s => s.name === ev.server);
+      if (dsrv) {
+        dsrv.connected = false;
+        dsrv.channels.forEach(ch => {
+          ch.messages.push({ time: ev.time, nick: '', text: 'Disconnected from server', type: 'server' });
+        });
+      }
       render();
       break;
     }
@@ -305,6 +312,7 @@ function handleSlash(text) {
       if (args[0]) SendWhois(state.activeServer, args[0]).catch(console.error);
       break;
     case 'join':
+    case 'j':
       if (args[0]) JoinChannel(state.activeServer, args[0]).catch(console.error);
       break;
     case 'part':
@@ -364,6 +372,17 @@ function handleSlash(text) {
     case 'quote':
       if (args.length) SendRaw(state.activeServer, args.join(' ')).catch(console.error);
       break;
+    case 'clear': {
+      const clrCh = activeChannel();
+      if (clrCh) { clrCh.messages = []; render(); }
+      break;
+    }
+    case 'sysinfo':
+      GetSysInfo().then(info => {
+        if (info && state.activeServer && state.activeChannel && state.activeChannel !== 'server')
+          SendMessage(state.activeServer, state.activeChannel, info).catch(console.error);
+      }).catch(console.error);
+      break;
     case 'quit':
       SendRaw(state.activeServer, `QUIT :${args.join(' ') || 'DojoIRC'}`).catch(console.error);
       break;
@@ -399,8 +418,62 @@ function handleSlash(text) {
   }
 }
 
+// ── Tab completion ──────────────────────────────────────────
+const SLASH_COMMANDS = [
+  'away','back','clear','help','invite','j','join','kick',
+  'me','mode','msg','nick','part','query','quit','raw','topic','whois',
+];
+
+let tabComp = null;
+
+function handleTab(input) {
+  const val = input.value;
+  const pos  = input.selectionStart;
+
+  if (tabComp) {
+    tabComp.idx = (tabComp.idx + 1) % tabComp.matches.length;
+  } else {
+    const before  = val.slice(0, pos);
+    const wordMatch = before.match(/(\S+)$/);
+    if (!wordMatch) return;
+    const partial = wordMatch[1];
+    const prefix  = before.slice(0, before.length - partial.length);
+    const after   = val.slice(pos);
+
+    let matches = [];
+    if (partial.startsWith('/') && prefix === '') {
+      matches = SLASH_COMMANDS
+        .filter(c => ('/' + c).startsWith(partial.toLowerCase()))
+        .map(c => '/' + c);
+    } else {
+      const srv = state.servers.find(s => s.name === state.activeServer);
+      const ch  = srv?.channels.find(c => c.name === state.activeChannel);
+      const nicks = (ch?.nicks || []).map(n => n.replace(/^[@+%~&]/, ''));
+      const lp = partial.toLowerCase();
+      matches = nicks.filter(n => n.toLowerCase().startsWith(lp));
+    }
+    if (!matches.length) return;
+    tabComp = { matches, idx: 0, prefix, after, atStart: prefix.trim() === '' };
+  }
+
+  const match  = tabComp.matches[tabComp.idx];
+  const isCmd  = match.startsWith('/');
+  const suffix = (!isCmd && tabComp.atStart) ? ': ' : ' ';
+  const newVal = tabComp.prefix + match + suffix + tabComp.after.trimStart();
+  input.value  = newVal;
+  const newPos = tabComp.prefix.length + match.length + suffix.length;
+  input.setSelectionRange(newPos, newPos);
+}
+
 // ── Render ─────────────────────────────────────────────────
 function render() {
+  const prevMsgs = document.getElementById('messages');
+  const prevKey = prevMsgs?.dataset.channel;
+  const curKey  = state.activeServer + '/' + state.activeChannel;
+  // Scroll to bottom if: no previous buffer, channel switched, or user was already at the bottom
+  const atBottom = !prevMsgs || prevKey !== curKey ||
+    prevMsgs.scrollTop + prevMsgs.clientHeight >= prevMsgs.scrollHeight - 60;
+
   const ch = activeChannel();
   const isServerBuf = state.activeChannel === 'server';
   document.querySelector('#app').innerHTML = `
@@ -419,7 +492,7 @@ function render() {
         ${ch?.topic && state.topicVisible ? `<span id="buffer-topic">${escapeHtml(ch.topic)}</span>` : ''}
       </div>
       <div id="content">
-        <div id="messages">${renderMessages()}</div>
+        <div id="messages" data-channel="${state.activeServer}/${state.activeChannel}">${renderMessages()}</div>
         ${isServerBuf ? '' : `<div id="nicklist-handle" title="Drag to resize"></div><div id="nicklist" style="width:${state.nicklistWidth}px">${renderNicklist()}</div>`}
       </div>
       <div id="typing-bar"></div>
@@ -430,7 +503,7 @@ function render() {
     </div>
   `;
   bindEvents();
-  scrollToBottom();
+  if (atBottom) { scrollToBottom(); setTimeout(scrollToBottom, 0); }
   bindLinkPreviews();
   renderTypingBar();
 }
@@ -582,6 +655,19 @@ function bindEvents() {
       state.activeChannel = 'server';
       render();
     });
+
+    el.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const name = el.dataset.server;
+      const srv  = state.servers.find(s => s.name === name);
+      const isConnected = srv?.connected ?? true;
+      showCtxMenu(e.clientX, e.clientY, isConnected ? [
+        { label: 'Disconnect', cls: 'danger', action: () => DisconnectServer(name).catch(console.error) },
+      ] : [
+        { label: 'Connect', action: () => ConnectServer(name).catch(console.error) },
+      ]);
+    });
   });
 
   document.querySelectorAll('.channel-item').forEach(el => {
@@ -630,6 +716,13 @@ function bindEvents() {
   if (input) {
     input.focus();
     input.addEventListener('keydown', e => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        handleTab(input);
+        return;
+      }
+      tabComp = null; // any other key resets completion cycle
+
       if (e.key === 'Enter') {
         const val = input.value.trim();
         input.value = '';
@@ -641,7 +734,7 @@ function bindEvents() {
         return;
       }
       // Send typing indicator (debounced, channels and DMs only)
-      if (state.activeChannel && state.activeChannel !== 'server' && !e.ctrlKey && !e.metaKey && e.key !== 'Tab') {
+      if (state.activeChannel && state.activeChannel !== 'server' && !e.ctrlKey && !e.metaKey) {
         clearTimeout(outgoingTypingTimer);
         SendTyping(state.activeServer, state.activeChannel, 'active').catch(() => {});
         outgoingTypingTimer = setTimeout(() => {
@@ -765,8 +858,22 @@ function bindEvents() {
     showCtxMenu(mx, my, [
       { label: `Theme: ${state.currentTheme}`, action: () => showThemePicker(mx, my) },
       { label: 'Open Config',   action: () => OpenConfig().catch(console.error) },
-      { label: 'Reload Config', action: () => ReloadConfig().then(applyUIConfig).catch(console.error) },
+      { label: 'Documentation', action: () => showDocs() },
+      { label: 'Reload Config', action: () =>
+        ReloadConfig()
+          .then(applyUIConfig)
+          .then(() => GetServers())
+          .then(servers => {
+            if (!servers) return;
+            servers.forEach(srv => {
+              ensureChannel(srv.Name || srv.name, 'server');
+              (srv.Channels || srv.channels || []).forEach(ch => ensureChannel(srv.Name || srv.name, ch));
+            });
+            render();
+          })
+          .catch(console.error) },
       { separator: true },
+      { label: 'Restart', action: () => RestartApp().catch(console.error) },
       { label: 'Quit', cls: 'danger', action: () => AppQuit().catch(console.error) },
     ]);
   });
@@ -908,6 +1015,130 @@ function applyUIConfig(cfg) {
   if (cfg.font)      r.setProperty('--font-family', `'${cfg.font}', 'Cascadia Code', monospace`);
   if (cfg.font_size) r.setProperty('--font-size', cfg.font_size + 'px');
   if (cfg.theme_name) state.currentTheme = cfg.theme_name;
+}
+
+// ── Documentation overlay ───────────────────────────────────
+function showDocs() {
+  const overlay = document.createElement('div');
+  overlay.className = 'docs-overlay';
+  overlay.innerHTML = `
+    <div class="docs-panel">
+      <div class="docs-header">
+        DojoIRC — Documentation
+        <button class="docs-close" id="docs-close">✕</button>
+      </div>
+      <div class="docs-body">
+
+        <h2>Config File</h2>
+        <p>Location: <code>~/.config/dojoirc/config.toml</code><br>
+        Use <b>Hamburger → Open Config</b> to open it in your editor.</p>
+        <pre><code>theme     = "default"   # theme name (see Themes section)
+font      = "IBM Plex Mono"
+font_size = 13
+
+[[server]]
+name     = "LinuxDojo"
+host     = "irc.linuxdojo.org"
+port     = 6697
+tls      = true
+nick     = "yournick"
+channels = ["#dojoirc", "#linuxdojo"]</code></pre>
+        <p>Add as many <code>[[server]]</code> blocks as you need. After editing, use <b>Hamburger → Reload Config</b> to connect new servers without restarting.</p>
+
+        <h2>SASL Authentication</h2>
+        <p>Add a <code>[server.sasl]</code> block directly after the <code>[[server]]</code> entry it belongs to:</p>
+        <pre><code>[[server]]
+name     = "Libera"
+host     = "irc.libera.chat"
+port     = 6697
+tls      = true
+nick     = "yournick"
+channels = ["#linux"]
+
+[server.sasl]
+mechanism = "PLAIN"
+username  = "youraccountname"
+password  = "yourpassword"</code></pre>
+
+        <h2>Themes</h2>
+        <p>Switch themes via <b>Hamburger → Theme picker</b>. Bundled: <code>default</code>, <code>dark</code>, <code>light</code>, <code>BreezeDarkPlus</code>.</p>
+        <p>To add a custom theme, drop a <code>.toml</code> file in <code>~/.config/dojoirc/themes/</code> and reload config.</p>
+
+        <h2>Font Sizes</h2>
+        <p>All font sizes are CSS custom properties defined in <code>style.css</code>. The main message font also responds to <code>font_size</code> in <code>config.toml</code> — it is applied at runtime on top of these defaults.</p>
+        <p>To change any font size permanently, open <code>style.css</code> (in the DojoIRC source or installed location) and edit the variable value in the <code>:root</code> block.</p>
+        <pre><code>/* style.css — :root block */
+:root {
+  --font-size:              13px;   /* main chat messages */
+  --font-size-timestamp:    11px;   /* HH:MM timestamps */
+  --font-size-sidebar-hdr:  11px;   /* "DOJOIRC" header + hamburger row */
+  --font-size-hamburger:    14px;   /* ☰ hamburger button */
+  --font-size-server:       11px;   /* server names in sidebar */
+  --font-size-channel:      13px;   /* channel names in sidebar */
+  --font-size-nicklist:     12px;   /* nick list */
+  --font-size-typing:       13px;   /* typing indicator above input */
+  --font-size-input-nick:   12px;   /* your nick beside the input box */
+  --font-size-input:        13px;   /* message input box */
+}</code></pre>
+        <table class="docs-table">
+          <tr><th>Variable</th><th>Controls</th><th>Default</th></tr>
+          <tr><td>--font-size</td><td>Main chat message text. Also overridden by <code>font_size</code> in config.toml</td><td>13px</td></tr>
+          <tr><td>--font-size-timestamp</td><td>HH:MM timestamp column left of each message</td><td>11px</td></tr>
+          <tr><td>--font-size-sidebar-hdr</td><td>"DOJOIRC" title and hamburger row at the top of the sidebar</td><td>11px</td></tr>
+          <tr><td>--font-size-hamburger</td><td>The ☰ hamburger button symbol</td><td>14px</td></tr>
+          <tr><td>--font-size-server</td><td>Server names in the sidebar (e.g. "LINUXDOJO")</td><td>11px</td></tr>
+          <tr><td>--font-size-channel</td><td>Channel and DM names in the sidebar</td><td>13px</td></tr>
+          <tr><td>--font-size-nicklist</td><td>Nicks in the nick list on the right</td><td>12px</td></tr>
+          <tr><td>--font-size-typing</td><td>Typing indicator shown above the input bar</td><td>13px</td></tr>
+          <tr><td>--font-size-input-nick</td><td>Your nick displayed to the left of the message input box</td><td>12px</td></tr>
+          <tr><td>--font-size-input</td><td>Text you type in the message input box</td><td>13px</td></tr>
+        </table>
+        <p><b>Quick config.toml method:</b> To change the main chat font size without touching CSS, set <code>font_size = 15</code> in <code>config.toml</code> and use <b>Hamburger → Reload Config</b>. Only the main chat text responds to this setting; everything else requires editing the CSS variables above.</p>
+        <p><b>Example — make the nick list and channel list bigger:</b></p>
+        <pre><code>--font-size-nicklist:  14px;
+--font-size-channel:   14px;</code></pre>
+        <p><b>Example — compact sidebar (smaller server and channel labels):</b></p>
+        <pre><code>--font-size-server:    10px;
+--font-size-channel:   11px;
+--font-size-sidebar-hdr: 10px;</code></pre>
+
+        <h2>Slash Commands</h2>
+        <table class="docs-table">
+          <tr><th>Command</th><th>Description</th></tr>
+          <tr><td>/j #channel</td><td>Join a channel (alias for /join)</td></tr>
+          <tr><td>/join #channel</td><td>Join a channel</td></tr>
+          <tr><td>/part [#channel]</td><td>Leave a channel</td></tr>
+          <tr><td>/nick &lt;name&gt;</td><td>Change your nick</td></tr>
+          <tr><td>/me &lt;text&gt;</td><td>Send an action (/me waves)</td></tr>
+          <tr><td>/msg &lt;nick&gt; &lt;text&gt;</td><td>Send a private message</td></tr>
+          <tr><td>/query &lt;nick&gt;</td><td>Open a DM buffer</td></tr>
+          <tr><td>/whois &lt;nick&gt;</td><td>Show info about a user</td></tr>
+          <tr><td>/away [message]</td><td>Set away status</td></tr>
+          <tr><td>/back</td><td>Clear away status</td></tr>
+          <tr><td>/topic &lt;text&gt;</td><td>Set channel topic</td></tr>
+          <tr><td>/kick &lt;nick&gt;</td><td>Kick from channel (ops only)</td></tr>
+          <tr><td>/mode &lt;args&gt;</td><td>Set channel or user mode</td></tr>
+          <tr><td>/invite &lt;nick&gt;</td><td>Invite a user to the channel</td></tr>
+          <tr><td>/raw &lt;line&gt;</td><td>Send a raw IRC line</td></tr>
+          <tr><td>/clear</td><td>Clear the current buffer</td></tr>
+          <tr><td>/sysinfo</td><td>Send OS, kernel, CPU and RAM info to the channel</td></tr>
+          <tr><td>/quit [message]</td><td>Disconnect from the server</td></tr>
+          <tr><td>/help</td><td>Show command list in the buffer</td></tr>
+        </table>
+
+        <h2>UI Tips</h2>
+        <p><b>Sidebar:</b> drag the edge to resize. Right-click a server to connect/disconnect. Right-click a channel to leave.</p>
+        <p><b>Nick list:</b> drag the edge to resize. Left-click or right-click a nick to open a DM.</p>
+        <p><b>Input:</b> right-click to paste. Tab completes nicks (cycles on repeated Tab, adds ": " at line start) and slash commands. Typing indicators are sent automatically while you type.</p>
+        <p><b>Links:</b> click any URL to open in your browser. Preview cards load automatically below links.</p>
+        <p><b>Tray:</b> closing the window hides to tray. Left-click the tray icon to toggle. Right-click to quit.</p>
+
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.getElementById('docs-close').addEventListener('click', () => overlay.remove());
 }
 
 // ── Boot ────────────────────────────────────────────────────
