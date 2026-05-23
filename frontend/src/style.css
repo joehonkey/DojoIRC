@@ -207,6 +207,53 @@ html, body {
   text-decoration: underline;
 }
 
+/* ── Search bar ──────────────────────────────────────────── */
+#search-open {
+  margin-left: auto;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--text-dim);
+  font-size: 15px;
+  line-height: 1;
+  padding: 1px 5px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+#search-open:hover { color: var(--text); border-color: var(--border); }
+
+#search-bar {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+#search-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  padding: 2px 8px;
+  outline: none;
+  width: 180px;
+}
+#search-input:focus { border-color: var(--accent); }
+#search-close {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 4px;
+  line-height: 1;
+}
+#search-close:hover { color: var(--text); }
+
+.message.search-miss { opacity: 0.2; }
+
 /* ── Content row ─────────────────────────────────────────── */
 #content {
   display: flex;

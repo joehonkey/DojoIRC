@@ -30,6 +30,10 @@ export function GetNickList(arg1, arg2) {
   return window['go']['main']['App']['GetNickList'](arg1, arg2);
 }
 
+export function GetScrollback() {
+  return window['go']['main']['App']['GetScrollback']();
+}
+
 export function GetServers() {
   return window['go']['main']['App']['GetServers']();
 }

@@ -562,6 +562,13 @@ func (a *App) ListChannels(server string) {
 	}
 }
 
+func (a *App) GetScrollback() int {
+	if a.cfg == nil || a.cfg.Behaviour.Scrollback <= 0 {
+		return 5000
+	}
+	return a.cfg.Behaviour.Scrollback
+}
+
 // ReadClipboard reads the system clipboard via the Wails runtime.
 func (a *App) ReadClipboard() string {
 	text, err := runtime.ClipboardGetText(a.ctx)

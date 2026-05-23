@@ -19,6 +19,8 @@ export function GetNick(arg1:string):Promise<string>;
 
 export function GetNickList(arg1:string,arg2:string):Promise<Array<string>>;
 
+export function GetScrollback():Promise<number>;
+
 export function GetServers():Promise<Array<config.Server>>;
 
 export function GetSysInfo():Promise<string>;
