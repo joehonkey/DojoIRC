@@ -1,14 +1,10 @@
 package tray
 
 import (
-	_ "embed"
 	"sync"
 
 	"fyne.io/systray"
 )
-
-//go:embed icon.png
-var icon []byte
 
 type Callbacks struct {
 	OnShow func()
