@@ -1569,15 +1569,32 @@ password  = "yourpassword"</code></pre>
           <tr><td>Escape</td><td>Close search</td></tr>
           <tr><td>Alt+↑ / Alt+↓</td><td>Navigate to previous / next channel or buffer</td></tr>
           <tr><td>Alt+← / Alt+→</td><td>Jump to previous / next server</td></tr>
-          <tr><td>Tab</td><td>Complete nick or slash command in input</td></tr>
+          <tr><td>Tab</td><td>Complete nick, slash command, or :emoji shortcode</td></tr>
+          <tr><td>↑ / ↓</td><td>Cycle through previously sent messages (input history)</td></tr>
           <tr><td>Enter</td><td>Send message</td></tr>
         </table>
+
+        <h2>Message Search</h2>
+        <p>Press <b>Ctrl+F</b> to open the search bar in the buffer header. As you type, messages matching by text or nick stay at full opacity — non-matching messages dim. The first match scrolls into view automatically. Press <b>Escape</b> or click <b>✕</b> to close and restore all messages.</p>
+
+        <h2>Emoji</h2>
+        <p>Click the <b>😊</b> button to the right of the input to open the emoji picker. Browse by category or search by name. Click any emoji to insert it at the cursor.</p>
+        <p>You can also type a <b>:shortcode:</b> directly — it converts to the emoji when you send the message:</p>
+        <pre><code>:fire:       → 🔥    :thumbsup:   → 👍    :heart:      → ❤️
+:joy:        → 😂    :sob:        → 😭    :thinking:   → 🤔
+:rocket:     → 🚀    :sparkles:   → ✨    :100:        → 💯
+:tada:       → 🎉    :check:      → ✅    :warning:    → ⚠️</code></pre>
+        <p>Tab-complete shortcodes: type <code>:fir</code> and press Tab → 🔥. Press Tab again to cycle matches.</p>
+
+        <h2>Input History</h2>
+        <p>Press <b>↑</b> in the message input to recall the previous sent message. Keep pressing to go further back. Press <b>↓</b> to move forward — reaching the end restores whatever you were drafting before you started scrolling.</p>
 
         <h2>Tab Completion</h2>
         <p>Press <b>Tab</b> in the input box to complete:</p>
         <ul style="margin:4px 0 8px 20px;color:var(--text-dim)">
           <li><b>Nicks</b> — matches nicks in the current channel. At the start of the line, adds <code>: </code> after the nick. Press Tab again to cycle through all matches.</li>
           <li><b>Slash commands</b> — type <code>/</code> and press Tab to complete or cycle through commands.</li>
+          <li><b>Emoji shortcodes</b> — type <code>:word</code> and press Tab to insert the matching emoji character.</li>
         </ul>
         <p>Any key other than Tab resets the completion cycle.</p>
 
