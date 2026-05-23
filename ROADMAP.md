@@ -24,11 +24,19 @@
 - [x] Hamburger menu (theme picker, open config, reload config, quit)
 - [x] Topic toggle pill button in buffer header
 - [x] Paste in input field (right-click context menu, Wails clipboard API)
-- [ ] Script aliases (/music, /sysinfo, /exec)
+- [x] Script aliases — /sysinfo (OS/kernel/CPU/RAM); /exec and /music pending
+- [x] Tab completion — nick (cycles, adds `: ` at line start) + slash command completion
+- [x] /j alias, /clear command
+- [x] Right-click server → Connect / Disconnect
+- [x] Auto-reconnect — retries every 10s on unexpected disconnect, quit channel for instant cancel
+- [x] Smart auto-scroll — scrolls to bottom on new messages (if at bottom) and channel switch
+- [x] In-app documentation panel (hamburger → Documentation)
+- [x] Restart button in hamburger menu
+- [x] Window position save/restore across hide/show cycles
 
 ## Stage 2 — Core IRC Features
+- [x] SASL PLAIN authentication
 - [ ] Full IRCv3 capability negotiation (CAP LS 302)
-- [ ] SASL PLAIN + EXTERNAL authentication
 - [ ] NickServ identify flow
 - [ ] WHOIS, WHO
 - [ ] Channel modes display
@@ -70,6 +78,12 @@
 - [ ] `react` — emoji reactions to messages
 - [ ] `read-marker` — sync read position across clients
 - [ ] `Standard Replies` — structured error/info replies from server
+- [ ] `sts` — Strict Transport Security; remember TLS-only per server, refuse plaintext downgrade
+- [ ] `utf8only` — declare UTF-8 only connection; remove encoding ambiguity
+- [ ] `draft/message-redaction` — allow authors/ops to delete a message with a reason (Ergo supported)
+- [ ] `draft/account-registration` — in-band account registration via CAP, no NickServ required (Ergo supported)
+- [ ] `draft/channel-rename` — rename a channel without part/rejoin (Ergo supported)
+- [ ] `WHOX` — extended WHO reply with account names, idle time, real hostname (ISUPPORT token, not a CAP)
 
 ## Stage 4 — User Experience
 - [x] Theme system (load from themes/*.toml at startup)
@@ -138,9 +152,15 @@ Reference: https://ircv3.net/irc/
 | `multiline` | planned | Multi-line message support |
 | `react` | planned | Emoji reactions to messages |
 | `read-marker` | planned | Sync read position across clients |
-| `sasl` | planned | SASL PLAIN + EXTERNAL (Stage 2) |
+| `sasl` | partial | SASL PLAIN done; EXTERNAL planned |
 | `server-time` | planned | Display server-supplied message timestamps |
 | `setname` | planned | Live REALNAME changes |
 | `Standard Replies` | planned | Structured error/info replies from server |
 | `typing` | done | Outgoing TAGMSG typing indicators; incoming shown above input bar |
 | `userhost-in-names` | planned | Full user@host included in NAMES reply |
+| `sts` | planned | Strict Transport Security — remember TLS-only per server, refuse plaintext downgrade |
+| `utf8only` | planned | Declare UTF-8 only connection; removes encoding ambiguity |
+| `draft/message-redaction` | planned | Delete a message with a reason; Ergo supported |
+| `draft/account-registration` | planned | In-band account registration via CAP, no NickServ required; Ergo supported |
+| `draft/channel-rename` | planned | Rename a channel server-side without part/rejoin; Ergo supported |
+| `WHOX` | planned | Extended WHO reply with account names, idle time, real hostname (ISUPPORT token) |
