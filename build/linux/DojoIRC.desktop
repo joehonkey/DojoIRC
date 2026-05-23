@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=DojoIRC
+Comment=IRC client for LinuxDojo.org
+Exec=/home/joe/Projects/DojoIRC/build/bin/DojoIRC
+Icon=dojoirc
+Type=Application
+Categories=Network;IRCClient;
+StartupWMClass=DojoIRC
+StartupNotify=false
