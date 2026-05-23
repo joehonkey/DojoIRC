@@ -92,6 +92,7 @@
 - [x] Font + font size selection in config (applied via Reload Config)
 - [x] Context menu overflow fix (flips upward/leftward at screen edges)
 - [x] Emoji support (picker + shortcodes + Tab completion)
+- [x] Input history navigation (Up/Down arrows in message input cycle through sent messages)
 - [x] Message search in buffer (Ctrl+F, live highlight, Escape to close)
 - [x] Buffer scrollback limit (configurable via [behaviour] scrollback, default 5000)
 - [x] Keyboard shortcuts (Alt+↑↓ channels, Alt+←→ servers, Ctrl+F search)

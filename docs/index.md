@@ -8,7 +8,7 @@ DojoIRC is a cross-platform IRC client built with Go and Wails v2. This document
 - [Configuration](configuration.md) — full `config.toml` reference with all options and examples
 - [Customization Guide](customization.md) — fonts, themes, per-element font sizes, and full config examples
 - [Slash Commands](commands.md) — every command, what it does, and usage examples
-- [Keyboard Shortcuts](keyboard-shortcuts.md) — navigation, search, and input shortcuts
+- [Keyboard Shortcuts](keyboard-shortcuts.md) — navigation, search, input history, emoji shortcodes, and full shortcode reference
 - [Themes](themes.md) — switching themes, creating your own, and the full theme color reference
 - [Font Sizes](font-sizes.md) — how to customize every font size in the UI via CSS variables
 - [IRCv3](ircv3.md) — supported IRCv3 capabilities, what they do, and what's coming
