@@ -127,23 +127,19 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 
 ### Config
 
-Create `~/.config/dojoirc/config.toml`:
+On first launch DojoIRC creates `~/.config/dojoirc/config.toml` automatically, pre-configured to connect to **irc.linuxdojo.org #dojoirc**. The only thing you need to change is your nick:
 
 ```toml
-theme     = "default"
-font      = "IBM Plex Mono"
-font_size = 13
-
 [[server]]
 name     = "LinuxDojo"
 host     = "irc.linuxdojo.org"
 port     = 6697
 tls      = true
-nick     = "yournick"
-channels = ["#dojoirc", "#linuxdojo"]
+nick     = "yournick"        # ← change this
+channels = ["#dojoirc"]
 ```
 
-Add as many `[[server]]` blocks as you need. Use **Hamburger → Open Config** to edit it in your system editor and **Hamburger → Reload Config** to apply changes without restarting.
+Use **Hamburger → Open Config** to edit it in your system editor and **Hamburger → Reload Config** to apply changes without restarting. Add as many `[[server]]` blocks as you need.
 
 ### SASL Authentication
 

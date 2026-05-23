@@ -45,8 +45,14 @@ func NewApp() *App {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 
-	// Ensure user theme directory exists so users know where to drop custom themes.
+	// Ensure user config and theme directories exist.
 	os.MkdirAll(filepath.Join(config.Dir(), "themes"), 0o755)
+
+	// Bootstrap config on first launch so users get linuxdojo.org pre-configured.
+	cfgPath := filepath.Join(config.Dir(), "config.toml")
+	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
+		os.WriteFile(cfgPath, configExample, 0o644)
+	}
 
 	cfg, err := config.Load()
 	if err != nil {

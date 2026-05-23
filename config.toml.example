@@ -1,116 +1,37 @@
 # DojoIRC Configuration
-# Copy this file to ~/.config/dojoirc/config.toml and edit to taste.
-# All sections are optional — DojoIRC will use defaults for anything not set.
+# Edit this file and use Hamburger → Reload Config to apply changes.
+# Full reference: https://github.com/joehonkey/DojoIRC/blob/main/docs/configuration.md
 
 # ── Appearance ────────────────────────────────────────────────────────────────
 
-# Name of the theme file to load from your themes/ directory (no .toml needed)
-theme = "default"
-
-# Font used in the message buffer and input bar
-font = "IBM Plex Mono"
+theme     = "default"       # theme name from themes/ (no .toml extension)
+font      = "IBM Plex Mono"
 font_size = 13
 
-# ── Behaviour ─────────────────────────────────────────────────────────────────
-
-[behaviour]
-# Hide to system tray when window is closed instead of quitting
-tray = true
-
-# Show a desktop notification when your nick is mentioned
-notifications = true
-
-# Play a sound on mention (path to audio file, or leave commented for silent)
-# mention_sound = "~/.config/dojoirc/sounds/mention.wav"
-
-# How many messages to keep in memory per buffer before trimming
-scrollback = 5000
-
-# Automatically reconnect on disconnect
-auto_reconnect = true
-reconnect_delay = 10  # seconds before reconnect attempt
-
 # ── Servers ───────────────────────────────────────────────────────────────────
-# Add one [[server]] block per IRC network. You can have as many as you want.
+# Add one [[server]] block per IRC network.
 
 [[server]]
-# Friendly name shown in the sidebar
-name = "linuxdojo"
-
-# LinuxDojo.org runs Ergo IRCd — TLS on 6697 only, plain text not accepted
-host = "irc.linuxdojo.org"
-port = 6697
-tls  = true
-
-# Your IRC nickname
-nick = "yournick"
-
-# Alternate nick if your primary is taken
-# alt_nick = "yournick_"
-
-# Ident / username shown in your hostmask
-# ident = "dojoirc"
-
-# Real name shown in /whois
-# realname = "DojoIRC User"
-
-# Channels to auto-join on connect
+name     = "LinuxDojo"
+host     = "irc.linuxdojo.org"
+port     = 6697
+tls      = true
+nick     = "yournick"        # ← change this to your IRC nick
 channels = ["#dojoirc"]
 
-# Optional: auto-identify with NickServ after connect
-# nickserv_password = "yourpassword"
-
-# Optional: SASL authentication (recommended on Ergo — more secure than NickServ)
+# Optional SASL authentication (recommended if you have a registered account):
 # [server.sasl]
-# mechanism = "PLAIN"   # PLAIN or EXTERNAL (EXTERNAL requires a client cert)
-# username = "yournick"
-# password = "yourpassword"
+# mechanism = "PLAIN"
+# username  = "yournick"
+# password  = "yourpassword"
 
-# ── Second server example (commented out) ─────────────────────────────────────
+# ── Additional servers ────────────────────────────────────────────────────────
+# Copy and paste another [[server]] block for each network you want to join.
+
 # [[server]]
-# name = "libera"
-# host = "irc.libera.chat"
-# port = 6697
-# tls  = true
-# nick = "yournick"
-# channels = ["#linux", "#go-nuts"]
-
-# ── Commands ──────────────────────────────────────────────────────────────────
-
-[commands]
-# /exec runs a shell command and sends the first line of output as a message.
-# Disabled by default for safety — enable only if you want this feature.
-[commands.exec]
-enabled = false
-timeout = 5           # seconds before the command is killed
-max_output_bytes = 512 # cap on output length sent to channel
-
-# Script aliases: map a short /command to a shell script or program.
-# The output of the script is sent as your message in the current buffer.
-# Requires commands.exec.enabled = true
-#
-# Usage: type /music in any channel to run the command below
-[commands.aliases]
-# music   = "playerctl metadata --format 'Now playing: {{ artist }} - {{ title }}'"
-# sysinfo = "uname -srm"
-# weather = "curl -s wttr.in/?format=3"
-# uptime  = "uptime -p"
-
-# ── Highlights ────────────────────────────────────────────────────────────────
-
-[highlights]
-# Words or phrases that trigger a mention highlight (in addition to your nick)
-# Case-insensitive. Your nick is always included automatically.
-# keywords = ["dojoirc", "important", "urgent"]
-
-# ── Logging ───────────────────────────────────────────────────────────────────
-
-[logging]
-# Save message history to disk
-enabled = false
-
-# Where to save logs — supports ~ for home directory
-# directory = "~/.local/share/dojoirc/logs"
-
-# Log format: "text" (plain) or "json" (structured)
-# format = "text"
+# name     = "Libera"
+# host     = "irc.libera.chat"
+# port     = 6697
+# tls      = true
+# nick     = "yournick"
+# channels = ["#linux"]
