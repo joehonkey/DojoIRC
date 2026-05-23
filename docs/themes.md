@@ -12,7 +12,7 @@ Open the theme picker via **Hamburger → Theme picker**. Themes are listed alph
 
 ## Theme gallery
 
-54 themes are included out of the box. Browse them with color swatches: **[Theme Gallery](themes-gallery.md)**
+55 themes are included out of the box. Browse them with color swatches: **[Theme Gallery](themes-gallery.md)**
 
 ## Bundled themes
 

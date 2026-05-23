@@ -5,6 +5,7 @@
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
     <img src="https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go" alt="Go 1.21+">
     <img src="https://img.shields.io/badge/IRCv3-supported-blueviolet" alt="IRCv3">
+    <img src="https://img.shields.io/badge/FreeBSD-confirmed-AB2B28?logo=freebsd" alt="FreeBSD">
   </p>
 
   <br>
@@ -40,6 +41,13 @@
           <sub>.tar.gz · Apple Silicon</sub>
         </a>
       </td>
+      <td align="center">
+        <a href="docs/building.md#freebsd">
+          <img src="build/icons/DojoIRC-Main.png" width="72" alt="FreeBSD"><br>
+          <b>FreeBSD</b><br>
+          <sub>build from source</sub>
+        </a>
+      </td>
     </tr>
   </table>
 
@@ -48,7 +56,7 @@
   <br>
 
   <a href="docs/themes-gallery.md">
-    <img src="https://img.shields.io/badge/54%20Themes-Browse%20Gallery-cba6f7?style=for-the-badge" alt="Browse Theme Gallery">
+    <img src="https://img.shields.io/badge/55%20Themes-Browse%20Gallery-cba6f7?style=for-the-badge" alt="Browse Theme Gallery">
   </a>
 </div>
 
@@ -56,7 +64,7 @@
 
 ## Documentation
 
-**[Installation](docs/installation.md)** — [Configuration](docs/configuration.md) — [Commands](docs/commands.md) — [Keyboard Shortcuts](docs/keyboard-shortcuts.md) — [Themes](docs/themes.md) — [**Theme Gallery (54 themes)**](docs/themes-gallery.md) — [Font Sizes](docs/font-sizes.md) — [IRCv3](docs/ircv3.md) — [Building from Source](docs/building.md)
+**[Installation](docs/installation.md)** — [Configuration](docs/configuration.md) — [Commands](docs/commands.md) — [Keyboard Shortcuts](docs/keyboard-shortcuts.md) — [Themes](docs/themes.md) — [**Theme Gallery (55 themes)**](docs/themes-gallery.md) — [Font Sizes](docs/font-sizes.md) — [IRCv3](docs/ircv3.md) — [Building from Source](docs/building.md)
 
 ---
 
@@ -64,10 +72,23 @@
 
 DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wails.io). The backend is a full IRC engine in Go; the frontend is HTML/CSS/JS rendered in a webkit2gtk webview. Inspired by Halloy, built without restrictions.
 
-- **IRC engine** — TLS, SASL PLAIN, multi-server, auto-reconnect, ignore list
+- **IRC engine** — TLS, SASL PLAIN, NickServ identify, multi-server, auto-reconnect, ignore list, message logging
 - **IRCv3** — `message-tags`, `draft/typing`, `server-time`, `away-notify`, CAP LS 302 multiline negotiation
-- **Theming** — Catppuccin Mocha default, live switching, custom TOML themes
-- **Desktop integration** — system tray, OS notifications, URL previews
+- **Theming** — 55 themes, Catppuccin Mocha default, live switching, custom TOML themes
+- **Desktop integration** — system tray, OS notifications, URL preview cards
+- **Bouncer support** — ZNC and soju via `password` field in config
+- **Cross-platform** — Linux, Windows, macOS, FreeBSD (confirmed on FreeBSD 15 / KDE Plasma 6)
+
+---
+
+## Platform Support
+
+| Platform | Status | Notes |
+|---|---|---|
+| **Linux** | ✅ Pre-built binary | Requires `webkit2gtk-4.1`. KDE Wayland: run with `GDK_BACKEND=x11` |
+| **Windows** | ✅ Pre-built binary | Requires WebView2 (ships with Windows 10/11) |
+| **macOS** | ✅ Pre-built binary | Apple Silicon (arm64). Intel: build from source |
+| **FreeBSD** | ✅ Build from source | Confirmed on FreeBSD 15 / KDE Plasma 6. Requires patched Wails v2 — see [building guide](docs/building.md#freebsd) |
 
 ---
 
@@ -87,13 +108,13 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | **Typing indicators** | IRCv3 `draft/typing` — outgoing debounced, incoming shown above input |
 | **URL previews** | Open Graph metadata cards and inline images loaded below links |
 | **Nick colorization** | Consistent hash-based color per nick across all buffers |
-| **Tab completion** | Nicks (cycles, adds `: ` at line start) and slash commands |
+| **Tab completion** | Nicks (cycles, adds `: ` at line start), slash commands, `:emoji` shortcodes |
 | **Theme picker** | Scrollable A–Z list, live switching, choice persisted to config |
 | **Draggable panels** | Sidebar and nick list resize handles with width persistence |
 | **DM windows** | Click any nick to open a private buffer; right-click to close |
 | **Server buffer** | MOTD, connection events, WHOIS output per server |
 | **Context menus** | Right-click channels to leave, servers to connect/disconnect |
-| **In-app docs** | Full documentation panel via Hamburger → Documentation |
+| **In-app docs** | Full searchable documentation panel via Hamburger → Documentation |
 | **About panel** | Hamburger → About DojoIRC — app icon, version, stack, IRCv3 caps, GitHub link |
 | **Channel list** | `/list` streams all public channels with user counts and topics; filter and click to join |
 | **Away status** | `/away` and `/back` toggle an **away** badge in the input bar; `away-notify` tracks other users |
@@ -101,8 +122,9 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | **Message search** | Ctrl+F opens an in-buffer search bar; matching messages stay bright, others dim |
 | **Keyboard shortcuts** | Alt+↑↓ navigate channels, Alt+←→ switch servers, Ctrl+F search, Escape close |
 | **Scrollback limit** | Configurable per session (`scrollback` in `[behaviour]`); default 5000 messages per buffer |
-| **Emoji** | 😊 button opens a picker (7 categories, ~175 emoji, live search); `:shortcode:` converts on send; Tab completes `:word` |
+| **Emoji** | 😊 button opens a picker (7 categories, ~175 emoji, live search); `:shortcode:` converts on send; Tab completes `:word`; button toggleable from hamburger menu |
 | **Input history** | Up/Down arrows in the message input cycle through previously sent messages |
+| **Message logging** | All messages logged to `~/.config/dojoirc/logs/<server>/<channel>.log` automatically |
 
 ---
 
@@ -114,12 +136,12 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | `draft/typing` | **Done** — outgoing TAGMSG typing indicators (debounced); incoming shown above input |
 | `sasl` | **Done** — SASL PLAIN; EXTERNAL planned |
 | `server-time` | **Done** — server-supplied timestamps used when available |
+| `away-notify` | **Done** — AWAY messages tracked; 305/306 update the away badge in the input bar |
 | `batch` | Planned |
 | `labeled-response` | Planned |
 | `multi-prefix` | Planned |
 | `extended-join` | Planned |
 | `account-notify` | Planned |
-| `away-notify` | **Done** — AWAY messages tracked; 305/306 update the away badge in the input bar |
 | `invite-notify` | Planned |
 | `chghost` | Planned |
 | `userhost-in-names` | Planned |
@@ -208,7 +230,7 @@ DojoIRC identifies automatically after the server's MOTD completes.
 
 ### Themes
 
-Switch themes via **Hamburger → Theme picker**. 54 themes included: Dracula, Nord, Gruvbox, One Dark, Tokyo Night, Catppuccin, Rose Piné, Kanagawa, Solarized, Cyberpunk, Matrix, and more.
+Switch themes via **Hamburger → Theme picker**. 55 themes included: Dracula, Nord, Gruvbox, One Dark, Tokyo Night, Catppuccin, Rose Piné, Kanagawa, Solarized, Cyberpunk, Matrix, Vira Carbon, and more.
 
 Browse all themes with color swatches: **[Theme Gallery](docs/themes-gallery.md)**
 
@@ -237,7 +259,7 @@ Drop a `.toml` file in `~/.config/dojoirc/themes/` to add your own — it appear
 | `/invite <nick>` | Invite a user to the channel |
 | `/raw <line>` | Send a raw IRC protocol line |
 | `/clear` | Clear the current buffer |
-| `/sysinfo` | Post OS, kernel, CPU and RAM info |
+| `/sysinfo` | Post OS, kernel, CPU and RAM info to the channel |
 | `/quit [message]` | Disconnect from the server |
 | `/help` | Show command list in buffer |
 
@@ -261,14 +283,9 @@ Tab-completes nicks and commands. Press Tab repeatedly to cycle through matches.
 
 ## Building from Source
 
-### Requirements
+### Linux / macOS / Windows
 
-- Go 1.21+
-- [Wails v2](https://wails.io): `go install github.com/wailsapp/wails/v2/cmd/wails@latest`
-- Node.js 18+
-- **Linux:** `webkit2gtk-4.1` (not 4.0)
-
-### Build
+**Requirements:** Go 1.21+, Node.js 18+, [Wails v2](https://wails.io), and `webkit2gtk-4.1` on Linux.
 
 ```bash
 git clone https://github.com/joehonkey/DojoIRC
@@ -278,6 +295,10 @@ cp -r themes build/bin/
 ```
 
 Binary lands at `build/bin/DojoIRC`.
+
+### FreeBSD
+
+Confirmed working on **FreeBSD 15 / KDE Plasma 6**. Upstream Wails v2 does not support FreeBSD — a patched local clone is required. Full step-by-step instructions including `pkg install` dependencies, PATH setup, Wails patching, and build flags: **[FreeBSD Build Guide](docs/building.md#freebsd)**
 
 ### Run on KDE Wayland
 
