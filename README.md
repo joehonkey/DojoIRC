@@ -29,6 +29,18 @@
       </td>
     </tr>
   </table>
+
+  <br>
+
+  <a href="https://github.com/joehonkey/DojoIRC/releases/latest">
+    <img src="https://img.shields.io/github/v/release/joehonkey/DojoIRC?label=Download&style=for-the-badge&color=89b4fa" alt="Download latest release">
+  </a>
+
+  <p>
+    <a href="https://github.com/joehonkey/DojoIRC/releases/latest">Linux (x86_64)</a> &nbsp;·&nbsp;
+    <a href="https://github.com/joehonkey/DojoIRC/releases/latest">Windows (x86_64)</a> &nbsp;·&nbsp;
+    <a href="https://github.com/joehonkey/DojoIRC/releases/latest">macOS (arm64)</a>
+  </p>
 </div>
 
 ---
