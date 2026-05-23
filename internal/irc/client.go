@@ -2,6 +2,7 @@ package irc
 
 import (
 	"crypto/tls"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net"
@@ -27,15 +28,15 @@ type Client struct {
 	conn   net.Conn
 	irc    *ircp.Client
 	emit   func(Event)
+	quitCh chan struct{}
 }
 
 func NewClient(server config.Server, emit func(Event)) *Client {
-	return &Client{server: server, emit: emit}
+	return &Client{server: server, emit: emit, quitCh: make(chan struct{})}
 }
 
-func (c *Client) Connect() error {
+func (c *Client) dial() error {
 	addr := fmt.Sprintf("%s:%d", c.server.Host, c.server.Port)
-
 	var err error
 	if c.server.TLS {
 		c.conn, err = tls.Dial("tcp", addr, &tls.Config{ServerName: c.server.Host})
@@ -45,28 +46,61 @@ func (c *Client) Connect() error {
 	if err != nil {
 		return fmt.Errorf("dial: %w", err)
 	}
-
 	// Kick off CAP negotiation before the library sends NICK/USER.
-	// Ergo will hold 001 until we send CAP END.
 	fmt.Fprintf(c.conn, "CAP LS 302\r\n")
-
-	cfg := ircp.ClientConfig{
+	c.irc = ircp.NewClient(c.conn, ircp.ClientConfig{
 		Nick:    c.server.Nick,
 		User:    c.server.Nick,
 		Name:    c.server.Nick,
 		Handler: ircp.HandlerFunc(c.handle),
-	}
-
-	c.irc = ircp.NewClient(c.conn, cfg)
-
-	go func() {
-		if err := c.irc.Run(); err != nil {
-			log.Printf("[%s] disconnected: %v", c.server.Name, err)
-			c.emit(Event{Server: c.server.Name, Type: "disconnected"})
-		}
-	}()
-
+	})
 	return nil
+}
+
+func (c *Client) Connect() error {
+	if err := c.dial(); err != nil {
+		return err
+	}
+	go c.runLoop()
+	return nil
+}
+
+func (c *Client) runLoop() {
+	for {
+		err := c.irc.Run()
+
+		// Check if we quit intentionally before doing anything else.
+		select {
+		case <-c.quitCh:
+			return
+		default:
+		}
+
+		if err != nil {
+			log.Printf("[%s] disconnected: %v", c.server.Name, err)
+		}
+		c.emit(Event{Server: c.server.Name, Type: "disconnected"})
+
+		// Reconnect loop — retry every 10s until success or quit.
+		for {
+			c.emit(Event{Server: c.server.Name, Type: "server", Channel: "server",
+				Text: "Reconnecting in 10s..."})
+			select {
+			case <-c.quitCh:
+				return
+			case <-time.After(10 * time.Second):
+			}
+
+			if err := c.dial(); err != nil {
+				log.Printf("[%s] reconnect failed: %v", c.server.Name, err)
+				continue
+			}
+			log.Printf("[%s] reconnected", c.server.Name)
+			c.emit(Event{Server: c.server.Name, Type: "server", Channel: "server",
+				Text: "Reconnected."})
+			break
+		}
+	}
 }
 
 func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
@@ -81,10 +115,61 @@ func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 		}
 		switch msg.Params[1] {
 		case "LS":
-			client.Write("CAP REQ :message-tags")
+			// Params: [nick, "LS", caps] or [nick, "LS", "*", caps] (multiline 302)
+			caps := ""
+			if len(msg.Params) >= 4 && msg.Params[2] == "*" {
+				caps = msg.Params[3]
+			} else if len(msg.Params) >= 3 {
+				caps = msg.Params[2]
+			}
+			req := "message-tags"
+			if c.server.SASL != nil && strings.EqualFold(c.server.SASL.Mechanism, "PLAIN") &&
+				strings.Contains(caps, "sasl") {
+				req += " sasl"
+			}
+			client.Write("CAP REQ :" + req)
 		case "ACK":
-			client.Write("CAP END")
+			acked := ""
+			if len(msg.Params) >= 3 {
+				acked = msg.Params[2]
+			}
+			if strings.Contains(acked, "sasl") && c.server.SASL != nil {
+				client.Write("AUTHENTICATE PLAIN")
+				// CAP END sent after 903/904 — not here
+			} else {
+				client.Write("CAP END")
+			}
 		}
+
+	case "AUTHENTICATE":
+		if len(msg.Params) < 1 || msg.Params[0] != "+" {
+			return
+		}
+		sasl := c.server.SASL
+		if sasl == nil {
+			client.Write("CAP END")
+			return
+		}
+		payload := base64.StdEncoding.EncodeToString(
+			[]byte("\x00" + sasl.Username + "\x00" + sasl.Password),
+		)
+		client.Write("AUTHENTICATE " + payload)
+
+	case "903": // SASL success
+		text := "SASL authentication successful"
+		if len(msg.Params) > 1 {
+			text = msg.Params[len(msg.Params)-1]
+		}
+		c.emit(Event{Server: srv, Type: "server", Channel: "server", Text: text, Time: now})
+		client.Write("CAP END")
+
+	case "904", "905": // SASL failure
+		text := "SASL authentication failed"
+		if len(msg.Params) > 1 {
+			text = msg.Params[len(msg.Params)-1]
+		}
+		c.emit(Event{Server: srv, Type: "server", Channel: "server", Text: text, Time: now})
+		client.Write("CAP END")
 
 	case "TAGMSG":
 		if len(msg.Params) < 1 {
@@ -288,6 +373,12 @@ func (c *Client) Raw(line string) {
 func (c *Client) Quit(reason string) {
 	if reason == "" {
 		reason = "DojoIRC"
+	}
+	// Signal runLoop to stop reconnecting before closing the connection.
+	select {
+	case <-c.quitCh:
+	default:
+		close(c.quitCh)
 	}
 	if c.conn == nil {
 		return

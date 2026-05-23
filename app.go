@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -43,29 +44,19 @@ func NewApp() *App {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 
+	// Ensure user theme directory exists so users know where to drop custom themes.
+	os.MkdirAll(filepath.Join(config.Dir(), "themes"), 0o755)
+
 	cfg, err := config.Load()
 	if err != nil {
 		log.Printf("config error: %v", err)
 	}
 	a.cfg = cfg
 
-	// Give the webview time to initialize before connecting so events aren't lost
+	// Give the webview time to initialize before connecting so events aren't lost.
+	// Uses connectNewServers so JS boot's ReloadConfig() call can't race and double-connect.
 	time.AfterFunc(1500*time.Millisecond, func() {
-		for _, srv := range cfg.Servers {
-			s := srv
-			client := irc.NewClient(s, func(ev irc.Event) {
-				if ev.Type == "names" {
-					a.updateNicklist(ev.Server, ev.Channel, ev.Text)
-				}
-				runtime.EventsEmit(ctx, "irc:event", ev)
-			})
-			if err := client.Connect(); err != nil {
-				log.Printf("failed to connect to %s: %v", s.Name, err)
-				continue
-			}
-			a.clients[s.Name] = client
-			log.Printf("connecting to %s...", s.Name)
-		}
+		a.connectNewServers(cfg)
 	})
 }
 
@@ -191,6 +182,52 @@ func (a *App) BrowserOpen(url string) {
 	}
 }
 
+// DisconnectServer sends QUIT to a server and removes it from the client map.
+func (a *App) DisconnectServer(name string) {
+	a.mu.Lock()
+	c, ok := a.clients[name]
+	if ok {
+		delete(a.clients, name)
+	}
+	a.mu.Unlock()
+	if ok {
+		c.Quit("")
+	}
+}
+
+// ConnectServer connects to a server by name using the current config.
+func (a *App) ConnectServer(name string) {
+	if a.cfg == nil {
+		return
+	}
+	a.mu.RLock()
+	_, already := a.clients[name]
+	a.mu.RUnlock()
+	if already {
+		return
+	}
+	for _, srv := range a.cfg.Servers {
+		if srv.Name != name {
+			continue
+		}
+		s := srv
+		client := irc.NewClient(s, func(ev irc.Event) {
+			if ev.Type == "names" {
+				a.updateNicklist(ev.Server, ev.Channel, ev.Text)
+			}
+			runtime.EventsEmit(a.ctx, "irc:event", ev)
+		})
+		if err := client.Connect(); err != nil {
+			log.Printf("failed to connect to %s: %v", s.Name, err)
+			return
+		}
+		a.mu.Lock()
+		a.clients[s.Name] = client
+		a.mu.Unlock()
+		return
+	}
+}
+
 // shutdown gracefully disconnects all IRC servers then quits the app.
 func (a *App) shutdown() {
 	a.mu.RLock()
@@ -237,15 +274,46 @@ func (a *App) uiConfig() UIConfig {
 	return UIConfig{ThemeName: name, Theme: c, Font: font, FontSize: size}
 }
 
-// ReloadConfig re-reads config.toml from disk and returns updated UI settings.
+// ReloadConfig re-reads config.toml from disk, connects any new servers, and returns updated UI settings.
 func (a *App) ReloadConfig() UIConfig {
 	cfg, err := config.Load()
 	if err != nil {
 		log.Printf("reload config: %v", err)
 	} else {
 		a.cfg = cfg
+		a.connectNewServers(cfg)
 	}
 	return a.uiConfig()
+}
+
+func (a *App) connectNewServers(cfg *config.Config) {
+	a.mu.RLock()
+	connected := make(map[string]bool, len(a.clients))
+	for name := range a.clients {
+		connected[name] = true
+	}
+	a.mu.RUnlock()
+
+	for _, srv := range cfg.Servers {
+		if connected[srv.Name] {
+			continue
+		}
+		s := srv
+		client := irc.NewClient(s, func(ev irc.Event) {
+			if ev.Type == "names" {
+				a.updateNicklist(ev.Server, ev.Channel, ev.Text)
+			}
+			runtime.EventsEmit(a.ctx, "irc:event", ev)
+		})
+		if err := client.Connect(); err != nil {
+			log.Printf("failed to connect to %s: %v", s.Name, err)
+			continue
+		}
+		a.mu.Lock()
+		a.clients[s.Name] = client
+		a.mu.Unlock()
+		log.Printf("connecting to %s...", s.Name)
+	}
 }
 
 // SaveTheme writes the chosen theme name back into config.toml so it persists.
@@ -345,6 +413,83 @@ func openInEditor(path string) {
 	exec.Command("xdg-open", path).Start()
 }
 
+// GetSysInfo returns a one-line system info string for /sysinfo.
+func (a *App) GetSysInfo() string {
+	os := sysInfoOS()
+	cpu := sysInfoCPU()
+	ram := sysInfoRAM()
+	kernel := sysInfoKernel()
+	return fmt.Sprintf("[sysinfo] OS: %s | Kernel: %s | CPU: %s | RAM: %s", os, kernel, cpu, ram)
+}
+
+func sysInfoOS() string {
+	data, err := os.ReadFile("/etc/os-release")
+	if err != nil {
+		return "Unknown"
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		if strings.HasPrefix(line, "PRETTY_NAME=") {
+			return strings.Trim(strings.TrimPrefix(line, "PRETTY_NAME="), `"`)
+		}
+	}
+	return "Linux"
+}
+
+func sysInfoCPU() string {
+	data, err := os.ReadFile("/proc/cpuinfo")
+	if err != nil {
+		return "Unknown"
+	}
+	name := ""
+	threads := 0
+	for _, line := range strings.Split(string(data), "\n") {
+		if strings.HasPrefix(line, "model name") && name == "" {
+			parts := strings.SplitN(line, ":", 2)
+			if len(parts) == 2 {
+				name = strings.TrimSpace(parts[1])
+			}
+		}
+		if strings.HasPrefix(line, "processor") {
+			threads++
+		}
+	}
+	if name == "" {
+		return "Unknown"
+	}
+	return fmt.Sprintf("%s (%d threads)", name, threads)
+}
+
+func sysInfoRAM() string {
+	data, err := os.ReadFile("/proc/meminfo")
+	if err != nil {
+		return "Unknown"
+	}
+	var total, available uint64
+	for _, line := range strings.Split(string(data), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) < 2 {
+			continue
+		}
+		val, _ := strconv.ParseUint(fields[1], 10, 64)
+		switch fields[0] {
+		case "MemTotal:":
+			total = val
+		case "MemAvailable:":
+			available = val
+		}
+	}
+	used := total - available
+	return fmt.Sprintf("%.1f/%.0fGB", float64(used)/1024/1024, float64(total)/1024/1024)
+}
+
+func sysInfoKernel() string {
+	out, err := exec.Command("uname", "-r").Output()
+	if err != nil {
+		return "Unknown"
+	}
+	return strings.TrimSpace(string(out))
+}
+
 // ReadClipboard reads the system clipboard via the Wails runtime.
 func (a *App) ReadClipboard() string {
 	text, err := runtime.ClipboardGetText(a.ctx)
@@ -356,6 +501,21 @@ func (a *App) ReadClipboard() string {
 
 // AppQuit gracefully disconnects and quits the application.
 func (a *App) AppQuit() {
+	a.quitting = true
+	go func() {
+		a.shutdown()
+		runtime.Quit(a.ctx)
+	}()
+}
+
+// RestartApp relaunches the binary and exits the current process.
+func (a *App) RestartApp() {
+	exe, err := os.Executable()
+	if err != nil {
+		log.Printf("restart: %v", err)
+		return
+	}
+	exec.Command(exe, os.Args[1:]...).Start()
 	a.quitting = true
 	go func() {
 		a.shutdown()

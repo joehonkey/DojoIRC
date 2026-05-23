@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"embed"
 	"os"
+	"sync"
 
 	"github.com/joehonkey/dojoire/internal/tray"
 	"github.com/wailsapp/wails/v2"
@@ -13,6 +14,28 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/linux"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
+
+var (
+	winX, winY   int
+	winPosSaved  bool
+	winPosMu     sync.Mutex
+)
+
+func saveWinPos(ctx context.Context) {
+	x, y := runtime.WindowGetPosition(ctx)
+	winPosMu.Lock()
+	winX, winY, winPosSaved = x, y, true
+	winPosMu.Unlock()
+}
+
+func restoreWinPos(ctx context.Context) {
+	winPosMu.Lock()
+	x, y, ok := winX, winY, winPosSaved
+	winPosMu.Unlock()
+	if ok {
+		runtime.WindowSetPosition(ctx, x, y)
+	}
+}
 
 //go:embed all:frontend/dist
 var assets embed.FS
@@ -33,11 +56,13 @@ func main() {
 		OnShow: func() {
 			if app.ctx != nil {
 				runtime.WindowShow(app.ctx)
+				restoreWinPos(app.ctx)
 				tray.SetVisible(true)
 			}
 		},
 		OnHide: func() {
 			if app.ctx != nil {
+				saveWinPos(app.ctx)
 				runtime.WindowHide(app.ctx)
 				tray.SetVisible(false)
 			}
@@ -62,12 +87,14 @@ func main() {
 			if app.quitting {
 				return false
 			}
+			saveWinPos(ctx)
 			runtime.WindowHide(app.ctx)
 			tray.SetVisible(false)
 			return true
 		},
 		Linux: &linux.Options{
-			Icon: appIcon,
+			Icon:        appIcon,
+			ProgramName: "dojoirc",
 		},
 		Bind: []interface{}{app},
 	})
