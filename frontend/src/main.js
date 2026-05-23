@@ -614,8 +614,8 @@ function render() {
         <span id="buffer-title">${state.activeChannel || 'DojoIRC'}</span>
         ${ch?.modes ? `<span id="buffer-modes">${escapeHtml(ch.modes)}</span>` : ''}
         ${ch?.topic ? `<button id="topic-toggle" class="${state.topicVisible ? 'active' : ''}" title="${state.topicVisible ? 'Hide topic' : 'Show topic'}">topic</button>` : ''}
-        ${ch?.topic && state.topicVisible ? `<span id="buffer-topic">${escapeHtml(ch.topic)}</span>` : ''}
       </div>
+      ${ch?.topic && state.topicVisible ? `<div id="buffer-topic">${renderText(ch.topic)}</div>` : ''}
       <div id="content">
         <div id="messages" data-channel="${state.activeServer}/${state.activeChannel}">${renderMessages()}</div>
         ${isServerBuf ? '' : `<div id="nicklist-handle" title="Drag to resize"></div><div id="nicklist" style="width:${state.nicklistWidth}px">${renderNicklist()}</div>`}
@@ -630,6 +630,9 @@ function render() {
   bindEvents();
   if (atBottom) { scrollToBottom(); setTimeout(scrollToBottom, 0); }
   bindLinkPreviews();
+  document.querySelectorAll('#buffer-topic a.msg-link').forEach(a => {
+    a.addEventListener('click', e => { e.preventDefault(); BrowserOpen(a.dataset.url).catch(() => {}); });
+  });
   renderTypingBar();
 }
 
