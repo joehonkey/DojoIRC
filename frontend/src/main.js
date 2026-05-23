@@ -1121,7 +1121,7 @@ function showAbout() {
           <img src="${DOJOIRC_ICON}" alt="DojoIRC" style="width:80px;height:80px;border-radius:16px;display:block;margin:0 auto 10px">
           <div style="font-size:12px;color:var(--text-dim)">IRC client for LinuxDojo.org</div>
           <div style="margin-top:16px;display:inline-block;background:var(--bg-sidebar);border:1px solid var(--border);border-radius:4px;padding:6px 18px;font-size:13px">
-            Version <strong>v0.3.0</strong>
+            Version <strong>v0.3.1</strong>
           </div>
         </div>
         <table style="width:100%;border-collapse:collapse;font-size:12px">
