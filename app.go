@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	_ "embed"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
@@ -476,6 +477,10 @@ func openInEditor(path string) {
 	}
 
 	exec.Command("xdg-open", path).Start()
+}
+
+func (a *App) GetAppIcon() string {
+	return "data:image/png;base64," + base64.StdEncoding.EncodeToString(appIcon)
 }
 
 // GetSysInfo returns a one-line system info string for /sysinfo.

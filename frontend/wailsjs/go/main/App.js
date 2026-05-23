@@ -38,6 +38,10 @@ export function GetServers() {
   return window['go']['main']['App']['GetServers']();
 }
 
+export function GetAppIcon() {
+  return window['go']['main']['App']['GetAppIcon']();
+}
+
 export function GetSysInfo() {
   return window['go']['main']['App']['GetSysInfo']();
 }

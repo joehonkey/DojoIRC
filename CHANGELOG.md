@@ -1,5 +1,28 @@
 # DojoIRC Changelog
 
+## Session 15 — 2026-05-23 (per-platform icons + Extra Icons gallery)
+
+### What Was Built
+- **Per-platform app icons via Go build tags** — `appicon_linux.go`, `appicon_windows.go`, `appicon_darwin.go`, `appicon_freebsd.go` each embed the correct OS-mascot icon (Tux / Windows / Apple mascot / BSD Beastie) at compile time. `build/appicon.png` is now only used by Linux.
+- **Per-platform system tray icons** — same build-tag approach for `internal/tray/`. Each platform embeds its own 32×32 icon. FreeBSD tray shows the BSD devil, not Tux.
+- **In-app about icon from Go runtime** — added `GetAppIcon()` method on `App` that returns `base64(appIcon)` as a data URI. Frontend calls it at boot so the About panel shows the correct platform icon instead of the hardcoded Tux.
+- **Extra Icons section in README** — 20 community icon variants added to `build/icons/extras/` and displayed in the GitHub README in four groups: Platform Icons, Multi-Platform, Torii Gate, Dojo Style.
+- **FreeBSD app icon** — `build/freebsd/appicon.png` is the FreeBSD-specific icon. `appicon_freebsd.go` embeds it; rebuilding natively on FreeBSD now uses Beastie throughout (window, tray, about panel).
+
+### Files Changed
+- `appicon_linux.go`, `appicon_windows.go`, `appicon_darwin.go`, `appicon_freebsd.go` (new)
+- `internal/tray/icon_linux.go`, `icon_windows.go`, `icon_darwin.go`, `icon_freebsd.go` (new)
+- `internal/tray/icon_windows.png`, `icon_darwin.png`, `icon_freebsd.png` (new)
+- `internal/tray/tray.go` — removed hardcoded embed, now in platform files
+- `main.go` — removed hardcoded `//go:embed build/appicon.png`
+- `app.go` — added `GetAppIcon()` returning base64 data URI
+- `frontend/wailsjs/go/main/App.js` — added `GetAppIcon` binding
+- `frontend/src/main.js` — `DOJOIRC_ICON` now fetched at boot via `GetAppIcon()`
+- `build/icons/extras/` — 20 icon PNG files
+- `README.md` — Extra Icons section
+
+---
+
 ## Session 14 — 2026-05-23 (bouncer support)
 
 ### What Was Built
