@@ -114,14 +114,14 @@
 - [ ] Plugin/script hooks (shell scripts on events)
 
 ## Stage 6 — Platform Polish
-- [ ] FreeBSD system tray via D-Bus/ksni
+- [x] FreeBSD build confirmed working — system tray, WebKit frontend, all features (requires patched Wails v2; see docs/building.md)
+- [ ] FreeBSD port skeleton (official ports tree submission)
 - [ ] macOS native notifications
 - [ ] Windows toast notifications
 - [x] .desktop file installer (Linux)
 - [ ] macOS .app bundle
 - [ ] Windows installer (NSIS, already scaffolded by Wails)
 - [ ] Flatpak / AppImage (Linux distribution)
-- [ ] FreeBSD port skeleton
 - [x] GitHub Actions CI (build matrix: linux/windows/macos; v* tag triggers release with platform artifacts)
 - [ ] Auto-update check
 

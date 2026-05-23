@@ -287,7 +287,7 @@ Project scaffold, IRC engine, UI layout, system tray, themes, multi-server, slas
 Bouncer support (ZNC/soju), SOCKS5 proxy, mTLS, split view, drag-to-reorder, flood protection, plugin hooks.
 
 **Stage 6 — Platform Polish**  
-~~GitHub Actions CI~~ ✅ — remaining: Flatpak/AppImage, .app bundle, Windows installer, FreeBSD port, auto-update.
+~~GitHub Actions CI~~ ✅ ~~FreeBSD build~~ ✅ (patched Wails v2; system tray + full UI confirmed on FreeBSD 15 / KDE Plasma 6) — remaining: FreeBSD port skeleton, Flatpak/AppImage, .app bundle, Windows installer, auto-update.
 
 See [ROADMAP.md](ROADMAP.md) for the full detailed list.
 

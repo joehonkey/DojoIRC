@@ -55,6 +55,100 @@ GDK_BACKEND=x11 ./build/bin/DojoIRC
 
 ---
 
+## FreeBSD
+
+DojoIRC builds and runs on FreeBSD 15+ (amd64). The system tray, WebKit frontend, and all features work identically to Linux. The GTK/WebKit2GTK layer is essentially the same between the two platforms.
+
+> **Note:** Wails v2.12.0 has no upstream FreeBSD support. Building requires a locally patched copy of Wails. See [Wails patches](#wails-freebsd-patches) below.
+
+### Package dependencies
+
+```sh
+sudo pkg install go126 webkit2-gtk_41
+```
+
+Node.js is typically already present. If not: `sudo pkg install node`.
+
+Make sure `npm` is reachable — on FreeBSD it may live under corepack:
+
+```sh
+export PATH=$PATH:/usr/local/lib/node_modules/corepack/shims
+```
+
+### Patch and install Wails
+
+Clone Wails and apply the FreeBSD patches from the DojoIRC repo:
+
+```sh
+git clone https://github.com/wailsapp/wails /home/you/wails
+# apply the FreeBSD patches (see docs/freebsd-wails-patches.md for the full list)
+```
+
+Then add a `replace` directive to DojoIRC's `go.mod` so it uses your local patched copy:
+
+```
+replace github.com/wailsapp/wails/v2 => /home/you/wails/v2
+```
+
+Build and install the patched `wails` CLI:
+
+```sh
+cd /home/you/wails/v2/cmd/wails
+go install .
+```
+
+### Build DojoIRC
+
+```sh
+git clone https://github.com/joehonkey/DojoIRC
+cd DojoIRC
+export PATH=$PATH:/usr/local/go126/bin:/usr/local/lib/node_modules/corepack/shims:~/go/bin
+GONOSUMDB='*' GOFLAGS="-mod=mod" wails build -tags webkit2_41
+cp -r themes build/bin/
+```
+
+The `-tags webkit2_41` flag is required on FreeBSD, the same as on Linux.
+
+### Run
+
+```sh
+./build/bin/DojoIRC
+```
+
+No `GDK_BACKEND` or `DISPLAY` overrides are needed. The binary picks up the session's `DISPLAY` automatically. Tested on KDE Plasma 6 / X11 (SDDM + `startplasma-x11`).
+
+### Wails FreeBSD patches
+
+The following changes are required to make Wails v2 build and run on FreeBSD. The GTK/WebKit frontend is reused from the Linux implementation — FreeBSD just needs build-tag and stub additions.
+
+**New files added:**
+
+| File | Purpose |
+|---|---|
+| `internal/system/operatingsystem/os_freebsd.go` | OS info stub |
+| `internal/system/system_freebsd.go` | System discovery stub |
+| `cmd/wails/internal/dev/dev_freebsd.go` | Process group / signal helpers |
+| `internal/frontend/desktop/desktop_freebsd.go` | Routes FreeBSD to the GTK/WebKit frontend |
+| `internal/frontend/desktop/linux/gettid_freebsd.go` | Thread ID via `thr_self` syscall (432) |
+| `pkg/assetserver/webview/request_freebsd.go` | WebKit URI scheme request handler |
+| `pkg/assetserver/webview/responsewriter_freebsd.go` | WebKit URI scheme response writer |
+
+**Existing files patched:**
+
+| File | Change |
+|---|---|
+| `cmd/wails/build.go` | Added `freebsd`, `freebsd/amd64`, `freebsd/arm64` to valid platform list |
+| `pkg/commands/build/packager.go` | Added `freebsd` case (no-op packaging) |
+| `internal/frontend/desktop/linux/*.go` | Build tags changed from `linux` to `linux \|\| freebsd` |
+| `internal/frontend/desktop/linux/window.h` | Added `typedef unsigned long ulong` guard |
+| `internal/frontend/desktop/linux/invoke.go` | Replaced `unix.Gettid()` with local `gettid()` helper |
+| `pkg/assetserver/webview/webkit2_*.go` | Build tags changed to `(linux \|\| freebsd) && ...` |
+| `internal/app/app_default_unix.go` | Added `freebsd` to build constraint |
+| `internal/app/app_preflight_unix.go` | Added `freebsd` to build constraint |
+| `github.com/jaypipes/ghw` (module cache) | Fixed `block_stub.go` — `load()` signature mismatch |
+
+---
+
 ## macOS
 
 ### Build
