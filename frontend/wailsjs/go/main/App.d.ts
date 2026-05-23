@@ -33,6 +33,8 @@ export function GetThemeByName(arg1:string):Promise<theme.Colors>;
 
 export function GetThemeNames():Promise<Array<string>>;
 
+export function GetVersion():Promise<string>;
+
 export function JoinChannel(arg1:string,arg2:string):Promise<void>;
 
 export function ListChannels(arg1:string):Promise<void>;

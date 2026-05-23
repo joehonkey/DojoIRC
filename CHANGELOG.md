@@ -1,5 +1,17 @@
 # DojoIRC Changelog
 
+## Session 20 — 2026-05-23 (v0.4.7 — release checklist + type declarations)
+
+### What Was Added
+- **`RELEASE_CHECKLIST.md`** — comprehensive 7-section checklist covering every doc location that must stay in sync on every release: code & build, in-app docs, docs/ folder, root-level docs, BeeMO, Claude memory, and git/GitHub. Includes a quick-reference table.
+- **`GetVersion` TypeScript declaration** — `App.d.ts` now exports `GetVersion():Promise<string>` so the Wails type bindings are complete.
+
+### Files Changed
+- `RELEASE_CHECKLIST.md` — new file
+- `frontend/wailsjs/go/main/App.d.ts` — added `GetVersion` export
+
+---
+
 ## Session 19 — 2026-05-23 (font manager extended + full docs refresh)
 
 ### What Was Added
