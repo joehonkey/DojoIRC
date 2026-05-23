@@ -36,23 +36,20 @@
 
 ## Stage 2 — Core IRC Features
 - [x] SASL PLAIN authentication
-- [ ] Full IRCv3 capability negotiation (CAP LS 302)
+- [x] WHOIS — /whois command + reply display in server buffer
+- [x] Nick list with op/voice/halfop indicators — live updates on JOIN/PART/QUIT/NICK
+- [x] CTCP — auto-replies to VERSION/PING/TIME; /ctcp command to query others
+- [x] Highlight/mention detection — regex match, red row tint, yellow unread dot
+- [x] Desktop notifications — Web Notifications API on mention
+- [x] Message logging to disk — ~/.config/dojoirc/logs/<server>/<channel>.log
+- [ ] Full IRCv3 CAP LS 302 negotiation (beyond message-tags and sasl)
 - [ ] NickServ identify flow
-- [ ] WHOIS, WHO
 - [ ] Channel modes display
-- [ ] Nick list with op/voice/halfop indicators
 - [ ] Away status
-- [ ] CTCP (VERSION, TIME, PING, ACTION)
-- [ ] DCC SEND — file transfer to/from users (peer-to-peer TCP, in-process listener)
-  - Frontend: drag-and-drop a file or use /dcc send <nick> to trigger
-  - Go: DCC negotiation CTCP, listener goroutine, progress events to UI
-  - Receive: accept prompt, stream to ~/Downloads
+- [ ] DCC SEND — file transfer (peer-to-peer TCP)
 - [ ] DCC chat (basic)
 - [ ] Channel list (/LIST)
 - [ ] Ignore list
-- [ ] Highlight/mention detection + notifications
-- [ ] Desktop notifications (libnotify / OS native)
-- [ ] Message logging to disk
 
 ## Stage 3 — IRCv3 Capabilities
 - [x] `message-tags` — CAP negotiation + inbound tag parsing

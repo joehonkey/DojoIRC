@@ -1,6 +1,8 @@
 package preview
 
 import (
+	"context"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -26,8 +28,31 @@ var imageExts = map[string]bool{
 	".gif": true, ".webp": true, ".svg": true,
 }
 
+// safeDialer resolves hostnames before connecting and rejects any private/loopback IPs.
+var safeDialer = &net.Dialer{Timeout: 5 * time.Second}
+
+func safeDial(ctx context.Context, network, addr string) (net.Conn, error) {
+	host, port, err := net.SplitHostPort(addr)
+	if err != nil {
+		return nil, err
+	}
+	addrs, err := net.DefaultResolver.LookupHost(ctx, host)
+	if err != nil {
+		return nil, err
+	}
+	for _, a := range addrs {
+		if isPrivateIP(net.ParseIP(a)) {
+			return nil, fmt.Errorf("preview: refusing connection to private address %s", a)
+		}
+	}
+	return safeDialer.DialContext(ctx, network, net.JoinHostPort(addrs[0], port))
+}
+
 var client = &http.Client{
 	Timeout: 5 * time.Second,
+	Transport: &http.Transport{
+		DialContext: safeDial,
+	},
 	CheckRedirect: func(req *http.Request, via []*http.Request) error {
 		if len(via) >= 3 {
 			return http.ErrUseLastResponse
@@ -163,6 +188,25 @@ func parseMeta(body string, r *Result) {
 	}
 }
 
+func isPrivateIP(ip net.IP) bool {
+	private := []net.IPNet{}
+	for _, cidr := range []string{
+		"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16",
+		"127.0.0.0/8", "::1/128", "fc00::/7",
+	} {
+		_, block, _ := net.ParseCIDR(cidr)
+		if block != nil {
+			private = append(private, *block)
+		}
+	}
+	for _, block := range private {
+		if block.Contains(ip) {
+			return true
+		}
+	}
+	return false
+}
+
 func isPrivate(host string) bool {
 	if host == "localhost" {
 		return true
@@ -171,15 +215,5 @@ func isPrivate(host string) bool {
 	if ip == nil {
 		return false
 	}
-	private := []string{
-		"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16",
-		"127.0.0.0/8", "::1/128", "fc00::/7",
-	}
-	for _, cidr := range private {
-		_, block, _ := net.ParseCIDR(cidr)
-		if block != nil && block.Contains(ip) {
-			return true
-		}
-	}
-	return false
+	return isPrivateIP(ip)
 }

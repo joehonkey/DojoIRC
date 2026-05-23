@@ -423,7 +423,7 @@ func (c *Client) handleCTCPRequest(client *ircp.Client, from, payload, now, srv 
 	case "VERSION":
 		client.WriteMessage(&ircp.Message{
 			Command: "NOTICE",
-			Params:  []string{from, "\x01VERSION DojoIRC v0.1.0 (https://github.com/joehonkey/DojoIRC)\x01"},
+			Params:  []string{from, "\x01VERSION DojoIRC v0.2.0 (https://github.com/joehonkey/DojoIRC)\x01"},
 		})
 		c.emit(Event{Server: srv, Type: "ctcp", Channel: "server", Nick: from, Text: "CTCP VERSION from " + from, Time: now})
 	case "PING":
