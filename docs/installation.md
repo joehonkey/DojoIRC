@@ -45,19 +45,16 @@ GDK_BACKEND=x11 ./DojoIRC
 
 This forces XWayland rendering and solves the issue.
 
-### Desktop Entry (optional)
+### Desktop Entry
 
-To add DojoIRC to your application launcher:
+A `.desktop` file is included in the release archive. Install it so DojoIRC appears in your application launcher and is recognized by KDE System Monitor:
 
-```ini
-# ~/.local/share/applications/dojoirc.desktop
-[Desktop Entry]
-Name=DojoIRC
-Exec=/path/to/DojoIRC
-Icon=dojoirc
-Type=Application
-Categories=Network;IRCClient;
+```bash
+cp DojoIRC.desktop ~/.local/share/applications/
+update-desktop-database ~/.local/share/applications/
 ```
+
+Update the `Exec=` path inside the file to match wherever you placed the binary.
 
 ---
 
