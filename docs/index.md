@@ -4,7 +4,7 @@ DojoIRC is a cross-platform IRC client built with Go and Wails v2. This document
 
 ## Contents
 
-- [Installation](installation.md) — downloading and installing on Linux, macOS, and Windows
+- [Installation](installation.md) — downloading and installing on Linux, macOS, Windows, and FreeBSD
 - [Configuration](configuration.md) — full `config.toml` reference with all options and examples
 - [Customization Guide](customization.md) — fonts, themes, per-element font sizes, and full config examples
 - [Slash Commands](commands.md) — every command, what it does, and usage examples

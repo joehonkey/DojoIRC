@@ -84,13 +84,51 @@ Windows Defender or SmartScreen may warn about an unrecognized app on first run 
 
 ---
 
+## FreeBSD
+
+No pre-built binary is provided for FreeBSD — build from source. Confirmed working on **FreeBSD 15.0 / KDE Plasma 6 / X11**.
+
+### Requirements
+
+```sh
+sudo pkg install go126 webkit2-gtk_41
+```
+
+Node.js is available via corepack — no separate install needed if `node` is already present.
+
+### Build
+
+Upstream Wails v2 does not support FreeBSD. A patched local clone is required. See the full [FreeBSD Build Guide](building.md#freebsd) for the patching steps.
+
+Once Wails is patched and `go.mod` has the `replace` directive set:
+
+```sh
+export PATH=$PATH:/usr/local/go126/bin:/usr/local/lib/node_modules/corepack/shims:~/go/bin
+GONOSUMDB='*' GOFLAGS="-mod=mod" wails build -tags webkit2_41
+cp -r themes build/bin/
+```
+
+The `-tags webkit2_41` flag is required, the same as on Linux. FreeBSD ships `webkit2-gtk_41` (WebKit2GTK 4.1 / libsoup3) which is identical.
+
+### Running
+
+Launch directly — no environment overrides needed:
+
+```sh
+./build/bin/DojoIRC
+```
+
+The window renders correctly, system tray works, and behaviour is identical to the Linux build. No `GDK_BACKEND` or `DISPLAY` overrides required on X11.
+
+---
+
 ## Config file location
 
 DojoIRC looks for its config at:
 
 | Platform | Path |
 |---|---|
-| Linux / BSD | `~/.config/dojoirc/config.toml` |
+| Linux / FreeBSD | `~/.config/dojoirc/config.toml` |
 | macOS | `~/.config/dojoirc/config.toml` |
 | Windows | `%APPDATA%\dojoirc\config.toml` |
 
