@@ -115,7 +115,9 @@ The `-tags webkit2_41` flag is required on FreeBSD, the same as on Linux.
 ./build/bin/DojoIRC
 ```
 
-No `GDK_BACKEND` or `DISPLAY` overrides are needed. The binary picks up the session's `DISPLAY` automatically. Tested on KDE Plasma 6 / X11 (SDDM + `startplasma-x11`).
+No `GDK_BACKEND` or `DISPLAY` overrides are needed. The binary picks up the session's `DISPLAY` automatically.
+
+Tested on: **FreeBSD 15.0-RELEASE-p8 amd64**, KDE Plasma 6 / X11, SDDM (`startplasma-x11`), kwin_x11 compositor. WebKit2GTK 4.1 (2.46.6). Window renders correctly with no visual glitches — identical appearance and behaviour to the Linux build. System tray works fully.
 
 ### Wails FreeBSD patches
 
@@ -129,7 +131,8 @@ The following changes are required to make Wails v2 build and run on FreeBSD. Th
 | `internal/system/system_freebsd.go` | System discovery stub |
 | `cmd/wails/internal/dev/dev_freebsd.go` | Process group / signal helpers |
 | `internal/frontend/desktop/desktop_freebsd.go` | Routes FreeBSD to the GTK/WebKit frontend |
-| `internal/frontend/desktop/linux/gettid_freebsd.go` | Thread ID via `thr_self` syscall (432) |
+| `internal/frontend/desktop/linux/gettid_linux.go` | Splits `unix.Gettid()` out into a platform-specific helper |
+| `internal/frontend/desktop/linux/gettid_freebsd.go` | FreeBSD thread ID via `thr_self` syscall (432) |
 | `pkg/assetserver/webview/request_freebsd.go` | WebKit URI scheme request handler |
 | `pkg/assetserver/webview/responsewriter_freebsd.go` | WebKit URI scheme response writer |
 
