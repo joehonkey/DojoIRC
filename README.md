@@ -47,7 +47,7 @@
 
 ## Documentation
 
-**[Installation](docs/installation.md)** — [Configuration](docs/configuration.md) — [Commands](docs/commands.md) — [Themes](docs/themes.md) — [Font Sizes](docs/font-sizes.md) — [IRCv3](docs/ircv3.md) — [Building from Source](docs/building.md)
+**[Installation](docs/installation.md)** — [Configuration](docs/configuration.md) — [Commands](docs/commands.md) — [Themes](docs/themes.md) — [**Theme Gallery (50 themes)**](docs/themes-gallery.md) — [Font Sizes](docs/font-sizes.md) — [IRCv3](docs/ircv3.md) — [Building from Source](docs/building.md)
 
 ---
 
@@ -157,9 +157,11 @@ password  = "yourpassword"
 
 ### Themes
 
-Switch themes via **Hamburger → Theme picker**. Bundled: `default` (Catppuccin Mocha), `dark`, `light`, `BreezeDarkPlus`.
+Switch themes via **Hamburger → Theme picker**. 54 themes included: Dracula, Nord, Gruvbox, One Dark, Tokyo Night, Catppuccin, Rose Piné, Kanagawa, Solarized, Cyberpunk, Matrix, and more.
 
-Drop a `.toml` file in `~/.config/dojoirc/themes/` to add custom themes — they appear in the picker after Reload Config.
+Browse all themes with color swatches: **[Theme Gallery](docs/themes-gallery.md)**
+
+Drop a `.toml` file in `~/.config/dojoirc/themes/` to add your own — it appears in the picker after Reload Config.
 
 ---
 

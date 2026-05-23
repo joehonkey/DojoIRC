@@ -1,0 +1,22 @@
+[colors]
+bg          = "#f1efee"
+bg_sidebar  = "#f1efee"
+bg_input    = "#e6e2e0"
+bg_hover    = "#e6e2e0"
+bg_active   = "#a8a19f"
+text        = "#68615e"
+text_dim    = "#766e6b"
+text_server = "#3d97b8"
+border      = "#1b1918"
+accent      = "#c38418"
+timestamp   = "#68615e"
+nick_self   = "#3d97b8"
+action      = "#7b9726"
+
+[sidebar]
+unread  = "#c38418"
+mention = "#f22c40"
+
+[highlights]
+mention    = "#f22c40"
+mention_bg = "rgba(242,44,64,0.08)"

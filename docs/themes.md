@@ -10,6 +10,10 @@ Open the theme picker via **Hamburger → Theme picker**. Themes are listed alph
 
 ---
 
+## Theme gallery
+
+54 themes are included out of the box. Browse them with color swatches: **[Theme Gallery](themes-gallery.md)**
+
 ## Bundled themes
 
 | Name | Description |
@@ -18,6 +22,23 @@ Open the theme picker via **Hamburger → Theme picker**. Themes are listed alph
 | `dark` | Plain dark theme with neutral grays |
 | `light` | Light theme |
 | `BreezeDarkPlus` | Port of the KDE Breeze Dark Plus color scheme |
+| `Dracula` | Classic Dracula dark theme |
+| `Nord` | Nord — cool blues and grays |
+| `Gruvbox` | Gruvbox dark with warm retro colors |
+| `One-Dark` | Atom One Dark |
+| `Tokyo-Night-Storm` | Tokyo Night Storm variant |
+| `Catppuccin-Latte` | Catppuccin Latte (light) |
+| `Catppuccin-Macchiato` | Catppuccin Macchiato |
+| `Catppuccin-Mocha` | Catppuccin Mocha (same palette as `default`) |
+| `Rose-Pine` | Rosé Pine dark |
+| `Rose-Pine-Moon` | Rosé Pine Moon |
+| `Rose-Pine-Dawn` | Rosé Pine Dawn (light) |
+| `Kanagawa` | Kanagawa — inspired by the Great Wave painting |
+| `Solarized-Dark` | Solarized Dark |
+| `Zenburn` | Zenburn low-contrast dark theme |
+| `Cyberpunk` | Cyberpunk — neons on dark |
+| `Matrix` | Matrix — green on black |
+| _…and 35 more_ | See the [Theme Gallery](themes-gallery.md) |
 
 ---
 
