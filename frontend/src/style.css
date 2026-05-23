@@ -607,6 +607,20 @@ a.msg-link:hover { color: var(--text); }
   font-weight: 600;
   color: var(--text);
 }
+#docs-search {
+  flex: 1;
+  max-width: 200px;
+  margin: 0 10px 0 auto;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: var(--text);
+  font-size: 12px;
+  outline: none;
+  font-family: inherit;
+}
+#docs-search:focus { border-color: var(--accent); }
 .docs-close {
   background: none;
   border: none;

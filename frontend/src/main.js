@@ -1480,7 +1480,8 @@ function showDocs() {
   overlay.innerHTML = `
     <div class="docs-panel">
       <div class="docs-header">
-        DojoIRC — Documentation
+        <span style="white-space:nowrap">DojoIRC — Documentation</span>
+        <input id="docs-search" type="text" placeholder="Search docs…" autocomplete="off">
         <button class="docs-close" id="docs-close">✕</button>
       </div>
       <div class="docs-body">
@@ -1671,6 +1672,32 @@ password  = "yourpassword"</code></pre>
     </div>
   `;
   document.body.appendChild(overlay);
+
+  // Group body children into per-h2 sections for search filtering
+  const docsBody = overlay.querySelector('.docs-body');
+  const sections = [];
+  let sec = null;
+  Array.from(docsBody.children).forEach(el => {
+    if (el.tagName === 'H2') {
+      sec = document.createElement('div');
+      sec.className = 'docs-section';
+      sections.push(sec);
+      docsBody.appendChild(sec);
+    }
+    (sec || docsBody).appendChild(el);
+  });
+
+  document.getElementById('docs-search').addEventListener('input', e => {
+    const q = e.target.value.trim().toLowerCase();
+    sections.forEach(s => {
+      s.style.display = (!q || s.textContent.toLowerCase().includes(q)) ? '' : 'none';
+    });
+    if (q) {
+      const first = sections.find(s => s.style.display !== 'none');
+      if (first) first.scrollIntoView({ block: 'nearest' });
+    }
+  });
+
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   document.getElementById('docs-close').addEventListener('click', () => overlay.remove());
 }
