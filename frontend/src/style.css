@@ -670,6 +670,19 @@ a.msg-link:hover { color: var(--text); }
   line-height: 1.5;
 }
 .docs-body pre code { background: none; padding: 0; }
+.fmgr-btn {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 1px 9px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.4;
+  vertical-align: middle;
+}
+.fmgr-btn:hover { background: var(--bg-hover); border-color: var(--accent); }
 .docs-table { width: 100%; border-collapse: collapse; margin: 8px 0; }
 .docs-table th {
   text-align: left;

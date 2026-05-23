@@ -1,5 +1,21 @@
 # DojoIRC Changelog
 
+## Session 17 — 2026-05-23 (font size manager)
+
+### What Was Built
+- **Font size manager** — Hamburger → Font Sizes opens a live panel with +/− controls for every UI font zone. Changes apply instantly without any restart. Settings persist across sessions via `localStorage`. A "Reset to Defaults" button restores all zones at once. The panel correctly overrides both the CSS defaults and the `font_size` config.toml setting (font manager always wins).
+- **Zones covered:** Sidebar Header (DOJOIRC), Hamburger Button (☰), Server Names, Channel Names, Chat Messages, Timestamps, Nick List, Typing Indicator, Input Nick Prefix, Input Field.
+
+### Files Changed
+- `frontend/src/main.js` — `FONT_ZONES` constant; `applyStoredFontSizes`, `getFontSize`, `setFontSize`, `showFontManager` functions; hamburger menu entry; `applyUIConfig` calls `applyStoredFontSizes` on every reload; `boot()` applies stored sizes at startup; in-app docs Font Sizes section rewritten
+- `frontend/src/style.css` — `.fmgr-btn` and `.fmgr-btn:hover` rules for font manager buttons
+- `docs/font-sizes.md` — rewritten around the new panel (CSS editing section demoted to "Advanced")
+- `docs/customization.md` — Per-element font sizes section updated to point to the panel
+- `README.md` — Font size manager row added to features table
+- `ROADMAP.md` — Stage 4 item checked off
+
+---
+
 ## Session 16 — 2026-05-23 (full-height nicklist, unified input bar, bot icon alignment)
 
 ### What Was Built

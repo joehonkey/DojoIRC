@@ -62,6 +62,20 @@ const SHORTCODES = {
   ':warning:':'⚠️', ':recycle:':'♻️', ':bell:':'🔔',
 };
 
+// ── Font size manager zones ───────────────────────────────────
+const FONT_ZONES = [
+  { label: 'Sidebar Header (DOJOIRC)', prop: '--font-size-sidebar-hdr', def: 11 },
+  { label: 'Hamburger Button (☰)',     prop: '--font-size-hamburger',   def: 14 },
+  { label: 'Server Names',             prop: '--font-size-server',      def: 11 },
+  { label: 'Channel Names',            prop: '--font-size-channel',     def: 13 },
+  { label: 'Chat Messages',            prop: '--font-size',             def: 13 },
+  { label: 'Timestamps',               prop: '--font-size-timestamp',   def: 13 },
+  { label: 'Nick List',                prop: '--font-size-nicklist',    def: 12 },
+  { label: 'Typing Indicator',         prop: '--font-size-typing',      def: 13 },
+  { label: 'Input Nick Prefix',        prop: '--font-size-input-nick',  def: 12 },
+  { label: 'Input Field',              prop: '--font-size-input',       def: 13 },
+];
+
 function applyShortcodes(text) {
   return text.replace(/:([a-z0-9_]+):/g, m => SHORTCODES[m] || m);
 }
@@ -1180,6 +1194,7 @@ function bindEvents() {
       { label: 'About DojoIRC',  action: () => showAbout() },
       { label: `Theme: ${state.currentTheme}`, action: () => showThemePicker(mx, my) },
       { label: 'Documentation', action: () => showDocs() },
+      { label: 'Font Sizes',    action: () => showFontManager() },
       { label: emojiBtnEnabled ? 'Emoji Button: On ✓' : 'Emoji Button: Off', action: () => {
           emojiBtnEnabled = !emojiBtnEnabled;
           localStorage.setItem('emojiBtnEnabled', emojiBtnEnabled);
@@ -1404,6 +1419,7 @@ function applyUIConfig(cfg) {
   if (cfg.font)      r.setProperty('--font-family', `'${cfg.font}', 'Cascadia Code', monospace`);
   if (cfg.font_size) r.setProperty('--font-size', cfg.font_size + 'px');
   if (cfg.theme_name) state.currentTheme = cfg.theme_name;
+  applyStoredFontSizes();
 }
 
 // ── About overlay ───────────────────────────────────────────
@@ -1441,6 +1457,84 @@ function showAbout() {
   document.getElementById('about-gh-link').addEventListener('click', e => {
     e.preventDefault();
     BrowserOpen('https://github.com/joehonkey/DojoIRC').catch(console.error);
+  });
+}
+
+// ── Font size manager ────────────────────────────────────────
+function applyStoredFontSizes() {
+  const r = document.documentElement.style;
+  FONT_ZONES.forEach(z => {
+    const v = localStorage.getItem('fs' + z.prop);
+    if (v) r.setProperty(z.prop, v + 'px');
+  });
+}
+
+function getFontSize(prop) {
+  const v = localStorage.getItem('fs' + prop);
+  if (v) return parseInt(v);
+  const computed = getComputedStyle(document.documentElement).getPropertyValue(prop).trim();
+  return parseInt(computed) || FONT_ZONES.find(z => z.prop === prop)?.def || 13;
+}
+
+function setFontSize(prop, val) {
+  const clamped = Math.max(8, Math.min(24, val));
+  document.documentElement.style.setProperty(prop, clamped + 'px');
+  localStorage.setItem('fs' + prop, clamped);
+  return clamped;
+}
+
+function showFontManager() {
+  const overlay = document.createElement('div');
+  overlay.className = 'docs-overlay';
+  overlay.innerHTML = `
+    <div class="docs-panel" style="max-width:460px">
+      <div class="docs-header">
+        Font Sizes
+        <button class="docs-close" id="fmgr-close">✕</button>
+      </div>
+      <div class="docs-body" style="padding:12px 20px">
+        <table style="width:100%;border-collapse:collapse">
+          ${FONT_ZONES.map(z => {
+            const cur = getFontSize(z.prop);
+            return `<tr class="fmgr-row" data-prop="${z.prop}" data-def="${z.def}">
+              <td style="padding:7px 0;color:var(--text);font-size:12px;width:62%">${z.label}</td>
+              <td style="text-align:right;padding:7px 0;white-space:nowrap">
+                <button class="fmgr-btn fmgr-dec">−</button>
+                <span class="fmgr-val" style="display:inline-block;min-width:38px;text-align:center;font-size:12px">${cur}px</span>
+                <button class="fmgr-btn fmgr-inc">+</button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </table>
+        <div style="margin-top:16px;display:flex;justify-content:flex-end">
+          <button id="fmgr-reset" class="fmgr-btn" style="padding:3px 16px;font-size:12px">Reset to Defaults</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.getElementById('fmgr-close').addEventListener('click', () => overlay.remove());
+
+  overlay.querySelectorAll('.fmgr-row').forEach(row => {
+    const prop = row.dataset.prop;
+    const valEl = row.querySelector('.fmgr-val');
+    row.querySelector('.fmgr-dec').addEventListener('click', () => {
+      valEl.textContent = setFontSize(prop, getFontSize(prop) - 1) + 'px';
+    });
+    row.querySelector('.fmgr-inc').addEventListener('click', () => {
+      valEl.textContent = setFontSize(prop, getFontSize(prop) + 1) + 'px';
+    });
+  });
+
+  document.getElementById('fmgr-reset').addEventListener('click', () => {
+    FONT_ZONES.forEach(z => {
+      document.documentElement.style.removeProperty(z.prop);
+      localStorage.removeItem('fs' + z.prop);
+    });
+    overlay.querySelectorAll('.fmgr-row').forEach(row => {
+      row.querySelector('.fmgr-val').textContent = row.dataset.def + 'px';
+    });
   });
 }
 
@@ -1681,40 +1775,21 @@ channels = ["#linux"]</code></pre>
         </table>
 
         <h2>Font Sizes</h2>
-        <p>The main chat font size responds to <code>font_size</code> in <code>config.toml</code> (use Reload Config to apply). All other font sizes are CSS custom properties — edit the <code>:root</code> block in <code>style.css</code> to change them.</p>
-        <pre><code>/* style.css — :root block */
-:root {
-  --font-size:              13px;   /* main chat messages */
-  --font-size-timestamp:    11px;   /* HH:MM timestamps */
-  --font-size-sidebar-hdr:  11px;   /* "DOJOIRC" header + hamburger row */
-  --font-size-hamburger:    14px;   /* ☰ hamburger button */
-  --font-size-server:       11px;   /* server names in sidebar */
-  --font-size-channel:      13px;   /* channel names in sidebar */
-  --font-size-nicklist:     12px;   /* nick list */
-  --font-size-typing:       13px;   /* typing indicator above input */
-  --font-size-input-nick:   12px;   /* your nick beside the input box */
-  --font-size-input:        13px;   /* message input box */
-}</code></pre>
+        <p>Open <b>Hamburger → Font Sizes</b> to adjust every UI zone live — changes apply instantly and are remembered across restarts. No editing files required.</p>
         <table class="docs-table">
-          <tr><th>Variable</th><th>Controls</th><th>Default</th></tr>
-          <tr><td>--font-size</td><td>Main chat message text (also set by config.toml font_size)</td><td>13px</td></tr>
-          <tr><td>--font-size-timestamp</td><td>HH:MM timestamp column left of each message</td><td>11px</td></tr>
-          <tr><td>--font-size-sidebar-hdr</td><td>"DOJOIRC" title and hamburger row at top of sidebar</td><td>11px</td></tr>
-          <tr><td>--font-size-hamburger</td><td>The ☰ hamburger button symbol</td><td>14px</td></tr>
-          <tr><td>--font-size-server</td><td>Server names in the sidebar (e.g. "LINUXDOJO")</td><td>11px</td></tr>
-          <tr><td>--font-size-channel</td><td>Channel and DM names in the sidebar</td><td>13px</td></tr>
-          <tr><td>--font-size-nicklist</td><td>Nicks in the nick list panel on the right</td><td>12px</td></tr>
-          <tr><td>--font-size-typing</td><td>Typing indicator shown above the input bar</td><td>13px</td></tr>
-          <tr><td>--font-size-input-nick</td><td>Your nick displayed left of the message input box</td><td>12px</td></tr>
-          <tr><td>--font-size-input</td><td>Text you type in the message input box</td><td>13px</td></tr>
+          <tr><th>Zone</th><th>Controls</th><th>Default</th></tr>
+          <tr><td>Sidebar Header (DOJOIRC)</td><td>"DOJOIRC" title and hamburger row at top of sidebar</td><td>11px</td></tr>
+          <tr><td>Hamburger Button (☰)</td><td>The ☰ hamburger button symbol</td><td>14px</td></tr>
+          <tr><td>Server Names</td><td>Server names in the sidebar (e.g. "LINUXDOJO")</td><td>11px</td></tr>
+          <tr><td>Channel Names</td><td>Channel and DM names in the sidebar</td><td>13px</td></tr>
+          <tr><td>Chat Messages</td><td>Main chat message text</td><td>13px</td></tr>
+          <tr><td>Timestamps</td><td>HH:MM timestamp column left of each message</td><td>13px</td></tr>
+          <tr><td>Nick List</td><td>Nicks in the nick list panel on the right</td><td>12px</td></tr>
+          <tr><td>Typing Indicator</td><td>Typing indicator shown above the input bar</td><td>13px</td></tr>
+          <tr><td>Input Nick Prefix</td><td>Your nick displayed left of the message input box</td><td>12px</td></tr>
+          <tr><td>Input Field</td><td>Text you type in the message input box</td><td>13px</td></tr>
         </table>
-        <p><b>Example — bigger nick list and channel list:</b></p>
-        <pre><code>--font-size-nicklist:  14px;
---font-size-channel:   14px;</code></pre>
-        <p><b>Example — compact sidebar:</b></p>
-        <pre><code>--font-size-server:      10px;
---font-size-channel:     11px;
---font-size-sidebar-hdr: 10px;</code></pre>
+        <p>Use <b>Reset to Defaults</b> in the Font Sizes panel to restore all zones at once. The main chat font size also responds to <code>font_size</code> in <code>config.toml</code>, but the Font Sizes panel always takes precedence.</p>
 
         <h2>Sidebar &amp; Panels</h2>
         <p>Drag the handle between the sidebar and chat area to resize the sidebar. Drag the handle between chat and the nick list to resize the nick list. Both widths are remembered across restarts.</p>
@@ -1863,6 +1938,7 @@ function showNickSetup(onDone) {
 
 function boot() {
   try { EventsOn('irc:event', handleEvent); } catch (_) {}
+  applyStoredFontSizes();
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission();
   }

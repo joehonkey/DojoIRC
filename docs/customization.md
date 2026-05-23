@@ -59,79 +59,22 @@ After changing `font` or `font_size`, use **Hamburger → Reload Config** to app
 
 ## Per-element font sizes
 
-`font_size` in config.toml only controls the main chat message area. Every other UI element has its own CSS variable that you edit directly in `style.css`.
+Open **Hamburger → Font Sizes** to adjust every UI zone live — changes apply instantly and are saved across restarts. No file editing or restart required.
 
-### Where is style.css?
+| Zone | Controls | Default |
+|---|---|---|
+| Sidebar Header (DOJOIRC) | "DOJOIRC" title and hamburger row | 11px |
+| Hamburger Button (☰) | The ☰ button | 14px |
+| Server Names | Server names in the sidebar | 11px |
+| Channel Names | Channel and DM names in the sidebar | 13px |
+| Chat Messages | Main chat message text | 13px |
+| Timestamps | HH:MM timestamp column | 13px |
+| Nick List | Nicks in the nick list panel | 12px |
+| Typing Indicator | Typing indicator above the input bar | 13px |
+| Input Nick Prefix | Your nick left of the message input box | 12px |
+| Input Field | Text you type in the input box | 13px |
 
-- **Built from source:** `frontend/src/style.css` in the DojoIRC source tree
-- **Installed from release:** `style.css` in the same folder as the `DojoIRC` binary
-
-After editing `style.css`, **restart DojoIRC** to apply.
-
-### CSS variables reference
-
-Find the `:root` block near the top of `style.css`:
-
-```css
-:root {
-  --font-size:              13px;   /* main chat messages */
-  --font-size-timestamp:    13px;   /* HH:MM timestamps in chat */
-  --font-size-sidebar-hdr:  11px;   /* "DOJOIRC" header + hamburger row */
-  --font-size-hamburger:    14px;   /* ☰ hamburger button */
-  --font-size-server:       11px;   /* server names in sidebar */
-  --font-size-channel:      13px;   /* channel names in sidebar */
-  --font-size-nicklist:     12px;   /* nick list panel */
-  --font-size-typing:       13px;   /* typing indicator above input */
-  --font-size-input-nick:   12px;   /* your nick left of the input box */
-  --font-size-input:        13px;   /* message input box */
-}
-```
-
-### Examples
-
-**Make everything larger (good for high-DPI displays):**
-
-```css
-:root {
-  --font-size:              15px;
-  --font-size-timestamp:    15px;
-  --font-size-sidebar-hdr:  13px;
-  --font-size-hamburger:    16px;
-  --font-size-server:       13px;
-  --font-size-channel:      15px;
-  --font-size-nicklist:     14px;
-  --font-size-typing:       15px;
-  --font-size-input-nick:   14px;
-  --font-size-input:        15px;
-}
-```
-
-**Bigger nick and input area only:**
-
-```css
---font-size-input-nick: 15px;
---font-size-input:      15px;
-```
-
-**Compact sidebar (fit more channels without scrolling):**
-
-```css
---font-size-server:       10px;
---font-size-channel:      11px;
---font-size-sidebar-hdr:  10px;
-```
-
-**Bigger nick list only:**
-
-```css
---font-size-nicklist: 14px;
-```
-
-**Larger typing indicator:**
-
-```css
---font-size-typing: 15px;
-```
+Use **Reset to Defaults** in the panel to restore all zones at once. See [Font Sizes](font-sizes.md) for the full reference.
 
 ---
 
