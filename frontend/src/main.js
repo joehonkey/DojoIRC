@@ -1,7 +1,7 @@
 import './style.css';
 import './app.css';
 
-import { EventsOn } from '../wailsjs/runtime/runtime.js';
+import { EventsOn, ClipboardSetText } from '../wailsjs/runtime/runtime.js';
 import {
   SendMessage, SendAction, SendCTCP, SendNick, SendWhois, SendRaw,
   GetServers, GetNick, GetNickList, PartChannel, JoinChannel,
@@ -881,8 +881,9 @@ function bindEvents() {
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed) return;
     e.preventDefault();
+    const text = sel.toString();
     showCtxMenu(e.clientX, e.clientY, [
-      { label: 'Copy', action: () => document.execCommand('copy') },
+      { label: 'Copy', action: () => ClipboardSetText(text).catch(() => {}) },
     ]);
   });
 
