@@ -10,6 +10,14 @@ export function BrowserOpen(arg1) {
   return window['go']['main']['App']['BrowserOpen'](arg1);
 }
 
+export function ConnectServer(arg1) {
+  return window['go']['main']['App']['ConnectServer'](arg1);
+}
+
+export function DisconnectServer(arg1) {
+  return window['go']['main']['App']['DisconnectServer'](arg1);
+}
+
 export function FetchURLPreview(arg1) {
   return window['go']['main']['App']['FetchURLPreview'](arg1);
 }
@@ -24,6 +32,10 @@ export function GetNickList(arg1, arg2) {
 
 export function GetServers() {
   return window['go']['main']['App']['GetServers']();
+}
+
+export function GetSysInfo() {
+  return window['go']['main']['App']['GetSysInfo']();
 }
 
 export function GetTheme() {
@@ -56,6 +68,10 @@ export function ReadClipboard() {
 
 export function ReloadConfig() {
   return window['go']['main']['App']['ReloadConfig']();
+}
+
+export function RestartApp() {
+  return window['go']['main']['App']['RestartApp']();
 }
 
 export function SaveTheme(arg1) {

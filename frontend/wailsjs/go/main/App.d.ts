@@ -9,6 +9,10 @@ export function AppQuit():Promise<void>;
 
 export function BrowserOpen(arg1:string):Promise<void>;
 
+export function ConnectServer(arg1:string):Promise<void>;
+
+export function DisconnectServer(arg1:string):Promise<void>;
+
 export function FetchURLPreview(arg1:string):Promise<preview.Result>;
 
 export function GetNick(arg1:string):Promise<string>;
@@ -16,6 +20,8 @@ export function GetNick(arg1:string):Promise<string>;
 export function GetNickList(arg1:string,arg2:string):Promise<Array<string>>;
 
 export function GetServers():Promise<Array<config.Server>>;
+
+export function GetSysInfo():Promise<string>;
 
 export function GetTheme():Promise<theme.Colors>;
 
@@ -32,6 +38,8 @@ export function PartChannel(arg1:string,arg2:string):Promise<void>;
 export function ReadClipboard():Promise<string>;
 
 export function ReloadConfig():Promise<main.UIConfig>;
+
+export function RestartApp():Promise<void>;
 
 export function SaveTheme(arg1:string):Promise<void>;
 
