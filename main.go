@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	_ "embed"
 	"embed"
 	"os"
 	"sync"
@@ -40,8 +39,6 @@ func restoreWinPos(ctx context.Context) {
 //go:embed all:frontend/dist
 var assets embed.FS
 
-//go:embed build/appicon.png
-var appIcon []byte
 
 func main() {
 	// webkit2gtk 2.52.x fails to spawn a GPU process on some AMD/Mesa setups,
