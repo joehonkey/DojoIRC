@@ -1,4 +1,4 @@
-module github.com/joehonkey/dojoire
+module github.com/joehonkey/dojoirc
 
 go 1.26.3
 

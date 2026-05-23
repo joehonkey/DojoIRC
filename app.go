@@ -14,11 +14,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/joehonkey/dojoire/internal/config"
-	"github.com/joehonkey/dojoire/internal/irc"
-	"github.com/joehonkey/dojoire/internal/preview"
-	"github.com/joehonkey/dojoire/internal/logger"
-	"github.com/joehonkey/dojoire/internal/theme"
+	"github.com/joehonkey/dojoirc/internal/config"
+	"github.com/joehonkey/dojoirc/internal/irc"
+	"github.com/joehonkey/dojoirc/internal/preview"
+	"github.com/joehonkey/dojoirc/internal/logger"
+	"github.com/joehonkey/dojoirc/internal/theme"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 

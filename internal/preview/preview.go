@@ -67,7 +67,7 @@ func Fetch(rawURL string) Result {
 	if err != nil {
 		return r
 	}
-	req.Header.Set("User-Agent", "DojoIRC/1.0 (+https://github.com/joehonkey/dojoire)")
+	req.Header.Set("User-Agent", "DojoIRC/1.0 (+https://github.com/joehonkey/dojoirc)")
 	req.Header.Set("Accept", "text/html,application/xhtml+xml")
 
 	resp, err := client.Do(req)

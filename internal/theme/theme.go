@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
-	"github.com/joehonkey/dojoire/internal/config"
+	"github.com/joehonkey/dojoirc/internal/config"
 )
 
 type General struct {

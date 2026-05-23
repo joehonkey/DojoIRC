@@ -11,7 +11,7 @@ import (
 
 	ircp "gopkg.in/irc.v3"
 
-	"github.com/joehonkey/dojoire/internal/config"
+	"github.com/joehonkey/dojoirc/internal/config"
 )
 
 type Event struct {
