@@ -163,6 +163,24 @@ See [Themes](themes.md) for the full color key reference.
 
 ---
 
+## Emoji
+
+### How do I send emoji?
+
+Three ways:
+
+1. **Shortcodes** — type `:shortcode:` and it converts on send. For example, type `:fire:` and it becomes 🔥, `:thumbsup:` becomes 👍, `:heart:` becomes ❤️. See the [full shortcode list](keyboard-shortcuts.md#shortcode-reference).
+
+2. **Emoji picker** — click the **😊** button to the right of the message input. Browse by category (Smileys, Gestures, Hearts, Animals, Food, Objects, Symbols) or search by name. Click any emoji to insert it at the cursor.
+
+3. **Tab completion** — type `:` followed by part of a name and press Tab to complete. For example `:fir` + Tab inserts 🔥. Press Tab again to cycle through matches (`:fire:`, `:fire:`, etc.).
+
+### Do emoji work in channel names, nicks, or topics?
+
+Shortcode conversion only runs on messages you send in the input box. It does not affect incoming messages, channel names, topics, or other UI elements. Emoji sent by other clients appear as-is.
+
+---
+
 ## Connecting & IRC
 
 ### Can I connect to multiple servers at once?

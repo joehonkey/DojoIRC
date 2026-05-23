@@ -48,9 +48,40 @@ Closing search (Escape or ✕) restores all messages to full opacity.
 
 ## Emoji
 
-Type `:shortcode:` in any message and it converts to the emoji on send (e.g. `:fire:` → 🔥, `:thumbsup:` → 👍, `:heart:` → ❤️).
+Type `:shortcode:` in any message and it converts to the emoji on send. Click the **😊** button to the right of the input to open the picker — 7 categories, ~175 emoji, live name search. Click any emoji to insert it at the cursor.
 
-Click the **😊** button to the right of the input to open the emoji picker. Browse by category or search by name. Click any emoji to insert it at the cursor.
+You can also Tab-complete shortcodes: type `:fir` and press Tab → 🔥. Keep pressing Tab to cycle through matches.
+
+### Shortcode reference
+
+| Shortcode | Emoji | Shortcode | Emoji | Shortcode | Emoji |
+|---|---|---|---|---|---|
+| `:smile:` | 😊 | `:grinning:` | 😀 | `:joy:` | 😂 |
+| `:rofl:` | 🤣 | `:laughing:` | 😆 | `:wink:` | 😉 |
+| `:blush:` | 😊 | `:innocent:` | 😇 | `:yum:` | 😋 |
+| `:sunglasses:` | 😎 | `:heart_eyes:` | 😍 | `:smiling_hearts:` | 🥰 |
+| `:kissing_heart:` | 😘 | `:hugging:` | 🤗 | `:thinking:` | 🤔 |
+| `:triumph:` | 😤 | `:sob:` | 😭 | `:cry:` | 😢 |
+| `:scream:` | 😱 | `:angry:` | 😠 | `:rage:` | 😡 |
+| `:sleeping:` | 😴 | `:wave:` | 👋 | `:ok_hand:` | 👌 |
+| `:peace:` | ✌️ | `:thumbsup:` | 👍 | `:thumbsdown:` | 👎 |
+| `:clap:` | 👏 | `:pray:` | 🙏 | `:muscle:` | 💪 |
+| `:eyes:` | 👀 | `:handshake:` | 🤝 | `:heart:` | ❤️ |
+| `:orange_heart:` | 🧡 | `:yellow_heart:` | 💛 | `:green_heart:` | 💚 |
+| `:blue_heart:` | 💙 | `:purple_heart:` | 💜 | `:broken_heart:` | 💔 |
+| `:two_hearts:` | 💕 | `:sparkling_heart:` | 💖 | `:fire:` | 🔥 |
+| `:sparkles:` | ✨ | `:100:` | 💯 | `:boom:` | 💥 |
+| `:star:` | ⭐ | `:star2:` | 🌟 | `:rainbow:` | 🌈 |
+| `:snowflake:` | ❄️ | `:sun:` | ☀️ | `:moon:` | 🌙 |
+| `:zap:` | ⚡ | `:dog:` | 🐶 | `:cat:` | 🐱 |
+| `:panda:` | 🐼 | `:unicorn:` | 🦄 | `:bee:` | 🐝 |
+| `:butterfly:` | 🦋 | `:pizza:` | 🍕 | `:hamburger:` | 🍔 |
+| `:taco:` | 🌮 | `:coffee:` | ☕ | `:beer:` | 🍺 |
+| `:cake:` | 🎂 | `:bulb:` | 💡 | `:computer:` | 💻 |
+| `:phone:` | 📱 | `:music:` | 🎵 | `:game:` | 🎮 |
+| `:trophy:` | 🏆 | `:rocket:` | 🚀 | `:tada:` | 🎉 |
+| `:balloon:` | 🎈 | `:check:` | ✅ | `:x:` | ❌ |
+| `:warning:` | ⚠️ | `:recycle:` | ♻️ | `:bell:` | 🔔 |
 
 ---
 
