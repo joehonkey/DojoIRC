@@ -43,7 +43,7 @@
       </td>
       <td align="center">
         <a href="docs/building.md#freebsd">
-          <img src="build/icons/DojoIRC-Main.png" width="72" alt="FreeBSD"><br>
+          <img src="build/icons/freebsd/128x128/apps/dojoirc.png" width="72" alt="FreeBSD"><br>
           <b>FreeBSD</b><br>
           <sub>build from source</sub>
         </a>
