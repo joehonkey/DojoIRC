@@ -43,7 +43,7 @@
 - [x] Desktop notifications — Web Notifications API on mention
 - [x] Message logging to disk — ~/.config/dojoirc/logs/<server>/<channel>.log
 - [ ] Full IRCv3 CAP LS 302 negotiation (beyond message-tags and sasl)
-- [ ] NickServ identify flow
+- [x] NickServ identify flow
 - [ ] Channel modes display
 - [ ] Away status
 - [ ] DCC SEND — file transfer (peer-to-peer TCP)
