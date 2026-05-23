@@ -230,12 +230,20 @@ function handleEvent(ev) {
         state.activeChannel = ev.channel;
         ch.active = true;
       }
+      if (!ch.nicks) ch.nicks = [];
+      if (!ch.nicks.some(n => n.replace(/^[@+~&]/, '') === ev.nick)) {
+        ch.nicks.push(ev.nick);
+        sortNicks(ch.nicks);
+      }
       render();
       break;
     }
     case 'part': {
       const ch = findChannel(ev.server, ev.channel);
-      if (ch) ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} left${ev.text ? ': ' + ev.text : ''}`, type: 'server' });
+      if (ch) {
+        ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} left${ev.text ? ': ' + ev.text : ''}`, type: 'server' });
+        if (ch.nicks) ch.nicks = ch.nicks.filter(n => n.replace(/^[@+~&]/, '') !== ev.nick);
+      }
       render();
       break;
     }
@@ -243,13 +251,17 @@ function handleEvent(ev) {
       const qsrv = state.servers.find(s => s.name === ev.server);
       if (qsrv) qsrv.channels.forEach(ch => {
         ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} quit${ev.text ? ': ' + ev.text : ''}`, type: 'server' });
+        if (ch.nicks) ch.nicks = ch.nicks.filter(n => n.replace(/^[@+~&]/, '') !== ev.nick);
       });
       render();
       break;
     }
     case 'kick': {
       const ch = findChannel(ev.server, ev.channel);
-      if (ch) ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} was kicked${ev.text ? ': ' + ev.text : ''}`, type: 'server' });
+      if (ch) {
+        ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} was kicked${ev.text ? ': ' + ev.text : ''}`, type: 'server' });
+        if (ch.nicks) ch.nicks = ch.nicks.filter(n => n.replace(/^[@+~&]/, '') !== ev.nick);
+      }
       render();
       break;
     }
@@ -258,6 +270,14 @@ function handleEvent(ev) {
       const nsrv = state.servers.find(s => s.name === ev.server);
       if (nsrv) nsrv.channels.forEach(ch => {
         ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} is now known as ${ev.text}`, type: 'server' });
+        if (ch.nicks) {
+          const idx = ch.nicks.findIndex(n => n.replace(/^[@+~&]/, '') === ev.nick);
+          if (idx !== -1) {
+            const prefix = ch.nicks[idx].match(/^[@+~&]/)?.[0] || '';
+            ch.nicks[idx] = prefix + ev.text;
+            sortNicks(ch.nicks);
+          }
+        }
       });
       render();
       break;
@@ -939,14 +959,17 @@ function sendMessage(text) {
 }
 
 // ── Nick list ───────────────────────────────────────────────
+function sortNicks(nicks) {
+  const rank = n => n.startsWith('@') || n.startsWith('~') || n.startsWith('&') ? 0 : n.startsWith('+') ? 1 : 2;
+  nicks.sort((a, b) => rank(a) - rank(b) || a.replace(/^[@+~&]/, '').localeCompare(b.replace(/^[@+~&]/, ''), undefined, { sensitivity: 'base' }));
+}
+
 function refreshNickList(server, channel) {
   GetNickList(server, channel).then(nicks => {
     const ch = findChannel(server, channel);
     if (ch && nicks) {
-      ch.nicks = nicks.sort((a, b) => {
-        const rank = n => n.startsWith('@') || n.startsWith('~') || n.startsWith('&') ? 0 : n.startsWith('+') ? 1 : 2;
-        return rank(a) - rank(b) || a.localeCompare(b, undefined, { sensitivity: 'base' });
-      });
+      sortNicks(nicks);
+      ch.nicks = nicks;
       renderNicklistOnly();
     }
   }).catch(() => {});
@@ -1035,6 +1058,10 @@ function applyTheme(t) {
   r.setProperty('--text-server', t.sidebar.server);
   r.setProperty('--bg-active',   t.nicklist.background);
   r.setProperty('--bg-hover',    t.nicklist.background);
+  r.setProperty('--nick-op',     t.nicklist.op);
+  r.setProperty('--nick-halfop', t.nicklist.halfop);
+  r.setProperty('--nick-voice',  t.nicklist.voice);
+  r.setProperty('--nick-away',   t.nicklist.away);
   r.setProperty('--timestamp',   t.buffer.timestamp);
   r.setProperty('--action',      t.buffer.action);
   r.setProperty('--nick-self',   t.buffer.nick_self);

@@ -17,6 +17,7 @@ import (
 	"github.com/joehonkey/dojoire/internal/config"
 	"github.com/joehonkey/dojoire/internal/irc"
 	"github.com/joehonkey/dojoire/internal/preview"
+	"github.com/joehonkey/dojoire/internal/logger"
 	"github.com/joehonkey/dojoire/internal/theme"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -58,6 +59,21 @@ func (a *App) startup(ctx context.Context) {
 	time.AfterFunc(1500*time.Millisecond, func() {
 		a.connectNewServers(cfg)
 	})
+}
+
+func (a *App) onEvent(ev irc.Event) {
+	if ev.Type == "names" {
+		a.updateNicklist(ev.Server, ev.Channel, ev.Text)
+	}
+	switch ev.Type {
+	case "message", "action":
+		logger.Log(config.Dir(), ev.Server, ev.Channel, ev.Nick, ev.Text)
+	case "notice":
+		logger.Log(config.Dir(), ev.Server, ev.Channel, "*"+ev.Nick+"*", ev.Text)
+	case "server", "whois":
+		logger.Log(config.Dir(), ev.Server, "server", "", ev.Text)
+	}
+	runtime.EventsEmit(a.ctx, "irc:event", ev)
 }
 
 func (a *App) updateNicklist(server, channel, text string) {
@@ -218,12 +234,7 @@ func (a *App) ConnectServer(name string) {
 			continue
 		}
 		s := srv
-		client := irc.NewClient(s, func(ev irc.Event) {
-			if ev.Type == "names" {
-				a.updateNicklist(ev.Server, ev.Channel, ev.Text)
-			}
-			runtime.EventsEmit(a.ctx, "irc:event", ev)
-		})
+		client := irc.NewClient(s, a.onEvent)
 		if err := client.Connect(); err != nil {
 			log.Printf("failed to connect to %s: %v", s.Name, err)
 			return
@@ -249,6 +260,7 @@ func (a *App) shutdown() {
 	}
 	// Give the server a moment to receive the QUIT before the socket closes
 	time.Sleep(300 * time.Millisecond)
+	logger.CloseAll()
 }
 
 // UIConfig bundles everything the frontend needs to apply after a config reload.
@@ -306,12 +318,7 @@ func (a *App) connectNewServers(cfg *config.Config) {
 			continue
 		}
 		s := srv
-		client := irc.NewClient(s, func(ev irc.Event) {
-			if ev.Type == "names" {
-				a.updateNicklist(ev.Server, ev.Channel, ev.Text)
-			}
-			runtime.EventsEmit(a.ctx, "irc:event", ev)
-		})
+		client := irc.NewClient(s, a.onEvent)
 		if err := client.Connect(); err != nil {
 			log.Printf("failed to connect to %s: %v", s.Name, err)
 			continue
