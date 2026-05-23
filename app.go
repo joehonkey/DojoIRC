@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	goruntime "runtime"
 	"strings"
 	"sync"
 	"syscall"
@@ -442,8 +443,37 @@ func (a *App) OpenConfig() {
 	openInEditor(cfgPath)
 }
 
+// MaybeShowKeyboard shows the virtual keyboard on Windows when in tablet mode.
+// No-op on other platforms.
+func (a *App) MaybeShowKeyboard() {
+	if goruntime.GOOS != "windows" {
+		return
+	}
+	out, err := exec.Command("reg", "query",
+		`HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ImmersiveShell`,
+		"/v", "TabletMode").Output()
+	if err != nil || !strings.Contains(string(out), "0x1") {
+		return
+	}
+	tabTip := `C:\Program Files\Common Files\Microsoft Shared\ink\TabTip.exe`
+	if _, err := os.Stat(tabTip); err == nil {
+		exec.Command(tabTip).Start()
+		return
+	}
+	exec.Command("osk.exe").Start()
+}
+
 // openInEditor opens a file in the best available text editor.
 func openInEditor(path string) {
+	switch goruntime.GOOS {
+	case "windows":
+		exec.Command("cmd", "/c", "start", "", path).Start()
+		return
+	case "darwin":
+		exec.Command("open", path).Start()
+		return
+	}
+
 	// 1. Honor $VISUAL / $EDITOR if set.
 	for _, env := range []string{"VISUAL", "EDITOR"} {
 		if val := os.Getenv(env); val != "" {
