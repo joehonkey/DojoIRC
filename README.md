@@ -333,6 +333,68 @@ See [ROADMAP.md](ROADMAP.md) for the full detailed list.
 
 ---
 
+## Extra Icons
+
+Community-contributed icon variants. Right-click → Save to use as a replacement app icon.
+
+### Platform Icons
+
+<table>
+  <tr>
+    <td align="center"><img src="build/icons/extras/Linux.png" width="96"><br><b>Linux</b></td>
+    <td align="center"><img src="build/icons/extras/Windows.png" width="96"><br><b>Windows</b></td>
+    <td align="center"><img src="build/icons/extras/macOS.png" width="96"><br><b>macOS</b></td>
+    <td align="center"><img src="build/icons/extras/FreeBSD.png" width="96"><br><b>FreeBSD</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="build/icons/extras/Linux-Alt.png" width="96"><br><sub>Linux Alt</sub></td>
+    <td align="center"></td>
+    <td align="center"><img src="build/icons/extras/macOS-Alt.png" width="96"><br><sub>macOS Alt</sub></td>
+    <td align="center"></td>
+  </tr>
+</table>
+
+### Multi-Platform
+
+<table>
+  <tr>
+    <td align="center"><img src="build/icons/extras/All-Platforms.png" width="96"><br><sub>All Platforms</sub></td>
+    <td align="center"><img src="build/icons/extras/All-Platforms-Logo.png" width="96"><br><sub>All Platforms + Logo</sub></td>
+    <td align="center"><img src="build/icons/extras/All-Platforms-2.png" width="96"><br><sub>All Platforms 2</sub></td>
+    <td align="center"><img src="build/icons/extras/All-Platforms-Logo-2.png" width="96"><br><sub>All Platforms + Logo 2</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="build/icons/extras/All-Platforms-Logo-3.png" width="96"><br><sub>All Platforms + Logo 3</sub></td>
+    <td align="center"><img src="build/icons/extras/DojoIRC-Logo.png" width="96"><br><sub>DojoIRC Logo</sub></td>
+    <td align="center"><img src="build/icons/extras/DojoIRC-Logo-2.png" width="96"><br><sub>DojoIRC Logo 2</sub></td>
+    <td align="center"><img src="build/icons/extras/DojoIRC-Logo-RGBA.png" width="96"><br><sub>DojoIRC Logo RGBA</sub></td>
+  </tr>
+</table>
+
+### Torii Gate
+
+<table>
+  <tr>
+    <td align="center"><img src="build/icons/extras/Torii.png" width="96"><br><sub>Torii</sub></td>
+    <td align="center"><img src="build/icons/extras/Torii-Glow.png" width="96"><br><sub>Torii Glow</sub></td>
+    <td align="center"><img src="build/icons/extras/Torii-Blue.png" width="96"><br><sub>Torii Blue</sub></td>
+    <td align="center"></td>
+  </tr>
+</table>
+
+### Dojo Style
+
+<table>
+  <tr>
+    <td align="center"><img src="build/icons/extras/Ninja.png" width="96"><br><sub>Ninja</sub></td>
+    <td align="center"><img src="build/icons/extras/Headband.png" width="96"><br><sub>Headband</sub></td>
+    <td align="center"><img src="build/icons/extras/NinjaBot.png" width="96"><br><sub>Ninja Bot</sub></td>
+    <td align="center"></td>
+  </tr>
+</table>
+
+---
+
 ## License
 
 MIT — see [LICENSE](LICENSE)
