@@ -1,5 +1,23 @@
 # DojoIRC Changelog
 
+## Session 13 — 2026-05-23 (post-v0.4.0 fixes + docs overhaul)
+
+### What Was Fixed
+- **/sysinfo missing local echo** — `/sysinfo` sent output to the channel via `SendMessage` but never pushed to `ch.messages`, so the user who ran it never saw their own output. Added the same local push + render that regular messages use.
+
+### What Was Built
+- **Documentation panel search** — a search input appears to the right of the "DojoIRC — Documentation" header in the hamburger docs overlay. Typing filters sections in real time (sections not matching the query are hidden); the first matching section scrolls into view. Clearing restores all sections. Implemented by grouping the flat docs body HTML into per-`h2` section divs post-mount and toggling their visibility on input.
+- **In-app docs updated for v0.4.0** — added Message Search, Emoji, and Input History sections; updated Keyboard Shortcuts table (↑/↓ history row, shortcode Tab entry); updated Tab Completion section to list all three completion types.
+- **FreeBSD build documented** — full build guide in `docs/building.md`: `pkg install` commands, PATH setup, Wails patching with `replace` directive, build flags, run notes, and a complete table of every Wails file added or patched for FreeBSD support. ROADMAP Stage 6 updated to reflect FreeBSD confirmed working on FreeBSD 15 / KDE Plasma 6 / X11.
+- **Emoji shortcode reference** — full 67-entry shortcode table added to `docs/keyboard-shortcuts.md`; emoji FAQ section added to `docs/faq.md` covering all three input methods and scope of conversion.
+- **Input history added to ROADMAP** — was shipped in v0.4.0 but missing from Stage 4 checklist.
+
+### Key Decisions
+- Docs search groups children into section divs post-mount (not in the HTML template) so the template stays readable and the grouping logic is a single pass over `body.children`.
+- FreeBSD Wails patches use a `replace` directive in `go.mod` pointing to a local patched clone — no upstream fork required, easy to update when Wails adds official FreeBSD support.
+
+---
+
 ## Session 12 — 2026-05-23 (v0.4.0 — emoji, input history, version bump)
 
 ### What Was Built
