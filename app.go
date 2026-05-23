@@ -467,7 +467,11 @@ func (a *App) MaybeShowKeyboard() {
 func openInEditor(path string) {
 	switch goruntime.GOOS {
 	case "windows":
-		exec.Command("cmd", "/c", "start", "", path).Start()
+		// rundll32 url.dll,FileProtocolHandler is the same mechanism Explorer
+		// uses — handles any path including spaces, no cmd.exe quoting issues.
+		if err := exec.Command("rundll32.exe", "url.dll,FileProtocolHandler", path).Start(); err != nil {
+			exec.Command("cmd", "/c", "start", "", path).Start()
+		}
 		return
 	case "darwin":
 		exec.Command("open", path).Start()
