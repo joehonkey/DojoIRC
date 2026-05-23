@@ -1,5 +1,21 @@
 # DojoIRC Changelog
 
+## Session 18 — 2026-05-23 (version string embedded in binary)
+
+### What Was Built
+- **Version embedded in binary via ldflags** — `Version` var in `main.go` is set at build time with `-ldflags "-X main.Version=vX.Y.Z"`. Defaults to `"dev"` if not set.
+- **`GetVersion()` Go binding** — exposes the version to the frontend at runtime. No more hardcoded version string in JS.
+- **About panel fetches version dynamically** — calls `GetVersion()` on open; shows `…` until resolved.
+
+### Files Changed
+- `main.go` — `var Version = "dev"`
+- `app.go` — `GetVersion()` method
+- `frontend/wailsjs/go/main/App.js` — `GetVersion` binding
+- `frontend/src/main.js` — About panel fetches version via `GetVersion()`
+- `docs/building.md` — all build commands updated with `-ldflags "-X main.Version=vX.Y.Z"`
+
+---
+
 ## Session 17 — 2026-05-23 (font size manager)
 
 ### What Was Built

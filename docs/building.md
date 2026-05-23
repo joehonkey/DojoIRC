@@ -33,11 +33,11 @@ sudo dnf install gtk3-devel webkit2gtk4.1-devel
 ```bash
 git clone https://github.com/joehonkey/DojoIRC
 cd DojoIRC
-~/go/bin/wails build -tags webkit2_41
+~/go/bin/wails build -tags webkit2_41 -ldflags "-X main.Version=v0.4.6"
 cp -r themes build/bin/
 ```
 
-The `-tags webkit2_41` flag is required on Linux. Without it, Wails defaults to webkit2gtk-4.0 which is not installed.
+The `-tags webkit2_41` flag is required on Linux. Without it, Wails defaults to webkit2gtk-4.0 which is not installed. The `-ldflags "-X main.Version=vX.Y.Z"` flag embeds the version string shown in the About panel — update it to match the release tag.
 
 Binary lands at `build/bin/DojoIRC`. The `themes/` folder must stay next to it.
 
@@ -103,11 +103,11 @@ go install .
 git clone https://github.com/joehonkey/DojoIRC
 cd DojoIRC
 export PATH=$PATH:/usr/local/go126/bin:/usr/local/lib/node_modules/corepack/shims:~/go/bin
-GONOSUMDB='*' GOFLAGS="-mod=mod" wails build -tags webkit2_41
+GONOSUMDB='*' GOFLAGS="-mod=mod" wails build -tags webkit2_41 -ldflags "-X main.Version=v0.4.6"
 cp -r themes build/bin/
 ```
 
-The `-tags webkit2_41` flag is required on FreeBSD, the same as on Linux.
+The `-tags webkit2_41` flag is required on FreeBSD, the same as on Linux. Update the `-X main.Version` value to match the release tag.
 
 ### Run
 
@@ -159,7 +159,7 @@ The following changes are required to make Wails v2 build and run on FreeBSD. Th
 ```bash
 git clone https://github.com/joehonkey/DojoIRC
 cd DojoIRC
-~/go/bin/wails build
+~/go/bin/wails build -ldflags "-X main.Version=v0.4.6"
 cp -r themes build/bin/
 ```
 
@@ -178,7 +178,7 @@ Open a PowerShell terminal:
 ```powershell
 git clone https://github.com/joehonkey/DojoIRC
 cd DojoIRC
-wails build
+wails build -ldflags "-X main.Version=v0.4.6"
 Copy-Item -Recurse themes build\bin\
 ```
 
