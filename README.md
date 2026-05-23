@@ -110,7 +110,7 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | **Nick colorization** | Consistent hash-based color per nick across all buffers |
 | **Tab completion** | Nicks (cycles, adds `: ` at line start), slash commands, `:emoji` shortcodes |
 | **Theme picker** | Scrollable A–Z list, live switching, choice persisted to config |
-| **Font size manager** | Hamburger → Font Sizes — live +/− controls for every UI zone (sidebar, chat, nick list, input, etc.); saved across restarts |
+| **Font size manager** | Hamburger → Font Sizes — live +/− controls for 14 UI zones (sidebar, buffer header, channel modes, topic, chat, nick list, input, and more); saved across restarts |
 | **Draggable panels** | Sidebar and nick list resize handles with width persistence; nick list spans full window height |
 | **DM windows** | Click any nick to open a private buffer; right-click to close |
 | **Server buffer** | MOTD, connection events, WHOIS output per server |

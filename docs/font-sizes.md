@@ -8,7 +8,7 @@ DojoIRC has a built-in Font Size manager that lets you adjust every UI zone live
 
 Open **Hamburger → Font Sizes** to get a panel with a + / − control for every UI zone. Changes apply instantly and persist across restarts.
 
-Use **Reset to Defaults** to restore everything at once.
+Use **Reset to Defaults** to restore everything at once. Font sizes are clamped to the range **8px – 24px**.
 
 ---
 
@@ -20,6 +20,10 @@ Use **Reset to Defaults** to restore everything at once.
 | Hamburger Button (☰) | The ☰ hamburger button symbol | 14px |
 | Server Names | Server names in the sidebar (shown in uppercase, e.g. "LINUXDOJO") | 11px |
 | Channel Names | Channel and DM names in the sidebar | 13px |
+| Buffer Title (#channel) | Channel or DM name displayed in the buffer header | 14px |
+| Channel Modes (+nt) | Mode string shown in the buffer header next to the channel name | 11px |
+| Topic Button | The "topic" pill button in the buffer header | 10px |
+| Topic Text | Topic content shown below the buffer header | 12px |
 | Chat Messages | Main chat message text | 13px |
 | Timestamps | HH:MM timestamp column left of each message | 13px |
 | Nick List | Nicks in the nick list panel on the right side | 12px |
@@ -27,13 +31,11 @@ Use **Reset to Defaults** to restore everything at once.
 | Input Nick Prefix | Your nick displayed to the left of the message input box | 12px |
 | Input Field | Text you type in the message input box | 13px |
 
-Font sizes are clamped to the range **8px – 24px**.
-
 ---
 
 ## config.toml font_size
 
-The `font_size` key in `config.toml` also sets the Chat Messages zone. The Font Sizes panel takes precedence — if you've set Chat Messages via the panel, config.toml `font_size` will be overridden by your saved preference.
+The `font_size` key in `config.toml` also sets the Chat Messages zone. The Font Sizes panel takes precedence — if you've set Chat Messages via the panel, the config value will be overridden by your saved preference.
 
 ```toml
 font_size = 15
@@ -43,7 +45,7 @@ font_size = 15
 
 ## Advanced — direct CSS editing
 
-If you prefer to edit `style.css` directly, the CSS variables are in the `:root` block:
+If you prefer to edit `style.css` directly, all font sizes are CSS variables in the `:root` block:
 
 - **Source build:** `frontend/src/style.css`
 - **Installed binary:** `style.css` alongside the `DojoIRC` binary

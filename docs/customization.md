@@ -67,6 +67,10 @@ Open **Hamburger → Font Sizes** to adjust every UI zone live — changes apply
 | Hamburger Button (☰) | The ☰ button | 14px |
 | Server Names | Server names in the sidebar | 11px |
 | Channel Names | Channel and DM names in the sidebar | 13px |
+| Buffer Title (#channel) | Channel or DM name in the buffer header | 14px |
+| Channel Modes (+nt) | Mode string in the buffer header | 11px |
+| Topic Button | The "topic" pill button | 10px |
+| Topic Text | Topic content below the header | 12px |
 | Chat Messages | Main chat message text | 13px |
 | Timestamps | HH:MM timestamp column | 13px |
 | Nick List | Nicks in the nick list panel | 12px |

@@ -101,7 +101,7 @@
 - [x] Full-height nicklist column (spans full window height alongside input bar)
 - [x] Unified input bar (full-width color strip with inline nick prefix + vertical separator)
 - [x] Bot icon alignment (inline flex layout — icon sits next to nick text, not at edge)
-- [x] Font size manager — Hamburger → Font Sizes opens a panel with live +/− controls for every UI zone (sidebar header, hamburger button, server names, channel names, chat messages, timestamps, nick list, typing indicator, input nick prefix, input field). Changes apply instantly and persist via localStorage.
+- [x] Font size manager — Hamburger → Font Sizes opens a panel with live +/− controls for 14 UI zones (sidebar header, hamburger button, server names, channel names, buffer title, channel modes, topic button, topic text, chat messages, timestamps, nick list, typing indicator, input nick prefix, input field). Changes apply instantly and persist via localStorage.
 
 ## Stage 5 — Power Features
 - [x] Bouncer support (ZNC, soju) — `password` field sends `PASS` before registration

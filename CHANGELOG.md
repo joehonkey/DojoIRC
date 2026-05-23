@@ -1,5 +1,18 @@
 # DojoIRC Changelog
 
+## Session 19 — 2026-05-23 (font manager extended + full docs refresh)
+
+### What Was Added
+- **4 new font zones** — Buffer Title (#channel name in header), Channel Modes (+nt), Topic Button (pill button), Topic Text (topic content). All were previously hardcoded px values; now CSS variables controllable from the Font Sizes panel.
+- **Full documentation pass** — in-app docs, `docs/font-sizes.md`, `docs/customization.md`, `README.md`, `ROADMAP.md`, `docs/faq.md`, `docs/index.md`, `docs/building.md`, and BeeMO all brought up to date with 14-zone font manager, version embedding, and all recent layout changes.
+
+### Files Changed
+- `frontend/src/main.js` — in-app Font Sizes table updated to 14 zones
+- `frontend/src/style.css` — 4 new CSS variables; `#buffer-title`, `#topic-toggle`, `#buffer-modes`, `#buffer-topic` converted from hardcoded px to var()
+- `docs/font-sizes.md`, `docs/customization.md`, `README.md`, `ROADMAP.md` — zone tables updated
+
+---
+
 ## Session 18 — 2026-05-23 (version string embedded in binary)
 
 ### What Was Built

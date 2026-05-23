@@ -1791,6 +1791,10 @@ channels = ["#linux"]</code></pre>
           <tr><td>Hamburger Button (☰)</td><td>The ☰ hamburger button symbol</td><td>14px</td></tr>
           <tr><td>Server Names</td><td>Server names in the sidebar (e.g. "LINUXDOJO")</td><td>11px</td></tr>
           <tr><td>Channel Names</td><td>Channel and DM names in the sidebar</td><td>13px</td></tr>
+          <tr><td>Buffer Title (#channel)</td><td>Channel or DM name in the buffer header</td><td>14px</td></tr>
+          <tr><td>Channel Modes (+nt)</td><td>Mode string shown in the buffer header</td><td>11px</td></tr>
+          <tr><td>Topic Button</td><td>"topic" pill button in the buffer header</td><td>10px</td></tr>
+          <tr><td>Topic Text</td><td>Topic content shown below the header</td><td>12px</td></tr>
           <tr><td>Chat Messages</td><td>Main chat message text</td><td>13px</td></tr>
           <tr><td>Timestamps</td><td>HH:MM timestamp column left of each message</td><td>13px</td></tr>
           <tr><td>Nick List</td><td>Nicks in the nick list panel on the right</td><td>12px</td></tr>
