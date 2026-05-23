@@ -394,9 +394,20 @@ func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 			c.emit(Event{Server: srv, Type: "whois", Channel: "server", Text: fmt.Sprintf("%s is on: %s", msg.Params[1], msg.Params[2]), Time: now})
 		}
 
-	case "366": // RPL_ENDOFNAMES — request channel modes now that we've fully joined
+	case "366": // RPL_ENDOFNAMES — request channel modes and WHO for bot detection
 		if len(msg.Params) >= 2 {
 			client.Write("MODE " + msg.Params[1])
+			client.Write("WHO " + msg.Params[1])
+		}
+
+	case "352": // RPL_WHOREPLY — detect +B bot flag from status field
+		// format: me #channel user host server nick status :hopcount realname
+		if len(msg.Params) >= 7 {
+			nick := msg.Params[5]
+			status := msg.Params[6]
+			if strings.Contains(status, "B") {
+				c.emit(Event{Server: srv, Type: "mode", Channel: nick, Text: "+B", Time: now})
+			}
 		}
 
 	case "324": // RPL_CHANNELMODEIS
