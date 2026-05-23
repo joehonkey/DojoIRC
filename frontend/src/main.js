@@ -938,6 +938,7 @@ function bindEvents() {
       { label: `Theme: ${state.currentTheme}`, action: () => showThemePicker(mx, my) },
       { label: 'Open Config',   action: () => OpenConfig().catch(console.error) },
       { label: 'Documentation', action: () => showDocs() },
+      { label: 'About DojoIRC',  action: () => showAbout() },
       { label: 'Reload Config', action: () =>
         ReloadConfig()
           .then(applyUIConfig)
@@ -1101,6 +1102,44 @@ function applyUIConfig(cfg) {
   if (cfg.font)      r.setProperty('--font-family', `'${cfg.font}', 'Cascadia Code', monospace`);
   if (cfg.font_size) r.setProperty('--font-size', cfg.font_size + 'px');
   if (cfg.theme_name) state.currentTheme = cfg.theme_name;
+}
+
+// ── About overlay ───────────────────────────────────────────
+function showAbout() {
+  const overlay = document.createElement('div');
+  overlay.className = 'docs-overlay';
+  overlay.innerHTML = `
+    <div class="docs-panel" style="max-width:420px">
+      <div class="docs-header">
+        About DojoIRC
+        <button class="docs-close" id="about-close">✕</button>
+      </div>
+      <div class="docs-body">
+        <div style="text-align:center;padding:16px 0 24px">
+          <div style="font-size:22px;font-weight:700;color:var(--text)">DojoIRC</div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:4px">IRC client for LinuxDojo.org</div>
+          <div style="margin-top:16px;display:inline-block;background:var(--bg-sidebar);border:1px solid var(--border);border-radius:4px;padding:6px 18px;font-size:13px">
+            Version <strong>v0.3.0</strong>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <tr><td style="color:var(--text-dim);padding:4px 0;width:120px">Platform</td><td>Linux / macOS / Windows / FreeBSD</td></tr>
+          <tr><td style="color:var(--text-dim);padding:4px 0">Stack</td><td>Go + Wails v2 + WebKit</td></tr>
+          <tr><td style="color:var(--text-dim);padding:4px 0">IRC</td><td>IRCv3 — message-tags, server-time, SASL, typing</td></tr>
+          <tr><td style="color:var(--text-dim);padding:4px 0">License</td><td>MIT</td></tr>
+          <tr><td style="color:var(--text-dim);padding:4px 0">Author</td><td>joehonkey</td></tr>
+          <tr><td style="color:var(--text-dim);padding:4px 0">Source</td><td><a href="#" id="about-gh-link" style="color:var(--accent)">github.com/joehonkey/DojoIRC</a></td></tr>
+        </table>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.getElementById('about-close').addEventListener('click', () => overlay.remove());
+  document.getElementById('about-gh-link').addEventListener('click', e => {
+    e.preventDefault();
+    BrowserOpen('https://github.com/joehonkey/DojoIRC').catch(console.error);
+  });
 }
 
 // ── Documentation overlay ───────────────────────────────────
