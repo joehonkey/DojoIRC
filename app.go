@@ -7,11 +7,13 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/joehonkey/dojoirc/internal/config"
@@ -65,6 +67,14 @@ func (a *App) startup(ctx context.Context) {
 	time.AfterFunc(1500*time.Millisecond, func() {
 		a.connectNewServers(cfg)
 	})
+
+	// Honour SIGTERM/SIGINT so `kill <pid>` cleanly removes the tray icon.
+	go func() {
+		ch := make(chan os.Signal, 1)
+		signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
+		<-ch
+		a.AppQuit()
+	}()
 }
 
 func (a *App) onEvent(ev irc.Event) {
