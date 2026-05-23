@@ -1,22 +1,39 @@
-[colors]
-bg          = "#000000"
-bg_sidebar  = "#000000"
-bg_input    = "#1a1a1a"
-bg_hover    = "#000000"
-bg_active   = "#000000"
-text        = "#00ff00"
-text_dim    = "#ffffff"
-text_server = "#003bf1"
-border      = "#555555"
-accent      = "#ffcc00"
-timestamp   = "#999999"
-nick_self   = "#ffffff"
-action      = "#ffcc00"
+[general]
+background   = "#000000"
+text         = "#00ff00"
+border       = "#555555"
+accent       = "#ffcc00"
 
 [sidebar]
-unread  = "#ffcc00"
-mention = "#ff4444"
+background   = "#000000"
+text         = "#ffffff"
+active       = "#00ff00"
+unread       = "#ffcc00"
+mention      = "#ff4444"
+server       = "#007f00"
+
+[buffer]
+background   = "#000000"
+timestamp    = "#999999"
+server_line  = "#003bf1"
+action       = "#ffcc00"
+nick_self    = "#ffffff"
 
 [highlights]
-mention    = "#ff4444"
-mention_bg = "rgba(255,68,68,0.08)"
+mention_bg   = "#1e0808"
+mention_text = "#ff4444"
+keyword      = "#bbbbbb"
+
+[nicklist]
+background   = "#000000"
+text         = "#ffffff"
+op           = "#ffcc00"
+halfop       = "#bbbbbb"
+voice        = "#00ff66"
+away         = "#999999"
+
+[input]
+background   = "#1a1a1a"
+text         = "#00ff00"
+placeholder  = "#ffffff"
+nick_color   = "#ffffff"

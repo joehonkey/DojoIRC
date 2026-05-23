@@ -1,22 +1,39 @@
-[colors]
-bg          = "#f1e6de"
-bg_sidebar  = "#f4ece6"
-bg_input    = "#eee0d5"
-bg_hover    = "#f4d6c7"
-bg_active   = "#e6c6c3"
-text        = "#685650"
-text_dim    = "#a79891"
-text_server = "#c19317"
-border      = "#ddd0c8"
-accent      = "#ffa07a"
-timestamp   = "#ae9d95"
-nick_self   = "#c4486c"
-action      = "#74862d"
+[general]
+background   = "#f1e6de"
+text         = "#685650"
+border       = "#ddd0c8"
+accent       = "#ffa07a"
 
 [sidebar]
-unread  = "#ffa07a"
-mention = "#df525e"
+background   = "#f4ece6"
+text         = "#a79891"
+active       = "#685650"
+unread       = "#ffa07a"
+mention      = "#df525e"
+server       = "#342b28"
+
+[buffer]
+background   = "#f1e6de"
+timestamp    = "#ae9d95"
+server_line  = "#c19317"
+action       = "#74862d"
+nick_self    = "#c4486c"
 
 [highlights]
-mention    = "#df525e"
-mention_bg = "rgba(223,82,94,0.08)"
+mention_bg   = "#eed4ce"
+mention_text = "#df525e"
+keyword      = "#a352c5"
+
+[nicklist]
+background   = "#f4ece6"
+text         = "#a79891"
+op           = "#ffa07a"
+halfop       = "#a352c5"
+voice        = "#74862d"
+away         = "#645b57"
+
+[input]
+background   = "#eee0d5"
+text         = "#685650"
+placeholder  = "#a79891"
+nick_color   = "#c4486c"
