@@ -16,6 +16,10 @@
   --font-size-typing:       13px;   /* typing indicator */
   --font-size-input-nick:   12px;   /* your nick left of input box */
   --font-size-input:        13px;   /* message input box */
+  --font-size-buffer-title: 14px;   /* channel name in buffer header (#dojoirc) */
+  --font-size-topic-btn:    10px;   /* "topic" pill button */
+  --font-size-modes:        11px;   /* channel modes (+nt) */
+  --font-size-topic:        12px;   /* topic text content */
   --bg:          #1e1e2e;
   --bg-sidebar:  #181825;
   --bg-input:    #313244;
@@ -160,7 +164,7 @@ html, body {
   flex-shrink: 0;
 }
 
-#buffer-title { font-weight: 700; font-size: 14px; }
+#buffer-title { font-weight: 700; font-size: var(--font-size-buffer-title); }
 
 #topic-toggle {
   background: none;
@@ -168,7 +172,7 @@ html, body {
   border-radius: 3px;
   color: var(--text-dim);
   font-family: inherit;
-  font-size: 10px;
+  font-size: var(--font-size-topic-btn);
   padding: 1px 6px;
   cursor: pointer;
   flex-shrink: 0;
@@ -179,7 +183,7 @@ html, body {
 #topic-toggle.active { color: var(--accent); border-color: var(--accent); }
 
 #buffer-modes {
-  font-size: 11px;
+  font-size: var(--font-size-modes);
   color: var(--text-dim);
   background: var(--bg-sidebar);
   border: 1px solid var(--border);
@@ -191,7 +195,7 @@ html, body {
 
 #buffer-topic {
   padding: 5px 16px;
-  font-size: 12px;
+  font-size: var(--font-size-topic);
   color: var(--text-dim);
   border-bottom: 1px solid var(--border);
   background: var(--bg);

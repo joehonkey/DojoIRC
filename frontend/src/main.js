@@ -65,16 +65,20 @@ const SHORTCODES = {
 
 // ── Font size manager zones ───────────────────────────────────
 const FONT_ZONES = [
-  { label: 'Sidebar Header (DOJOIRC)', prop: '--font-size-sidebar-hdr', def: 11 },
-  { label: 'Hamburger Button (☰)',     prop: '--font-size-hamburger',   def: 14 },
-  { label: 'Server Names',             prop: '--font-size-server',      def: 11 },
-  { label: 'Channel Names',            prop: '--font-size-channel',     def: 13 },
-  { label: 'Chat Messages',            prop: '--font-size',             def: 13 },
-  { label: 'Timestamps',               prop: '--font-size-timestamp',   def: 13 },
-  { label: 'Nick List',                prop: '--font-size-nicklist',    def: 12 },
-  { label: 'Typing Indicator',         prop: '--font-size-typing',      def: 13 },
-  { label: 'Input Nick Prefix',        prop: '--font-size-input-nick',  def: 12 },
-  { label: 'Input Field',              prop: '--font-size-input',       def: 13 },
+  { label: 'Sidebar Header (DOJOIRC)', prop: '--font-size-sidebar-hdr',  def: 11 },
+  { label: 'Hamburger Button (☰)',     prop: '--font-size-hamburger',    def: 14 },
+  { label: 'Server Names',             prop: '--font-size-server',       def: 11 },
+  { label: 'Channel Names',            prop: '--font-size-channel',      def: 13 },
+  { label: 'Buffer Title (#channel)',  prop: '--font-size-buffer-title', def: 14 },
+  { label: 'Channel Modes (+nt)',      prop: '--font-size-modes',        def: 11 },
+  { label: 'Topic Button',             prop: '--font-size-topic-btn',    def: 10 },
+  { label: 'Topic Text',               prop: '--font-size-topic',        def: 12 },
+  { label: 'Chat Messages',            prop: '--font-size',              def: 13 },
+  { label: 'Timestamps',               prop: '--font-size-timestamp',    def: 13 },
+  { label: 'Nick List',                prop: '--font-size-nicklist',     def: 12 },
+  { label: 'Typing Indicator',         prop: '--font-size-typing',       def: 13 },
+  { label: 'Input Nick Prefix',        prop: '--font-size-input-nick',   def: 12 },
+  { label: 'Input Field',              prop: '--font-size-input',        def: 13 },
 ];
 
 function applyShortcodes(text) {
