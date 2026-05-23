@@ -207,14 +207,17 @@ function handleEvent(ev) {
     case 'message':
     case 'action': {
       const ch = ensureChannel(ev.server, ev.channel);
-      ch.messages.push({ time: ev.time, nick: ev.nick, text: ev.text, type: ev.type });
+      let isMention = false;
+      if (state.nick && ev.nick && ev.nick !== state.nick) {
+        const re = new RegExp(`(?:^|\\W)${escapeRegex(state.nick)}(?:\\W|$)`, 'i');
+        isMention = re.test(ev.text);
+      }
+      ch.messages.push({ time: ev.time, nick: ev.nick, text: ev.text, type: ev.type, mention: isMention });
       if (ev.server !== state.activeServer || ev.channel !== state.activeChannel) {
         ch.unread++;
-        if (state.nick && ev.nick !== state.nick) {
-          const re = new RegExp(`(?:^|\\W)${escapeRegex(state.nick)}(?:\\W|$)`, 'i');
-          if (re.test(ev.text)) ch.mentions++;
-        }
+        if (isMention) ch.mentions++;
       }
+      if (isMention) fireNotification(ev.server, ev.channel, ev.nick, ev.text);
       setTyping(ev.server, ev.channel, ev.nick, 'done');
       render();
       break;
@@ -548,7 +551,7 @@ function renderMessages() {
       : `<span class="msg-nick${clickable ? ' clickable' : ''}"${nickAttrs} ${color}>${m.nick ? escapeHtml(m.nick) : ''}</span>`;
     const textClass = m.type === 'action' ? 'msg-text action-text' : 'msg-text';
     return `
-    <div class="message ${m.type || ''}">
+    <div class="message ${m.type || ''}${m.mention ? ' mention' : ''}">
       <span class="msg-time">${m.time}</span>
       ${nickDisplay}
       <span class="${textClass}">${renderText(m.text)}</span>
@@ -571,6 +574,14 @@ function renderNicklist() {
 
 // ── Typing indicators ──────────────────────────────────────
 function typingKey(server, channel) { return `${server}\0${channel}`; }
+
+function fireNotification(server, channel, nick, text) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const isActiveChannel = server === state.activeServer && channel === state.activeChannel;
+  if (isActiveChannel && document.hasFocus()) return;
+  const body = text.length > 120 ? text.slice(0, 117) + '…' : text;
+  new Notification(`${nick} in ${channel}`, { body, silent: false });
+}
 
 function setTyping(server, channel, nick, status) {
   const key = typingKey(server, channel);
@@ -1030,11 +1041,10 @@ function showDocs() {
       <div class="docs-body">
 
         <h2>Config File</h2>
-        <p>Location: <code>~/.config/dojoirc/config.toml</code><br>
-        Use <b>Hamburger → Open Config</b> to open it in your editor.</p>
-        <pre><code>theme     = "default"   # theme name (see Themes section)
+        <p>Location: <code>~/.config/dojoirc/config.toml</code> — use <b>Hamburger → Open Config</b> to open it in your editor, then <b>Hamburger → Reload Config</b> to apply changes without restarting.</p>
+        <pre><code>theme     = "default"   # theme name (see Themes)
 font      = "IBM Plex Mono"
-font_size = 13
+font_size = 13          # main chat font size in px
 
 [[server]]
 name     = "LinuxDojo"
@@ -1043,10 +1053,28 @@ port     = 6697
 tls      = true
 nick     = "yournick"
 channels = ["#dojoirc", "#linuxdojo"]</code></pre>
-        <p>Add as many <code>[[server]]</code> blocks as you need. After editing, use <b>Hamburger → Reload Config</b> to connect new servers without restarting.</p>
+
+        <h2>Multiple Servers</h2>
+        <p>Add as many <code>[[server]]</code> blocks as you need. Each gets its own entry in the sidebar. Reload Config connects any new servers without dropping existing ones.</p>
+        <pre><code>[[server]]
+name     = "LinuxDojo"
+host     = "irc.linuxdojo.org"
+port     = 6697
+tls      = true
+nick     = "joe"
+channels = ["#dojoirc"]
+
+[[server]]
+name     = "Libera"
+host     = "irc.libera.chat"
+port     = 6697
+tls      = true
+nick     = "joe"
+channels = ["#linux", "#archlinux"]</code></pre>
+        <p>Right-click any server name in the sidebar to manually connect or disconnect it.</p>
 
         <h2>SASL Authentication</h2>
-        <p>Add a <code>[server.sasl]</code> block directly after the <code>[[server]]</code> entry it belongs to:</p>
+        <p>Add a <code>[server.sasl]</code> block immediately after the <code>[[server]]</code> it belongs to. Only PLAIN is supported currently.</p>
         <pre><code>[[server]]
 name     = "Libera"
 host     = "irc.libera.chat"
@@ -1059,14 +1087,70 @@ channels = ["#linux"]
 mechanism = "PLAIN"
 username  = "youraccountname"
 password  = "yourpassword"</code></pre>
+        <p>SASL negotiation happens during the CAP handshake. A success or failure message appears in the server buffer.</p>
 
         <h2>Themes</h2>
-        <p>Switch themes via <b>Hamburger → Theme picker</b>. Bundled: <code>default</code>, <code>dark</code>, <code>light</code>, <code>BreezeDarkPlus</code>.</p>
-        <p>To add a custom theme, drop a <code>.toml</code> file in <code>~/.config/dojoirc/themes/</code> and reload config.</p>
+        <p>Switch themes via <b>Hamburger → Theme picker</b>. The active theme is highlighted. Selection persists across restarts.</p>
+        <p>Bundled themes: <code>default</code> (Catppuccin Mocha), <code>dark</code>, <code>light</code>, <code>BreezeDarkPlus</code>.</p>
+        <p>To add a custom theme, drop a <code>.toml</code> file in <code>~/.config/dojoirc/themes/</code> and use Reload Config — it will appear in the picker immediately.</p>
+
+        <h2>Mentions &amp; Highlights</h2>
+        <p>Any message containing your current nick (case-insensitive, whole-word match) is a <b>mention</b>. Mentions are highlighted with a red tint on the message row. The channel in the sidebar shows a yellow dot instead of the normal blue unread dot.</p>
+        <p><b>Desktop notifications:</b> DojoIRC uses your OS notification system. On first launch you will be asked to allow notifications. Once granted, a notification fires whenever your nick is mentioned — even if DojoIRC is in the background or you are in a different channel. If you are actively viewing the channel the mention arrived in and the window is focused, no popup is shown since you are already looking at it.</p>
+        <p>Notification permission can be re-granted from your browser/OS settings if you accidentally denied it.</p>
+
+        <h2>Typing Indicators</h2>
+        <p>DojoIRC supports IRCv3 <code>draft/typing</code>. While you are typing, an <code>active</code> indicator is sent to the channel automatically (debounced). When you stop typing it sends <code>paused</code>, and when you send or clear the input it sends <code>done</code>. Other users running clients that support typing indicators will appear above your input bar, e.g. <i>joe is typing…</i></p>
+
+        <h2>Auto-reconnect</h2>
+        <p>If a server drops unexpectedly, DojoIRC retries the connection every 10 seconds and shows reconnect attempts in the server buffer. To cancel reconnection, right-click the server and choose Disconnect. Connecting again after a manual disconnect works the same way — right-click → Connect.</p>
+
+        <h2>URL Previews</h2>
+        <p>URLs in chat are clickable and open in your default browser. DojoIRC also fetches Open Graph metadata for links and shows a preview card below the message — title, description, and thumbnail when available. Plain image links (jpg, png, gif, webp) show inline. Previews are cached for the session so the same URL is only fetched once.</p>
+
+        <h2>DM Windows</h2>
+        <p>Open a private conversation with any user by:</p>
+        <ul style="margin:4px 0 8px 20px;color:var(--text-dim)">
+          <li>Left-clicking or right-clicking their nick in the nick list</li>
+          <li>Left-clicking their nick in chat</li>
+          <li>Using <code>/query &lt;nick&gt;</code> or <code>/msg &lt;nick&gt; &lt;text&gt;</code></li>
+        </ul>
+        <p>DM buffers appear in the sidebar under the server. Right-click to close them.</p>
+
+        <h2>Tab Completion</h2>
+        <p>Press <b>Tab</b> in the input box to complete:</p>
+        <ul style="margin:4px 0 8px 20px;color:var(--text-dim)">
+          <li><b>Nicks</b> — matches nicks in the current channel. At the start of the line, adds <code>: </code> after the nick. Press Tab again to cycle through all matches.</li>
+          <li><b>Slash commands</b> — type <code>/</code> and press Tab to complete or cycle through commands.</li>
+        </ul>
+        <p>Any key other than Tab resets the completion cycle.</p>
+
+        <h2>Slash Commands</h2>
+        <table class="docs-table">
+          <tr><th>Command</th><th>Description</th></tr>
+          <tr><td>/j #channel</td><td>Join a channel (short alias for /join)</td></tr>
+          <tr><td>/join #channel</td><td>Join a channel</td></tr>
+          <tr><td>/part [#channel]</td><td>Leave a channel (defaults to current)</td></tr>
+          <tr><td>/nick &lt;name&gt;</td><td>Change your nick</td></tr>
+          <tr><td>/me &lt;text&gt;</td><td>Send a /me action message</td></tr>
+          <tr><td>/msg &lt;nick&gt; &lt;text&gt;</td><td>Send a private message and open a DM buffer</td></tr>
+          <tr><td>/query &lt;nick&gt;</td><td>Open a DM buffer without sending a message</td></tr>
+          <tr><td>/whois &lt;nick&gt;</td><td>Show info about a user in the server buffer</td></tr>
+          <tr><td>/away [message]</td><td>Set yourself as away with an optional message</td></tr>
+          <tr><td>/back</td><td>Clear away status</td></tr>
+          <tr><td>/topic &lt;text&gt;</td><td>Set the channel topic (ops only)</td></tr>
+          <tr><td>/kick &lt;nick&gt; [reason]</td><td>Kick a user from the channel (ops only)</td></tr>
+          <tr><td>/mode &lt;args&gt;</td><td>Set channel or user modes</td></tr>
+          <tr><td>/invite &lt;nick&gt;</td><td>Invite a user to the current channel</td></tr>
+          <tr><td>/raw &lt;line&gt;</td><td>Send a raw IRC protocol line</td></tr>
+          <tr><td>/clear</td><td>Clear all messages from the current buffer</td></tr>
+          <tr><td>/sysinfo</td><td>Post your OS, kernel, CPU and RAM info to the channel</td></tr>
+          <tr><td>/quit [message]</td><td>Disconnect from the current server</td></tr>
+          <tr><td>/help</td><td>Print the command list into the current buffer</td></tr>
+        </table>
 
         <h2>Font Sizes</h2>
-        <p>All font sizes are CSS custom properties defined in <code>style.css</code>. The main message font also responds to <code>font_size</code> in <code>config.toml</code> — it is applied at runtime on top of these defaults.</p>
-        <p>To change any font size permanently, open <code>style.css</code> (in the DojoIRC source or installed location) and edit the variable value in the <code>:root</code> block.</p>
+        <p>The main chat font size responds to <code>font_size</code> in <code>config.toml</code> (use Reload Config to apply). All other font sizes are CSS custom properties — edit the <code>:root</code> block in <code>style.css</code> to change them.</p>
         <pre><code>/* style.css — :root block */
 :root {
   --font-size:              13px;   /* main chat messages */
@@ -1082,56 +1166,32 @@ password  = "yourpassword"</code></pre>
 }</code></pre>
         <table class="docs-table">
           <tr><th>Variable</th><th>Controls</th><th>Default</th></tr>
-          <tr><td>--font-size</td><td>Main chat message text. Also overridden by <code>font_size</code> in config.toml</td><td>13px</td></tr>
+          <tr><td>--font-size</td><td>Main chat message text (also set by config.toml font_size)</td><td>13px</td></tr>
           <tr><td>--font-size-timestamp</td><td>HH:MM timestamp column left of each message</td><td>11px</td></tr>
-          <tr><td>--font-size-sidebar-hdr</td><td>"DOJOIRC" title and hamburger row at the top of the sidebar</td><td>11px</td></tr>
+          <tr><td>--font-size-sidebar-hdr</td><td>"DOJOIRC" title and hamburger row at top of sidebar</td><td>11px</td></tr>
           <tr><td>--font-size-hamburger</td><td>The ☰ hamburger button symbol</td><td>14px</td></tr>
           <tr><td>--font-size-server</td><td>Server names in the sidebar (e.g. "LINUXDOJO")</td><td>11px</td></tr>
           <tr><td>--font-size-channel</td><td>Channel and DM names in the sidebar</td><td>13px</td></tr>
-          <tr><td>--font-size-nicklist</td><td>Nicks in the nick list on the right</td><td>12px</td></tr>
+          <tr><td>--font-size-nicklist</td><td>Nicks in the nick list panel on the right</td><td>12px</td></tr>
           <tr><td>--font-size-typing</td><td>Typing indicator shown above the input bar</td><td>13px</td></tr>
-          <tr><td>--font-size-input-nick</td><td>Your nick displayed to the left of the message input box</td><td>12px</td></tr>
+          <tr><td>--font-size-input-nick</td><td>Your nick displayed left of the message input box</td><td>12px</td></tr>
           <tr><td>--font-size-input</td><td>Text you type in the message input box</td><td>13px</td></tr>
         </table>
-        <p><b>Quick config.toml method:</b> To change the main chat font size without touching CSS, set <code>font_size = 15</code> in <code>config.toml</code> and use <b>Hamburger → Reload Config</b>. Only the main chat text responds to this setting; everything else requires editing the CSS variables above.</p>
-        <p><b>Example — make the nick list and channel list bigger:</b></p>
+        <p><b>Example — bigger nick list and channel list:</b></p>
         <pre><code>--font-size-nicklist:  14px;
 --font-size-channel:   14px;</code></pre>
-        <p><b>Example — compact sidebar (smaller server and channel labels):</b></p>
-        <pre><code>--font-size-server:    10px;
---font-size-channel:   11px;
+        <p><b>Example — compact sidebar:</b></p>
+        <pre><code>--font-size-server:      10px;
+--font-size-channel:     11px;
 --font-size-sidebar-hdr: 10px;</code></pre>
 
-        <h2>Slash Commands</h2>
-        <table class="docs-table">
-          <tr><th>Command</th><th>Description</th></tr>
-          <tr><td>/j #channel</td><td>Join a channel (alias for /join)</td></tr>
-          <tr><td>/join #channel</td><td>Join a channel</td></tr>
-          <tr><td>/part [#channel]</td><td>Leave a channel</td></tr>
-          <tr><td>/nick &lt;name&gt;</td><td>Change your nick</td></tr>
-          <tr><td>/me &lt;text&gt;</td><td>Send an action (/me waves)</td></tr>
-          <tr><td>/msg &lt;nick&gt; &lt;text&gt;</td><td>Send a private message</td></tr>
-          <tr><td>/query &lt;nick&gt;</td><td>Open a DM buffer</td></tr>
-          <tr><td>/whois &lt;nick&gt;</td><td>Show info about a user</td></tr>
-          <tr><td>/away [message]</td><td>Set away status</td></tr>
-          <tr><td>/back</td><td>Clear away status</td></tr>
-          <tr><td>/topic &lt;text&gt;</td><td>Set channel topic</td></tr>
-          <tr><td>/kick &lt;nick&gt;</td><td>Kick from channel (ops only)</td></tr>
-          <tr><td>/mode &lt;args&gt;</td><td>Set channel or user mode</td></tr>
-          <tr><td>/invite &lt;nick&gt;</td><td>Invite a user to the channel</td></tr>
-          <tr><td>/raw &lt;line&gt;</td><td>Send a raw IRC line</td></tr>
-          <tr><td>/clear</td><td>Clear the current buffer</td></tr>
-          <tr><td>/sysinfo</td><td>Send OS, kernel, CPU and RAM info to the channel</td></tr>
-          <tr><td>/quit [message]</td><td>Disconnect from the server</td></tr>
-          <tr><td>/help</td><td>Show command list in the buffer</td></tr>
-        </table>
+        <h2>Sidebar &amp; Panels</h2>
+        <p>Drag the handle between the sidebar and chat area to resize the sidebar. Drag the handle between chat and the nick list to resize the nick list. Both widths are remembered across restarts.</p>
+        <p>Click a server name to view the server buffer (MOTD and connection messages). Click a channel name to switch to it. The topic bar under the channel name can be toggled with the <b>Topic</b> pill button.</p>
 
-        <h2>UI Tips</h2>
-        <p><b>Sidebar:</b> drag the edge to resize. Right-click a server to connect/disconnect. Right-click a channel to leave.</p>
-        <p><b>Nick list:</b> drag the edge to resize. Left-click or right-click a nick to open a DM.</p>
-        <p><b>Input:</b> right-click to paste. Tab completes nicks (cycles on repeated Tab, adds ": " at line start) and slash commands. Typing indicators are sent automatically while you type.</p>
-        <p><b>Links:</b> click any URL to open in your browser. Preview cards load automatically below links.</p>
-        <p><b>Tray:</b> closing the window hides to tray. Left-click the tray icon to toggle. Right-click to quit.</p>
+        <h2>System Tray</h2>
+        <p>Closing the window hides DojoIRC to the system tray — it stays connected. Left-click the tray icon to show or hide the window. Right-click for Show / Quit.</p>
+        <p>Use <b>Hamburger → Restart</b> to relaunch the app in place (useful after config or theme changes that need a full restart).</p>
 
       </div>
     </div>
@@ -1146,6 +1206,9 @@ render(); // show connecting state immediately
 
 function boot() {
   try { EventsOn('irc:event', handleEvent); } catch (_) {}
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
 
   Promise.resolve()
     .then(() => ReloadConfig())
