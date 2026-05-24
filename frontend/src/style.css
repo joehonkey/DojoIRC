@@ -256,7 +256,26 @@ html, body {
 }
 #search-close:hover { color: var(--text); }
 
+#search-count {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  min-width: 3ch;
+  text-align: right;
+}
+#search-prev, #search-next {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 3px;
+  line-height: 1;
+}
+#search-prev:hover, #search-next:hover { color: var(--text); }
+
 .message.search-miss { opacity: 0.2; }
+.message.search-current { background: var(--bg-hover); outline: 1px solid var(--accent); outline-offset: -1px; }
 
 /* ── Content row ─────────────────────────────────────────── */
 #content {

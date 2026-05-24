@@ -29,6 +29,7 @@ const state = {
   listLoading: false,  // true while LIST is running
   searchOpen: false,
   searchQuery: '',
+  searchMatchIdx: 0,
   scrollback: 5000,
 };
 
@@ -789,7 +790,7 @@ function render() {
         <span id="buffer-title">${state.activeChannel || 'DojoIRC'}</span>
         ${ch?.modes ? `<span id="buffer-modes">${escapeHtml(ch.modes)}</span>` : ''}
         ${ch?.topic ? `<button id="topic-toggle" class="${state.topicVisible ? 'active' : ''}" title="${state.topicVisible ? 'Hide topic' : 'Show topic'}">topic</button>` : ''}
-        ${state.searchOpen ? `<div id="search-bar"><input id="search-input" type="text" placeholder="Search…" value="${escapeAttr(state.searchQuery)}" autocomplete="off"><button id="search-close" title="Close search (Esc)">✕</button></div>` : `<button id="search-open" title="Search (Ctrl+F)">⌕</button>`}
+        ${state.searchOpen ? `<div id="search-bar"><input id="search-input" type="text" placeholder="Search…" value="${escapeAttr(state.searchQuery)}" autocomplete="off"><span id="search-count"></span><button id="search-prev" title="Previous match (Shift+Enter)">↑</button><button id="search-next" title="Next match (Enter)">↓</button><button id="search-close" title="Close search (Esc)">✕</button></div>` : `<button id="search-open" title="Search (Ctrl+F)">⌕</button>`}
       </div>
       ${ch?.topic && state.topicVisible ? `<div id="buffer-topic">${renderText(ch.topic)}</div>` : ''}
       <div id="content">
@@ -962,6 +963,22 @@ function showCtxMenu(x, y, items) {
 function removeCtxMenu() {
   document.getElementById('ctx-menu')?.remove();
   document.getElementById('ctx-overlay')?.remove();
+}
+
+function updateSearchCurrent() {
+  const msgs = document.getElementById('messages');
+  const count = document.getElementById('search-count');
+  if (!msgs) return;
+  const matches = Array.from(msgs.querySelectorAll('.message.search-match'));
+  if (!matches.length) {
+    if (count) count.textContent = state.searchQuery ? '0 of 0' : '';
+    return;
+  }
+  if (state.searchMatchIdx >= matches.length) state.searchMatchIdx = 0;
+  if (state.searchMatchIdx < 0) state.searchMatchIdx = matches.length - 1;
+  matches.forEach((m, i) => m.classList.toggle('search-current', i === state.searchMatchIdx));
+  matches[state.searchMatchIdx].scrollIntoView({ block: 'nearest' });
+  if (count) count.textContent = `${state.searchMatchIdx + 1} of ${matches.length}`;
 }
 
 // ── Events ─────────────────────────────────────────────────
@@ -1256,16 +1273,33 @@ function bindEvents() {
     if (state.searchQuery) searchInput.setSelectionRange(state.searchQuery.length, state.searchQuery.length);
     searchInput.addEventListener('input', () => {
       state.searchQuery = searchInput.value;
+      state.searchMatchIdx = 0;
       const msgs = document.getElementById('messages');
       if (msgs) {
         msgs.innerHTML = renderMessages();
         rebindMessageNicks();
         bindLinkPreviews();
-        const first = msgs.querySelector('.message.search-match');
-        if (first) first.scrollIntoView({ block: 'nearest' });
+        updateSearchCurrent();
+      }
+    });
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (e.shiftKey) state.searchMatchIdx--;
+        else state.searchMatchIdx++;
+        updateSearchCurrent();
       }
     });
   }
+
+  document.getElementById('search-prev')?.addEventListener('click', () => {
+    state.searchMatchIdx--;
+    updateSearchCurrent();
+  });
+  document.getElementById('search-next')?.addEventListener('click', () => {
+    state.searchMatchIdx++;
+    updateSearchCurrent();
+  });
 
   // Search close button
   document.getElementById('search-close')?.addEventListener('click', () => {
@@ -1976,7 +2010,7 @@ function boot() {
     if (e.ctrlKey && !e.altKey && !e.metaKey && e.key === 'f') {
       e.preventDefault();
       state.searchOpen = !state.searchOpen;
-      if (!state.searchOpen) state.searchQuery = '';
+      if (!state.searchOpen) { state.searchQuery = ''; state.searchMatchIdx = 0; }
       render();
       if (state.searchOpen) {
         const si = document.getElementById('search-input');
@@ -1990,6 +2024,7 @@ function boot() {
     if (e.key === 'Escape' && state.searchOpen) {
       state.searchOpen = false;
       state.searchQuery = '';
+      state.searchMatchIdx = 0;
       render();
       document.getElementById('message-input')?.focus();
       return;
