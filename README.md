@@ -182,6 +182,8 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | **Channel list** | `/list` streams all public channels with user counts and topics; filter and click to join |
 | **Away status** | `/away` and `/back` toggle an **away** badge in the input bar; `away-notify` tracks other users |
 | **Ignore list** | Per-server `ignore = [...]` in config silently drops messages from unwanted nicks |
+| **DCC file transfer** | Receive: inline Accept/Decline prompt in DM buffer, downloads to `~/Downloads` with progress. Send: drag a file onto any open DM window |
+| **CTCP stack** | `/version`, `/ping` (shows RTT in ms), `/time`, `/finger`, `/clientinfo`, `/ctcp` — all tab-completable; auto-replies to inbound requests |
 | **Message search** | Ctrl+F opens an in-buffer search bar; matching messages stay bright, others dim |
 | **Keyboard shortcuts** | Alt+↑↓ navigate channels, Alt+←→ switch servers, Ctrl+F search, Escape close |
 | **Scrollback limit** | Configurable per session (`scrollback` in `[behaviour]`); default 5000 messages per buffer |
@@ -378,7 +380,7 @@ DISPLAY=:1 GDK_BACKEND=x11 ./build/bin/DojoIRC
 Project scaffold, IRC engine, UI layout, system tray, themes, multi-server, slash commands, nick colorization, tab completion, URL previews, typing indicators, SASL, auto-reconnect, mention highlights, desktop notifications.
 
 **Stage 2 — Core IRC Features** ✅  
-~~NickServ~~ ✅ ~~CTCP~~ ✅ ~~message logging~~ ✅ ~~channel modes~~ ✅ ~~CAP LS 302 negotiation~~ ✅ ~~away status~~ ✅ ~~channel list~~ ✅ ~~ignore list~~ ✅ — remaining: DCC.
+~~NickServ~~ ✅ ~~CTCP~~ ✅ ~~message logging~~ ✅ ~~channel modes~~ ✅ ~~CAP LS 302 negotiation~~ ✅ ~~away status~~ ✅ ~~channel list~~ ✅ ~~ignore list~~ ✅ ~~DCC SEND~~ ✅ — Stage 2 complete.
 
 **Stage 3 — IRCv3 Capabilities**  
 ~~server-time~~ ✅ — remaining: batch, labeled-response, chathistory, echo-message, msgid, Monitor, multiline, react, read-marker.

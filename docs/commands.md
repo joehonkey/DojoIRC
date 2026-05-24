@@ -66,6 +66,36 @@ Type any of these in the message input box. Tab completes both command names and
 
 ---
 
+## CTCP
+
+Query another user's client info directly. All replies appear in the server buffer.
+
+| Command | Description |
+|---|---|
+| `/version <nick>` | Ask what IRC client and version they are running |
+| `/ping <nick>` | Measure round-trip time to their client — reply shows RTT in ms |
+| `/time <nick>` | Ask their client's local date and time |
+| `/finger <nick>` | Request basic client identity info |
+| `/clientinfo <nick>` | Ask which CTCP commands their client supports |
+| `/ctcp <nick> <cmd> [param]` | Send any arbitrary CTCP request |
+
+DojoIRC auto-replies to inbound VERSION, PING, TIME, FINGER, and CLIENTINFO requests.
+
+---
+
+## DCC file transfer
+
+Send and receive files peer-to-peer (no server relay).
+
+| Action | How |
+|---|---|
+| **Receive a file** | An inline Accept/Decline prompt appears in your DM buffer when someone sends you a file. Click Accept — file downloads to `~/Downloads` with live progress. |
+| **Send a file** | Drag a file from your file manager onto an open DM or query window. The transfer initiates automatically. |
+
+> **NAT note:** outgoing DCC requires the recipient to connect back to your IP. Works reliably on direct connections; may fail behind NAT without port forwarding. Receiving always works.
+
+---
+
 ## Tab completion
 
 Press **Tab** while typing to complete:

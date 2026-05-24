@@ -1869,6 +1869,33 @@ channels = ["#linux"]</code></pre>
         </ul>
         <p>DM buffers appear in the sidebar under the server. Right-click to close them.</p>
 
+        <h2>DCC File Transfer</h2>
+        <p>DojoIRC supports peer-to-peer file transfers via DCC SEND. No server relay — files go directly between clients.</p>
+        <p><b>Receiving a file:</b> when someone sends you a file, an inline prompt appears in your DM buffer:</p>
+        <pre><code>[DCC] alice wants to send photo.jpg (2.4 MB)   [Accept] [Decline]</code></pre>
+        <p>Click <b>Accept</b> — the file downloads to <code>~/Downloads</code>. Progress updates inline and a completion message appears when done.</p>
+        <p><b>Sending a file:</b> drag a file from your file manager and drop it onto an open DM or query window. The transfer starts automatically and the recipient gets the accept/decline prompt.</p>
+        <p><b>Note:</b> outgoing DCC requires the recipient to connect directly to your IP. If you are behind NAT without port forwarding, the recipient will not be able to connect. Receiving always works since you connect outward.</p>
+
+        <h2>CTCP Commands</h2>
+        <p>CTCP (Client-To-Client Protocol) lets you query another user's client information directly. All replies appear in the server buffer.</p>
+        <table class="docs-table">
+          <tr><th>Command</th><th>What it does</th></tr>
+          <tr><td>/version &lt;nick&gt;</td><td>Ask what IRC client and version they are running</td></tr>
+          <tr><td>/ping &lt;nick&gt;</td><td>Measure round-trip time to their client in milliseconds</td></tr>
+          <tr><td>/time &lt;nick&gt;</td><td>Ask their client's local date and time</td></tr>
+          <tr><td>/finger &lt;nick&gt;</td><td>Request basic client identity info</td></tr>
+          <tr><td>/clientinfo &lt;nick&gt;</td><td>Ask which CTCP commands their client supports</td></tr>
+          <tr><td>/ctcp &lt;nick&gt; &lt;cmd&gt; [param]</td><td>Send any arbitrary CTCP request</td></tr>
+        </table>
+        <p>Examples:</p>
+        <pre><code>/version alice
+/ping bob
+/time charlie
+/clientinfo alice
+/ctcp alice ACTION</code></pre>
+        <p>DojoIRC auto-replies to inbound VERSION, PING, TIME, FINGER, and CLIENTINFO requests from other users.</p>
+
         <h2>Keyboard Shortcuts</h2>
         <table class="docs-table">
           <tr><th>Shortcut</th><th>Action</th></tr>
