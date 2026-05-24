@@ -2084,6 +2084,11 @@ function boot() {
     .catch(() => render());
 }
 
+// Prevent WebKit from navigating to dropped files (default browser behaviour).
+// When DCC SEND drag-drop is implemented this will be replaced with the real handler.
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop',     e => e.preventDefault());
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', boot);
 } else {
