@@ -2197,7 +2197,11 @@ function boot() {
   try {
     OnFileDrop((x, y, paths) => {
       if (!paths || !paths.length) return;
-      if (!state.activeChannel || !state.activeServer || !isDm(state.activeChannel)) return;
+      if (!state.activeChannel || !state.activeServer || !isDm(state.activeChannel)) {
+        const ch = activeChannel();
+        if (ch) { ch.messages.push({ time: timestamp(), nick: '', text: 'DCC SEND only works in DM windows — open a query with the recipient first (/query <nick>)', type: 'server' }); render(); }
+        return;
+      }
       DCCSend(state.activeServer, state.activeChannel, paths[0]).catch(console.error);
     }, false);
   } catch (_) {}
