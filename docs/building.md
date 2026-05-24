@@ -123,7 +123,7 @@ git clone https://github.com/joehonkey/DojoIRC
 cd DojoIRC
 export GOROOT=/usr/local/go126
 export PATH=/usr/local/go126/bin:/usr/local/lib/node_modules/corepack/shims:~/go/bin:$PATH
-GONOSUMDB='*' GOFLAGS="-mod=mod" wails build -tags webkit2_41 -ldflags "-X main.Version=v0.4.10"
+GONOSUMDB='*' GOFLAGS="-mod=mod" wails build -tags webkit2_41 -ldflags "-X main.Version=v0.4.11"
 cp -r themes build/bin/
 ```
 
