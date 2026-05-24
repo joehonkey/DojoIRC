@@ -1,3 +1,7 @@
 build/bin/
 frontend/node_modules/
 frontend/dist/
+
+# Local-only files — never push
+CLAUDE.md
+SESSION.md
