@@ -77,11 +77,11 @@ export PATH=$PATH:/usr/local/lib/node_modules/corepack/shims
 
 ### Patch and install Wails
 
-Clone Wails and apply the FreeBSD patches from the DojoIRC repo:
+Clone Wails v2.12.0 and apply the FreeBSD patches from the DojoIRC repo:
 
 ```sh
-git clone https://github.com/wailsapp/wails /home/you/wails
-# apply the FreeBSD patches (see docs/freebsd-wails-patches.md for the full list)
+git clone --depth=1 --branch v2.12.0 https://github.com/wailsapp/wails /home/you/wails
+# apply the FreeBSD patches (see Wails FreeBSD patches table below for the full list)
 ```
 
 Then add a `replace` directive to DojoIRC's `go.mod` so it uses your local patched copy:
@@ -90,11 +90,30 @@ Then add a `replace` directive to DojoIRC's `go.mod` so it uses your local patch
 replace github.com/wailsapp/wails/v2 => /home/you/wails/v2
 ```
 
+**Fix the `ghw` module cache signature mismatch** (one-time per machine; redo if you run `go clean -modcache`):
+
+```sh
+chmod u+w ~/go/pkg/mod/github.com/jaypipes/ghw@v0.21.3/pkg/block/block_stub.go
+```
+
+Edit that file so `load()` accepts `*option.Options`:
+
+```go
+// add this import:
+"github.com/jaypipes/ghw/pkg/option"
+
+// change the signature from:
+func (i *Info) load() error {
+
+// to:
+func (i *Info) load(_ *option.Options) error {
+```
+
 Build and install the patched `wails` CLI:
 
 ```sh
 cd /home/you/wails/v2/cmd/wails
-go install .
+GOROOT=/usr/local/go126 PATH=/usr/local/go126/bin:$PATH GONOSUMDB='*' GOFLAGS="-mod=mod" go install .
 ```
 
 ### Build DojoIRC
@@ -102,8 +121,9 @@ go install .
 ```sh
 git clone https://github.com/joehonkey/DojoIRC
 cd DojoIRC
-export PATH=$PATH:/usr/local/go126/bin:/usr/local/lib/node_modules/corepack/shims:~/go/bin
-GONOSUMDB='*' GOFLAGS="-mod=mod" wails build -tags webkit2_41 -ldflags "-X main.Version=v0.4.6"
+export GOROOT=/usr/local/go126
+export PATH=/usr/local/go126/bin:/usr/local/lib/node_modules/corepack/shims:~/go/bin:$PATH
+GONOSUMDB='*' GOFLAGS="-mod=mod" wails build -tags webkit2_41 -ldflags "-X main.Version=v0.4.10"
 cp -r themes build/bin/
 ```
 
@@ -115,9 +135,25 @@ The `-tags webkit2_41` flag is required on FreeBSD, the same as on Linux. Update
 ./build/bin/DojoIRC
 ```
 
-No `GDK_BACKEND` or `DISPLAY` overrides are needed. The binary picks up the session's `DISPLAY` automatically.
+When launching from within a desktop session, `DISPLAY` is picked up automatically. If you launch from a terminal or script that doesn't inherit the session environment (e.g. SSH without X forwarding), supply `DISPLAY` and `XAUTHORITY` manually:
 
-Tested on: **FreeBSD 15.0-RELEASE-p8 amd64**, KDE Plasma 6 / X11, SDDM (`startplasma-x11`), kwin_x11 compositor. WebKit2GTK 4.1 (2.46.6). Window renders correctly with no visual glitches — identical appearance and behaviour to the Linux build. System tray works fully.
+```sh
+# find the cookie file for :0
+xauth -f /tmp/xauth_<file> list
+DISPLAY=:0 XAUTHORITY=/tmp/xauth_<file> ./build/bin/DojoIRC
+```
+
+**Expected startup warnings (all benign):**
+
+```
+systray error: failed to register: The name org.kde.StatusNotifierWatcher was not provided by any .service files
+libEGL warning: failed to get driver name for fd -1
+WARNING: Can't connect to a11y bus: Could not connect: Permission denied
+```
+
+These fire during binding generation when no live D-Bus tray watcher is present, when WebKit probes for hardware EGL without a DRM context, and when the accessibility bus isn't running. None affect the running app.
+
+Tested on: **FreeBSD 15.0-RELEASE-p9 amd64**, KDE Plasma 6 / X11, SDDM (`startplasma-x11`), kwin_x11 compositor. WebKit2GTK 4.1 (2.46.6). Window renders correctly with no visual glitches — identical appearance and behaviour to the Linux build. System tray works fully.
 
 ### Wails FreeBSD patches
 
