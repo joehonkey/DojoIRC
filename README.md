@@ -58,13 +58,74 @@
   <a href="docs/themes-gallery.md">
     <img src="https://img.shields.io/badge/55%20Themes-Browse%20Gallery-cba6f7?style=for-the-badge" alt="Browse Theme Gallery">
   </a>
+
+  &nbsp;
+
+  <a href="docs/index.md">
+    <img src="https://img.shields.io/badge/📚%20Documentation-Read%20the%20Docs-89dceb?style=for-the-badge" alt="Documentation">
+  </a>
 </div>
 
 ---
 
 ## Documentation
 
-**[Installation](docs/installation.md)** — [Configuration](docs/configuration.md) — [Commands](docs/commands.md) — [Keyboard Shortcuts](docs/keyboard-shortcuts.md) — [Themes](docs/themes.md) — [**Theme Gallery (55 themes)**](docs/themes-gallery.md) — [Font Sizes](docs/font-sizes.md) — [IRCv3](docs/ircv3.md) — [Building from Source](docs/building.md)
+<table>
+  <tr>
+    <td align="center" width="25%">
+      <a href="docs/installation.md"><b>📦 Installation</b></a><br>
+      <sub>Download, install, and first launch on all platforms</sub>
+    </td>
+    <td align="center" width="25%">
+      <a href="docs/configuration.md"><b>⚙️ Configuration</b></a><br>
+      <sub>Full config file reference — servers, SASL, themes, behaviour</sub>
+    </td>
+    <td align="center" width="25%">
+      <a href="docs/commands.md"><b>💬 Commands</b></a><br>
+      <sub>All slash commands with usage examples</sub>
+    </td>
+    <td align="center" width="25%">
+      <a href="docs/keyboard-shortcuts.md"><b>⌨️ Keyboard Shortcuts</b></a><br>
+      <sub>Every keyboard shortcut in one place</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="25%">
+      <a href="docs/themes.md"><b>🎨 Themes</b></a><br>
+      <sub>How theming works, custom TOML themes, color keys</sub>
+    </td>
+    <td align="center" width="25%">
+      <a href="docs/themes-gallery.md"><b>🖼️ Theme Gallery</b></a><br>
+      <sub>Browse all 55 bundled themes with color swatches</sub>
+    </td>
+    <td align="center" width="25%">
+      <a href="docs/font-sizes.md"><b>🔡 Font Sizes</b></a><br>
+      <sub>Live per-zone font size controls — all 14 zones</sub>
+    </td>
+    <td align="center" width="25%">
+      <a href="docs/customization.md"><b>🛠️ Customization</b></a><br>
+      <sub>Advanced options, CSS variables, custom themes</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="25%">
+      <a href="docs/ircv3.md"><b>📡 IRCv3</b></a><br>
+      <sub>Capability support status and implementation notes</sub>
+    </td>
+    <td align="center" width="25%">
+      <a href="docs/building.md"><b>🔨 Building from Source</b></a><br>
+      <sub>Linux, macOS, Windows, FreeBSD — full build guides</sub>
+    </td>
+    <td align="center" width="25%">
+      <a href="docs/faq.md"><b>❓ FAQ</b></a><br>
+      <sub>Common questions, troubleshooting, known quirks</sub>
+    </td>
+    <td align="center" width="25%">
+      <a href="docs/index.md"><b>📚 Full Index</b></a><br>
+      <sub>All documentation pages in one place</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -322,8 +383,8 @@ Project scaffold, IRC engine, UI layout, system tray, themes, multi-server, slas
 **Stage 3 — IRCv3 Capabilities**  
 ~~server-time~~ ✅ — remaining: batch, labeled-response, chathistory, echo-message, msgid, Monitor, multiline, react, read-marker.
 
-**Stage 4 — UX** (in progress)  
-~~message search~~ ✅ ~~keyboard shortcuts~~ ✅ ~~scrollback limit~~ ✅ ~~emoji~~ ✅ ~~input history~~ ✅ — remaining: message search pagination.
+**Stage 4 — UX** ✅  
+~~message search + pagination~~ ✅ ~~keyboard shortcuts~~ ✅ ~~scrollback limit~~ ✅ ~~emoji~~ ✅ ~~input history~~ ✅ ~~font size manager~~ ✅ — complete.
 
 **Stage 5 — Power Features**  
 ~~Bouncer support (ZNC/soju)~~ ✅ — remaining: SOCKS5 proxy, mTLS, split view, drag-to-reorder, flood protection, plugin hooks.
