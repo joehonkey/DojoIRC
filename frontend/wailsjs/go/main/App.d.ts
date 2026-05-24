@@ -7,6 +7,10 @@ import {main} from '../models';
 
 export function AppQuit():Promise<void>;
 
+export function DCCAccept(arg1:string,arg2:string,arg3:string,arg4:string,arg5:number,arg6:number):Promise<void>;
+
+export function DCCSend(arg1:string,arg2:string,arg3:string):Promise<void>;
+
 export function BrowserOpen(arg1:string):Promise<void>;
 
 export function ConnectServer(arg1:string):Promise<void>;

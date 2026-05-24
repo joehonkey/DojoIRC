@@ -83,6 +83,7 @@ func main() {
 		BackgroundColour: &options.RGBA{R: 30, G: 30, B: 46, A: 255},
 		AssetServer:      &assetserver.Options{Assets: assets},
 		OnStartup:        app.startup,
+		DragAndDrop: &options.DragAndDrop{EnableFileDrop: true},
 		OnBeforeClose: func(ctx context.Context) bool {
 			if app.quitting {
 				return false

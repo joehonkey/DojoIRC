@@ -6,6 +6,14 @@ export function AppQuit() {
   return window['go']['main']['App']['AppQuit']();
 }
 
+export function DCCAccept(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['main']['App']['DCCAccept'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+export function DCCSend(arg1, arg2, arg3) {
+  return window['go']['main']['App']['DCCSend'](arg1, arg2, arg3);
+}
+
 export function BrowserOpen(arg1) {
   return window['go']['main']['App']['BrowserOpen'](arg1);
 }

@@ -803,3 +803,22 @@ a.msg-link:hover { color: var(--text); }
 .chanlist-name { color: var(--accent); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chanlist-users { color: var(--text-dim); text-align: right; font-size: 11px; }
 .chanlist-topic { color: var(--text); opacity: 0.75; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── DCC transfer UI ────────────────────────────────────── */
+.dcc-accept, .dcc-decline {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 1px 8px;
+  margin-left: 6px;
+  line-height: 1.4;
+}
+.dcc-accept { border-color: var(--accent); color: var(--accent); }
+.dcc-accept:hover { background: var(--accent); color: var(--bg); }
+.dcc-decline:hover { background: var(--border); }
+.dcc-accepted { color: var(--accent); font-size: 11px; margin-left: 6px; }
+.dcc-declined { color: var(--text-dim); font-size: 11px; margin-left: 6px; }
+.message.dcc_progress .msg-text { color: var(--text-dim); font-size: 11px; font-style: italic; }

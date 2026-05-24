@@ -46,8 +46,8 @@
 - [x] NickServ identify flow
 - [x] Channel modes display
 - [x] Away status (305/306 numerics + away badge in input bar)
-- [ ] DCC SEND — file transfer (peer-to-peer TCP); Go backend opens listener, negotiates via CTCP, streams file directly to recipient's machine
-- [ ] DCC SEND drag-and-drop — drag a file or image onto a DM/query window to initiate a DCC SEND to that user; file lands in recipient's downloads path (Go backend, Option B)
+- [x] DCC SEND — file transfer (peer-to-peer TCP); Go backend opens listener, negotiates via CTCP, streams file to recipient's ~/Downloads
+- [x] DCC SEND drag-and-drop — drag a file onto a DM/query window to initiate DCC SEND; file lands in recipient's ~/Downloads
 - [ ] DCC chat (basic)
 - [x] Channel list (/LIST — streaming overlay panel with filter)
 - [x] Ignore list (per-server ignore = [...] in config)

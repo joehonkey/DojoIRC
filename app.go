@@ -19,9 +19,10 @@ import (
 	"time"
 
 	"github.com/joehonkey/dojoirc/internal/config"
+	"github.com/joehonkey/dojoirc/internal/dcc"
 	"github.com/joehonkey/dojoirc/internal/irc"
-	"github.com/joehonkey/dojoirc/internal/preview"
 	"github.com/joehonkey/dojoirc/internal/logger"
+	"github.com/joehonkey/dojoirc/internal/preview"
 	"github.com/joehonkey/dojoirc/internal/theme"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -610,6 +611,100 @@ func (a *App) ListChannels(server string) {
 	if c, ok := a.clients[server]; ok {
 		c.Raw("LIST")
 	}
+}
+
+// DCCAccept accepts an incoming DCC SEND offer and downloads the file to ~/Downloads.
+func (a *App) DCCAccept(server, nick, file, ip string, port int, size int64) {
+	go func() {
+		dir := dcc.DownloadsDir()
+		var lastPct int64
+		path, err := dcc.Receive(ip, port, file, size, dir, func(received, total int64) {
+			var pct int64
+			if total > 0 {
+				pct = received * 100 / total
+			}
+			if pct-lastPct >= 5 || received == total {
+				lastPct = pct
+				runtime.EventsEmit(a.ctx, "dcc:progress", map[string]interface{}{
+					"server": server, "nick": nick, "file": file,
+					"bytes": received, "total": total,
+				})
+			}
+		})
+		if err != nil {
+			runtime.EventsEmit(a.ctx, "dcc:error", map[string]interface{}{
+				"server": server, "nick": nick, "file": file, "error": err.Error(),
+			})
+			return
+		}
+		runtime.EventsEmit(a.ctx, "dcc:done", map[string]interface{}{
+			"server": server, "nick": nick, "file": file, "path": path,
+		})
+	}()
+}
+
+// DCCSend initiates an outgoing DCC SEND of filePath to nick on server.
+// Note: outgoing DCC requires the recipient to be able to connect to the sender's IP.
+// This may not work behind NAT without port forwarding.
+func (a *App) DCCSend(server, nick, filePath string) {
+	go func() {
+		sender, err := dcc.NewSender(filePath)
+		if err != nil {
+			runtime.EventsEmit(a.ctx, "dcc:error", map[string]interface{}{
+				"server": server, "nick": nick, "file": filepath.Base(filePath), "error": err.Error(),
+			})
+			return
+		}
+		localIP, err := dcc.LocalIP()
+		if err != nil {
+			sender.Close()
+			runtime.EventsEmit(a.ctx, "dcc:error", map[string]interface{}{
+				"server": server, "nick": nick, "file": filepath.Base(filePath),
+				"error": "cannot determine local IP: " + err.Error(),
+			})
+			return
+		}
+		param, err := sender.CTCPParam(localIP)
+		if err != nil {
+			sender.Close()
+			runtime.EventsEmit(a.ctx, "dcc:error", map[string]interface{}{
+				"server": server, "nick": nick, "file": filepath.Base(filePath), "error": err.Error(),
+			})
+			return
+		}
+		a.mu.RLock()
+		c, ok := a.clients[server]
+		a.mu.RUnlock()
+		if ok {
+			c.SendCTCP(nick, "DCC", "SEND "+param)
+		}
+		runtime.EventsEmit(a.ctx, "dcc:sending", map[string]interface{}{
+			"server": server, "nick": nick, "file": filepath.Base(filePath),
+		})
+		var lastPct int64
+		err = sender.Stream(func(sent, total int64) {
+			var pct int64
+			if total > 0 {
+				pct = sent * 100 / total
+			}
+			if pct-lastPct >= 5 || sent == total {
+				lastPct = pct
+				runtime.EventsEmit(a.ctx, "dcc:progress", map[string]interface{}{
+					"server": server, "nick": nick, "file": filepath.Base(filePath),
+					"bytes": sent, "total": total,
+				})
+			}
+		})
+		if err != nil {
+			runtime.EventsEmit(a.ctx, "dcc:error", map[string]interface{}{
+				"server": server, "nick": nick, "file": filepath.Base(filePath), "error": err.Error(),
+			})
+			return
+		}
+		runtime.EventsEmit(a.ctx, "dcc:sent", map[string]interface{}{
+			"server": server, "nick": nick, "file": filepath.Base(filePath),
+		})
+	}()
 }
 
 func (a *App) GetScrollback() int {

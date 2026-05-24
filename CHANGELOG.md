@@ -1,5 +1,24 @@
 # DojoIRC Changelog
 
+## Session 24 — 2026-05-24 (DCC SEND + DCC CHAT — Stage 2 complete)
+
+### What Was Added
+- **DCC SEND (incoming)** — When another user sends a `DCC SEND` CTCP offer, it appears as an inline accept/decline prompt in the DM buffer. Clicking Accept downloads the file to `~/Downloads` via a direct TCP connection. Progress shown inline (every 5%). Completion and errors displayed as system messages.
+- **DCC SEND (outgoing)** — Drag a file onto an open DM/query window to initiate a DCC SEND to that user. Uses Wails `DragAndDrop.EnableFileDrop` to get native file paths. The Go backend opens a TCP listener, sends a CTCP DCC SEND to the peer, then streams the file when the peer connects. Note: outgoing DCC requires the recipient to be able to connect to your IP (may not work behind NAT without port forwarding).
+- **`internal/dcc` package** — New package: `ParseSend`, `IPFromUint32`, `IPToUint32`, `LocalIP`, `DownloadsDir`, `Receive` (download), `Sender` / `NewSender` / `CTCPParam` / `Stream` (upload).
+- **Stage 2 complete** — DCC is the last remaining Stage 2 item. All Stage 2 features are now shipped.
+
+### Files Changed
+- `internal/dcc/dcc.go` — new DCC protocol package
+- `internal/irc/client.go` — Event struct adds `DCCFile`, `DCCIP`, `DCCPort`, `DCCSize` fields; `handleCTCPRequest` handles `DCC SEND` → emits `dcc_offer` event
+- `app.go` — `DCCAccept()` and `DCCSend()` Wails bindings
+- `main.go` — `DragAndDrop: &options.DragAndDrop{EnableFileDrop: true}`
+- `frontend/wailsjs/go/main/App.js` + `App.d.ts` — `DCCAccept`, `DCCSend` exports
+- `frontend/src/main.js` — `dcc_offer` event handler, DCC button delegation in `bindEvents`, `dcc:progress/done/error/sending/sent` Wails event listeners, `OnFileDrop` for drag-drop, `formatBytes` helper, import updates
+- `frontend/src/style.css` — DCC button and progress styles
+
+---
+
 ## Session 23 — 2026-05-24 (Stage 4 complete — search pagination)
 
 ### What Was Added

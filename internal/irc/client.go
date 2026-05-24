@@ -12,6 +12,7 @@ import (
 	ircp "gopkg.in/irc.v3"
 
 	"github.com/joehonkey/dojoirc/internal/config"
+	"github.com/joehonkey/dojoirc/internal/dcc"
 )
 
 type Event struct {
@@ -21,6 +22,10 @@ type Event struct {
 	Nick    string `json:"nick"`
 	Text    string `json:"text"`
 	Time    string `json:"time"`
+	DCCFile string `json:"dcc_file,omitempty"`
+	DCCIP   string `json:"dcc_ip,omitempty"`
+	DCCPort int    `json:"dcc_port,omitempty"`
+	DCCSize int64  `json:"dcc_size,omitempty"`
 }
 
 type Client struct {
@@ -559,6 +564,25 @@ func (c *Client) handleCTCPRequest(client *ircp.Client, from, payload, now, srv 
 			Params:  []string{from, "\x01TIME " + t + "\x01"},
 		})
 		c.emit(Event{Server: srv, Type: "ctcp", Channel: "server", Nick: from, Text: "CTCP TIME from " + from, Time: now})
+	case "DCC":
+		if strings.HasPrefix(param, "SEND ") {
+			file, ip, port, size, err := dcc.ParseSend(strings.TrimPrefix(param, "SEND "))
+			if err != nil {
+				log.Printf("dcc parse: %v", err)
+				return
+			}
+			c.emit(Event{
+				Server:  srv,
+				Type:    "dcc_offer",
+				Channel: from,
+				Nick:    from,
+				DCCFile: file,
+				DCCIP:   ip,
+				DCCPort: port,
+				DCCSize: size,
+				Time:    now,
+			})
+		}
 	}
 }
 
