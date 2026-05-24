@@ -545,7 +545,7 @@ func (c *Client) handleCTCPRequest(client *ircp.Client, from, payload, now, srv 
 	case "VERSION":
 		client.WriteMessage(&ircp.Message{
 			Command: "NOTICE",
-			Params:  []string{from, "\x01VERSION DojoIRC v0.4.11 (https://github.com/joehonkey/DojoIRC)\x01"},
+			Params:  []string{from, "\x01VERSION DojoIRC v0.4.12 (https://github.com/joehonkey/DojoIRC)\x01"},
 		})
 		c.emit(Event{Server: srv, Type: "ctcp", Channel: "server", Nick: from, Text: "CTCP VERSION from " + from, Time: now})
 	case "PING":
@@ -564,6 +564,18 @@ func (c *Client) handleCTCPRequest(client *ircp.Client, from, payload, now, srv 
 			Params:  []string{from, "\x01TIME " + t + "\x01"},
 		})
 		c.emit(Event{Server: srv, Type: "ctcp", Channel: "server", Nick: from, Text: "CTCP TIME from " + from, Time: now})
+	case "FINGER":
+		client.WriteMessage(&ircp.Message{
+			Command: "NOTICE",
+			Params:  []string{from, "\x01FINGER DojoIRC (https://github.com/joehonkey/DojoIRC)\x01"},
+		})
+		c.emit(Event{Server: srv, Type: "ctcp", Channel: "server", Nick: from, Text: "CTCP FINGER from " + from, Time: now})
+	case "CLIENTINFO":
+		client.WriteMessage(&ircp.Message{
+			Command: "NOTICE",
+			Params:  []string{from, "\x01CLIENTINFO VERSION PING TIME FINGER CLIENTINFO DCC\x01"},
+		})
+		c.emit(Event{Server: srv, Type: "ctcp", Channel: "server", Nick: from, Text: "CTCP CLIENTINFO from " + from, Time: now})
 	case "DCC":
 		if strings.HasPrefix(param, "SEND ") {
 			file, ip, port, size, err := dcc.ParseSend(strings.TrimPrefix(param, "SEND "))

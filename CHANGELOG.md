@@ -1,5 +1,20 @@
 # DojoIRC Changelog
 
+## Session 25 — 2026-05-24 (CTCP command stack)
+
+### What Was Added
+- **Full CTCP command stack** — `/version`, `/ping`, `/time`, `/finger`, `/clientinfo`, and the existing `/ctcp` are now all first-class slash commands with tab completion.
+- **PING RTT** — `/ping <nick>` records the send timestamp; when the PING reply arrives the round-trip time is computed and displayed as `PING reply from <nick>: Nms`.
+- **FINGER + CLIENTINFO auto-replies** — DojoIRC now responds to inbound CTCP FINGER (returns client name/URL) and CLIENTINFO (returns supported command list: VERSION PING TIME FINGER CLIENTINFO DCC).
+- All six CTCP commands added to `SLASH_COMMANDS` for tab completion.
+- `/help` and in-app Documentation updated with the new commands.
+
+### Files Changed
+- `internal/irc/client.go` — `handleCTCPRequest` adds FINGER and CLIENTINFO cases; VERSION string bumped to v0.4.12
+- `frontend/src/main.js` — `pingTimes` map, `/version` `/ping` `/time` `/finger` `/clientinfo` slash cases, updated `ctcp_reply` handler (RTT), updated SLASH_COMMANDS, /help text, in-app docs
+
+---
+
 ## Session 24 — 2026-05-24 (DCC SEND + DCC CHAT — Stage 2 complete)
 
 ### What Was Added

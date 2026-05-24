@@ -183,6 +183,7 @@ let outgoingTypingTimer = null;
 
 // Bot nick tracking — populated when MODE <nick> +B is seen
 const botNicks = {}; // "server\0nick" → true
+const pingTimes = {}; // nick → Date.now() when /ping was sent
 
 function botIcon(nick) {
   const icons = ['🤖', '👾'];
@@ -495,7 +496,16 @@ function handleEvent(ev) {
     }
     case 'ctcp_reply': {
       const ch = ensureChannel(ev.server, 'server');
-      ch.messages.push({ time: ev.time, nick: ev.nick, text: `[CTCP] ${ev.text}`, type: 'notice' });
+      let displayText = `[CTCP] ${ev.text}`;
+      if (ev.text.startsWith('PING ')) {
+        const sentAt = pingTimes[ev.nick];
+        if (sentAt) {
+          const rtt = Date.now() - sentAt;
+          delete pingTimes[ev.nick];
+          displayText = `[CTCP] PING reply from ${ev.nick}: ${rtt}ms`;
+        }
+      }
+      ch.messages.push({ time: ev.time, nick: ev.nick, text: displayText, type: 'notice' });
       render();
       break;
     }
@@ -667,6 +677,25 @@ function handleSlash(text) {
       }
       break;
     }
+    case 'version':
+      if (args[0]) SendCTCP(state.activeServer, args[0], 'VERSION', '').catch(console.error);
+      break;
+    case 'ping': {
+      if (args[0]) {
+        pingTimes[args[0]] = Date.now();
+        SendCTCP(state.activeServer, args[0], 'PING', String(Date.now())).catch(console.error);
+      }
+      break;
+    }
+    case 'time':
+      if (args[0]) SendCTCP(state.activeServer, args[0], 'TIME', '').catch(console.error);
+      break;
+    case 'finger':
+      if (args[0]) SendCTCP(state.activeServer, args[0], 'FINGER', '').catch(console.error);
+      break;
+    case 'clientinfo':
+      if (args[0]) SendCTCP(state.activeServer, args[0], 'CLIENTINFO', '').catch(console.error);
+      break;
     case 'raw':
     case 'quote':
       if (args.length) SendRaw(state.activeServer, args.join(' ')).catch(console.error);
@@ -699,22 +728,28 @@ function handleSlash(text) {
       const helpCh = activeChannel();
       if (helpCh) {
         [
-          '/nick <name>       — change your nick',
-          '/whois <nick>      — show info about a user',
-          '/join <#channel>   — join a channel',
-          '/part [#channel]   — leave a channel',
-          '/me <text>         — send an action',
-          '/msg <nick> <text> — send a private message',
-          '/query <nick>      — open a DM buffer',
-          '/away [message]    — set away status',
-          '/back              — clear away status',
-          '/topic <text>      — set channel topic',
-          '/kick <nick>       — kick from channel',
-          '/mode <args>       — set mode',
-          '/invite <nick>     — invite to channel',
-          '/list              — browse channels on this server',
-          '/raw <line>        — send raw IRC line',
-          '/quit [message]    — disconnect',
+          '/nick <name>              — change your nick',
+          '/whois <nick>             — show info about a user',
+          '/join <#channel>          — join a channel',
+          '/part [#channel]          — leave a channel',
+          '/me <text>                — send an action',
+          '/msg <nick> <text>        — send a private message',
+          '/query <nick>             — open a DM buffer',
+          '/away [message]           — set away status',
+          '/back                     — clear away status',
+          '/topic <text>             — set channel topic',
+          '/kick <nick>              — kick from channel',
+          '/mode <args>              — set mode',
+          '/invite <nick>            — invite to channel',
+          '/list                     — browse channels on this server',
+          '/raw <line>               — send raw IRC line',
+          '/quit [message]           — disconnect',
+          '/version <nick>           — query CTCP VERSION',
+          '/ping <nick>              — CTCP PING (shows RTT)',
+          '/time <nick>              — query CTCP TIME',
+          '/finger <nick>            — query CTCP FINGER',
+          '/clientinfo <nick>        — query CTCP CLIENTINFO',
+          '/ctcp <nick> <cmd> [p]    — send arbitrary CTCP request',
         ].forEach(line => helpCh.messages.push({ time: timestamp(), nick: '', text: line, type: 'server' }));
         render();
       }
@@ -730,8 +765,8 @@ function handleSlash(text) {
 
 // ── Tab completion ──────────────────────────────────────────
 const SLASH_COMMANDS = [
-  'away','back','clear','help','invite','j','join','kick','list',
-  'me','mode','msg','nick','part','query','quit','raw','topic','whois',
+  'away','back','clear','clientinfo','ctcp','finger','help','invite','j','join','kick','list',
+  'me','mode','msg','nick','part','ping','query','quit','raw','time','topic','version','whois',
 ];
 
 let tabComp = null;
@@ -1899,6 +1934,12 @@ channels = ["#linux"]</code></pre>
           <tr><td>/sysinfo</td><td>Post your OS, kernel, CPU and RAM info to the channel</td></tr>
           <tr><td>/quit [message]</td><td>Disconnect from the current server</td></tr>
           <tr><td>/help</td><td>Print the command list into the current buffer</td></tr>
+          <tr><td>/version &lt;nick&gt;</td><td>Send a CTCP VERSION request — reply appears in server buffer</td></tr>
+          <tr><td>/ping &lt;nick&gt;</td><td>Send a CTCP PING — reply shows round-trip time in ms</td></tr>
+          <tr><td>/time &lt;nick&gt;</td><td>Send a CTCP TIME request — reply shows remote client's local time</td></tr>
+          <tr><td>/finger &lt;nick&gt;</td><td>Send a CTCP FINGER request</td></tr>
+          <tr><td>/clientinfo &lt;nick&gt;</td><td>Ask which CTCP commands a client supports</td></tr>
+          <tr><td>/ctcp &lt;nick&gt; &lt;cmd&gt; [param]</td><td>Send an arbitrary CTCP request</td></tr>
         </table>
 
         <h2>Font Sizes</h2>
