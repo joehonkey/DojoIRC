@@ -39,6 +39,8 @@ export function JoinChannel(arg1:string,arg2:string):Promise<void>;
 
 export function ListChannels(arg1:string):Promise<void>;
 
+export function MaybeShowKeyboard():Promise<void>;
+
 export function NeedsNickSetup():Promise<boolean>;
 
 export function OpenConfig():Promise<void>;

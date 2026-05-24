@@ -70,6 +70,10 @@ export function ListChannels(arg1) {
   return window['go']['main']['App']['ListChannels'](arg1);
 }
 
+export function MaybeShowKeyboard() {
+  return window['go']['main']['App']['MaybeShowKeyboard']();
+}
+
 export function NeedsNickSetup() {
   return window['go']['main']['App']['NeedsNickSetup']();
 }
