@@ -1,5 +1,23 @@
 # DojoIRC Changelog
 
+## Session 22 — 2026-05-24 (docs — FreeBSD build guide expanded)
+
+### What Changed
+- **`docs/building.md`** — FreeBSD section expanded with session-verified details from a live build on FreeBSD 15.0-RELEASE-p9:
+  - `GOROOT=/usr/local/go126` added to Wails CLI and DojoIRC build commands (go126 installs outside the default PATH)
+  - Wails clone now pinned to `--branch v2.12.0`
+  - `ghw` module cache fix expanded from a vague table note to the actual code change (add `*option.Options` arg to `load()` signature in `block_stub.go`)
+  - `DISPLAY`/`XAUTHORITY` instructions added for launching from non-desktop shells (SSH, scripts)
+  - Three benign startup warnings documented so builders aren't alarmed (systray D-Bus, EGL, a11y)
+  - Tested-on updated from FreeBSD 15.0-RELEASE-p8 to p9
+- **`SESSION.md`** — new session handoff file in project root; tracks what was done each session, open items, current state, and a session-close checklist to keep all docs (BeeMO, in-app docs, README, ROADMAP) in sync
+
+### Files Changed
+- `docs/building.md` — FreeBSD section (44 lines added, 8 changed)
+- `SESSION.md` — new file
+
+---
+
 ## Session 21 — 2026-05-23 (v0.4.10 — bug fixes + Windows improvements)
 
 ### What Was Fixed / Added
