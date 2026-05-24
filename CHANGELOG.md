@@ -1,5 +1,17 @@
 # DojoIRC Changelog
 
+## Session 23 — 2026-05-24 (Stage 4 complete — search pagination)
+
+### What Was Added
+- **Search result pagination** — Ctrl+F search now shows a "N of M" match counter and ↑ ↓ navigation buttons. Enter / Shift+Enter step forward and backward through matches from the keyboard. Wrap-around at both ends. The active match gets a distinct accent-color outline highlight (`.search-current`). Completes Stage 4.
+
+### Files Changed
+- `frontend/src/main.js` — `state.searchMatchIdx`, `updateSearchCurrent()` helper, prev/next button handlers, Enter/Shift+Enter keydown handler in search input, reset on open/close, in-app docs updated
+- `frontend/src/style.css` — `.search-current`, `#search-count`, `#search-prev`, `#search-next` styles
+- `SESSION.md` — session handoff file introduced (local-only, not pushed)
+
+---
+
 ## Session 22 — 2026-05-24 (docs — FreeBSD build guide expanded)
 
 ### What Changed

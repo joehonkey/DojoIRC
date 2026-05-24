@@ -1764,6 +1764,7 @@ channels = ["#linux"]</code></pre>
         <table class="docs-table">
           <tr><th>Shortcut</th><th>Action</th></tr>
           <tr><td>Ctrl+F</td><td>Open / close message search</td></tr>
+          <tr><td>Enter / Shift+Enter</td><td>Next / previous search match</td></tr>
           <tr><td>Escape</td><td>Close search</td></tr>
           <tr><td>Alt+↑ / Alt+↓</td><td>Navigate to previous / next channel or buffer</td></tr>
           <tr><td>Alt+← / Alt+→</td><td>Jump to previous / next server</td></tr>
@@ -1773,7 +1774,7 @@ channels = ["#linux"]</code></pre>
         </table>
 
         <h2>Message Search</h2>
-        <p>Press <b>Ctrl+F</b> to open the search bar in the buffer header. As you type, messages matching by text or nick stay at full opacity — non-matching messages dim. The first match scrolls into view automatically. Press <b>Escape</b> or click <b>✕</b> to close and restore all messages.</p>
+        <p>Press <b>Ctrl+F</b> to open the search bar in the buffer header. As you type, matching messages stay at full opacity — non-matching messages dim. A <b>N of M</b> counter shows your position. Use <b>↑ ↓</b> buttons or <b>Enter / Shift+Enter</b> to step through matches — wraps around at both ends. The active match is highlighted with an accent outline. Press <b>Escape</b> or click <b>✕</b> to close and restore all messages.</p>
 
         <h2>Emoji</h2>
         <p><b>Picker:</b> Click the <b>😊</b> button to the right of the input to open the emoji picker. Browse by category or search by name. Click any emoji to insert it at the cursor.</p>

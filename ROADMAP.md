@@ -93,7 +93,7 @@
 - [x] Context menu overflow fix (flips upward/leftward at screen edges)
 - [x] Emoji support (picker + shortcodes + Tab completion)
 - [x] Input history navigation (Up/Down arrows in message input cycle through sent messages)
-- [x] Message search in buffer (Ctrl+F, live highlight, Escape to close)
+- [x] Message search in buffer (Ctrl+F, live highlight, Escape to close, prev/next navigation with match counter)
 - [x] Buffer scrollback limit (configurable via [behaviour] scrollback, default 5000)
 - [x] Keyboard shortcuts (Alt+↑↓ channels, Alt+←→ servers, Ctrl+F search)
 - [x] Command autocomplete (Tab)
