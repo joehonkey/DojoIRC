@@ -313,7 +313,14 @@ function applyModes(modeSet, modeStr) {
 
 // ── URL preview ────────────────────────────────────────────
 const URL_RE = /https?:\/\/[^\s<>"']+[^\s<>"'.,:;!?)]/g;
-const previewCache = new Map(); // url → result or 'pending'
+const previewCache = new Map(); // url → result or null (pending)
+const PREVIEW_CACHE_MAX = 500;
+function previewCacheSet(url, value) {
+  if (!previewCache.has(url) && previewCache.size >= PREVIEW_CACHE_MAX) {
+    previewCache.delete(previewCache.keys().next().value);
+  }
+  previewCache.set(url, value);
+}
 
 function extractURLs(text) {
   return [...(text.match(URL_RE) || [])];
@@ -374,9 +381,9 @@ function bindLinkPreviews() {
       return;
     }
 
-    previewCache.set(url, null); // mark pending
+    previewCacheSet(url, null); // mark pending
     FetchURLPreview(url).then(p => {
-      previewCache.set(url, p);
+      previewCacheSet(url, p);
       // The message row might have been replaced by a re-render; find it again
       document.querySelectorAll(`a.msg-link[data-url="${escapeAttr(url)}"]`).forEach(link => {
         const row = link.closest('.message');

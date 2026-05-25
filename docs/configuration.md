@@ -14,7 +14,7 @@ font      = "IBM Plex Mono"
 font_size = 13
 
 [behaviour]
-scrollback      = 5000   # max messages kept per buffer
+scrollback      = 500    # messages visible per buffer (hard memory cap: 500, persistence cap: 200)
 notifications   = true
 auto_reconnect  = true
 reconnect_delay = 10
@@ -60,21 +60,48 @@ The `[behaviour]` block controls connection and UI behaviour. All keys are optio
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `scrollback` | integer | `5000` | Maximum number of messages kept in memory per buffer. Older messages are discarded once the limit is reached |
+| `scrollback` | integer | `500` | Number of messages visible per buffer. Hard memory cap is 500; up to 200 messages are persisted across restarts. Values above 500 have no additional effect |
 | `notifications` | bool | `true` | Enable OS desktop notifications on nick mention |
 | `auto_reconnect` | bool | `true` | Automatically reconnect on unexpected disconnect |
 | `reconnect_delay` | integer | `10` | Seconds to wait before each reconnect attempt |
 | `tray` | bool | `true` | Enable system tray integration |
+| `dcc_enabled` | bool | `true` | Enable DCC file transfer and chat. Set `false` to disable all DCC. See [DCC security note](#dcc-security-note) |
+| `previews_enabled` | bool | `true` | Enable URL preview cards. Set `false` to disable all previews. See [URL preview privacy note](#url-preview-privacy-note) |
+| `max_dcc_file_size` | integer | `0` | Reject incoming DCC files larger than this many bytes. `0` means unlimited |
 
 ### Example
 
 ```toml
 [behaviour]
-scrollback      = 10000
+scrollback      = 500
 notifications   = true
 auto_reconnect  = true
 reconnect_delay = 5
 ```
+
+---
+
+## DCC security note
+
+DCC (Direct Client-to-Client) transfers use a direct TCP connection between you and another IRC user. This means:
+
+- The other user learns your IP address.
+- Files are transferred without encryption.
+- Only accept DCC offers from users you trust.
+
+Set `dcc_enabled = false` in `[behaviour]` to disable all DCC. You can also limit the maximum accepted file size with `max_dcc_file_size`.
+
+---
+
+## URL preview privacy note
+
+When URL previews are enabled, DojoIRC fetches metadata (title, description, image) for links that appear in chat. This means:
+
+- A network request is made to each linked site as messages arrive.
+- The site receives your IP address and a DojoIRC user-agent string.
+- Preview image thumbnails are loaded by the webview from the image's origin, which may be a third-party host.
+
+Set `previews_enabled = false` in `[behaviour]` to disable all URL previews.
 
 ---
 

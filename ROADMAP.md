@@ -133,6 +133,32 @@
 - [x] GitHub Actions CI (build matrix: linux/windows/macos; v* tag triggers release with platform artifacts)
 - [ ] Auto-update check
 
+## Security & Reliability
+
+- [x] Write `config.toml` with `0600` permissions (secrets are currently world-readable on multi-user systems)
+- [x] Validate URL scheme in `BrowserOpen` backend (defense-in-depth; frontend already validates)
+- [x] DCC hardening: quoted filename parsing, port/size range checks, `DialTimeout`, read/write deadlines, stop at advertised size, no-overwrite (rename collisions)
+- [x] DCC: add max receive file size setting in config
+- [x] Protect `a.quitting` with `sync/atomic.Bool`; guard all `a.clients` and `a.cfg` access consistently under `a.mu`
+- [ ] Add context cancellation to `App` and IRC clients to coordinate clean shutdown
+- [x] Preview cache: add TTL and max-entry limit (backend `sync.Map` and frontend `Map` are currently unbounded)
+- [x] First-run safety: DCC and URL previews off-by-default until enabled in config
+- [x] Add DCC security note and URL preview privacy note to docs
+- [x] Align scrollback docs and config with actual behavior (memory cap 500, persistence cap 200)
+- [x] Add `SECURITY.md`
+
+## Testing & CI
+
+- [x] CI workflow for push/PR (separate from release workflow — go test, go vet, frontend build)
+- [x] Pin Wails CLI version in release workflow (currently uses `@latest`)
+- [x] Go unit tests: `internal/dcc` (ParseSend, malformed payloads, quoted filenames, IP conversion)
+- [x] Go unit tests: `internal/preview` (scheme check, private IP rejection, redirect behavior, read limit)
+- [x] Go unit tests: `internal/config` (defaults, missing file, bad TOML, SASL parsing)
+- [ ] IRC integration tests with fake server (connect/CAP/SASL/reconnect/malformed messages/no-reconnect-after-quit)
+- [x] Run `go test -race ./...` locally and fix reported races
+- [x] Add `govulncheck` and Dependabot for Go modules and npm
+- [x] Add checksums to release artifacts
+
 ## IRCv3 Capabilities
 
 We strive to be a leading IRC client with a rich IRCv3 feature set.

@@ -13,35 +13,92 @@ import (
 	"time"
 )
 
+const (
+	dialTimeout      = 30 * time.Second
+	acceptTimeout    = 2 * time.Minute
+	transferDeadline = 2 * time.Hour
+)
+
 // ParseSend parses a "SEND filename ipuint32 port size" DCC param string.
-// Returns the filename, dotted IPv4, TCP port, and file size.
+// Handles quoted filenames containing spaces.
 func ParseSend(param string) (file, ip string, port int, size int64, err error) {
-	parts := strings.Fields(param)
-	if len(parts) < 4 {
-		err = fmt.Errorf("dcc: malformed SEND: %q", param)
+	var rest string
+	if strings.HasPrefix(param, `"`) {
+		end := strings.Index(param[1:], `"`)
+		if end < 0 {
+			err = fmt.Errorf("dcc: unterminated quoted filename: %q", param)
+			return
+		}
+		file = param[1 : end+1]
+		rest = strings.TrimSpace(param[end+2:])
+	} else {
+		idx := strings.IndexAny(param, " \t")
+		if idx < 0 {
+			err = fmt.Errorf("dcc: malformed SEND: %q", param)
+			return
+		}
+		file = param[:idx]
+		rest = strings.TrimSpace(param[idx+1:])
+	}
+
+	if file == "" {
+		err = fmt.Errorf("dcc: empty filename")
 		return
 	}
-	file = parts[0]
-	if len(file) >= 2 && file[0] == '"' && file[len(file)-1] == '"' {
-		file = file[1 : len(file)-1]
+
+	parts := strings.Fields(rest)
+	if len(parts) < 3 {
+		err = fmt.Errorf("dcc: malformed SEND (missing fields): %q", param)
+		return
 	}
-	ipInt, e := strconv.ParseUint(parts[1], 10, 32)
+
+	ipInt, e := strconv.ParseUint(parts[0], 10, 32)
 	if e != nil {
-		err = fmt.Errorf("dcc: bad ip %q: %w", parts[1], e)
+		err = fmt.Errorf("dcc: bad ip %q: %w", parts[0], e)
 		return
 	}
 	ip = IPFromUint32(uint32(ipInt))
-	port, e = strconv.Atoi(parts[2])
+
+	port, e = strconv.Atoi(parts[1])
 	if e != nil {
-		err = fmt.Errorf("dcc: bad port %q: %w", parts[2], e)
+		err = fmt.Errorf("dcc: bad port %q: %w", parts[1], e)
 		return
 	}
-	size, e = strconv.ParseInt(parts[3], 10, 64)
-	if e != nil {
-		err = fmt.Errorf("dcc: bad size %q: %w", parts[3], e)
+	if port < 1 || port > 65535 {
+		err = fmt.Errorf("dcc: port out of range: %d", port)
 		return
 	}
+
+	size, e = strconv.ParseInt(parts[2], 10, 64)
+	if e != nil {
+		err = fmt.Errorf("dcc: bad size %q: %w", parts[2], e)
+		return
+	}
+	if size <= 0 {
+		err = fmt.Errorf("dcc: invalid size: %d", size)
+		return
+	}
+
 	return
+}
+
+// safeDest returns a path in dir for filename that does not overwrite an existing file.
+// If dir/filename exists it appends " (1)", " (2)", etc. up to 999.
+func safeDest(dir, filename string) string {
+	base := filepath.Base(filename)
+	dest := filepath.Join(dir, base)
+	if _, err := os.Stat(dest); os.IsNotExist(err) {
+		return dest
+	}
+	ext := filepath.Ext(base)
+	stem := base[:len(base)-len(ext)]
+	for i := 1; i < 1000; i++ {
+		candidate := filepath.Join(dir, fmt.Sprintf("%s (%d)%s", stem, i, ext))
+		if _, err := os.Stat(candidate); os.IsNotExist(err) {
+			return candidate
+		}
+	}
+	return dest
 }
 
 // IPFromUint32 converts a DCC 32-bit integer IP to dotted notation.
@@ -97,7 +154,6 @@ func PublicIP() string {
 			}
 		}
 	}
-	// fall back to LAN IP
 	local, err := LocalIP()
 	if err != nil {
 		return "0.0.0.0"
@@ -109,13 +165,14 @@ func PublicIP() string {
 // progress(received, total) is called after each chunk.
 // Returns the path of the saved file.
 func Receive(ip string, port int, filename string, size int64, dir string, progress func(int64, int64)) (string, error) {
-	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", ip, port))
+	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", ip, port), dialTimeout)
 	if err != nil {
 		return "", fmt.Errorf("dcc receive: connect: %w", err)
 	}
 	defer conn.Close()
+	conn.SetDeadline(time.Now().Add(transferDeadline))
 
-	destPath := filepath.Join(dir, filepath.Base(filename))
+	destPath := safeDest(dir, filename)
 	f, err := os.Create(destPath)
 	if err != nil {
 		return "", fmt.Errorf("dcc receive: create file: %w", err)
@@ -125,8 +182,12 @@ func Receive(ip string, port int, filename string, size int64, dir string, progr
 	buf := make([]byte, 32*1024)
 	ack := make([]byte, 4)
 	var received int64
-	for {
-		n, rerr := conn.Read(buf)
+	for received < size {
+		toRead := int64(len(buf))
+		if size-received < toRead {
+			toRead = size - received
+		}
+		n, rerr := conn.Read(buf[:toRead])
 		if n > 0 {
 			if _, werr := f.Write(buf[:n]); werr != nil {
 				return "", fmt.Errorf("dcc receive: write: %w", werr)
@@ -144,6 +205,9 @@ func Receive(ip string, port int, filename string, size int64, dir string, progr
 		if rerr != nil {
 			return "", fmt.Errorf("dcc receive: read: %w", rerr)
 		}
+	}
+	if received < size {
+		return destPath, fmt.Errorf("dcc receive: incomplete: got %d of %d bytes", received, size)
 	}
 	return destPath, nil
 }
@@ -185,11 +249,15 @@ func (s *Sender) CTCPParam(localIP string) (string, error) {
 // Stream accepts one inbound connection and sends the file. Blocks until done or error.
 func (s *Sender) Stream(progress func(int64, int64)) error {
 	defer s.ln.Close()
+	if tl, ok := s.ln.(*net.TCPListener); ok {
+		tl.SetDeadline(time.Now().Add(acceptTimeout))
+	}
 	conn, err := s.ln.Accept()
 	if err != nil {
 		return fmt.Errorf("dcc send: accept: %w", err)
 	}
 	defer conn.Close()
+	conn.SetDeadline(time.Now().Add(transferDeadline))
 
 	f, err := os.Open(s.FilePath)
 	if err != nil {
@@ -210,7 +278,9 @@ func (s *Sender) Stream(progress func(int64, int64)) error {
 				return fmt.Errorf("dcc send: write: %w", werr)
 			}
 			sent += int64(n)
-			conn.Read(ack) //nolint:errcheck
+			if _, ackerr := conn.Read(ack); ackerr != nil && ackerr != io.EOF {
+				return fmt.Errorf("dcc send: ack: %w", ackerr)
+			}
 			if progress != nil {
 				progress(sent, total)
 			}

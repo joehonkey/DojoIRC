@@ -25,6 +25,9 @@ type Behaviour struct {
 	Scrollback     int    `toml:"scrollback"`
 	AutoReconnect  bool   `toml:"auto_reconnect"`
 	ReconnectDelay int    `toml:"reconnect_delay"`
+	DCCEnabled     bool   `toml:"dcc_enabled"`
+	PreviewsEnabled bool  `toml:"previews_enabled"`
+	MaxDCCFileSize int64  `toml:"max_dcc_file_size"` // bytes; 0 = unlimited
 }
 
 type Server struct {
@@ -76,11 +79,14 @@ func defaults() *Config {
 		Font:     "IBM Plex Mono",
 		FontSize: 13,
 		Behaviour: Behaviour{
-			Tray:           true,
-			Notifications:  true,
-			Scrollback:     5000,
-			AutoReconnect:  true,
-			ReconnectDelay: 10,
+			Tray:            true,
+			Notifications:   true,
+			Scrollback:      500,
+			AutoReconnect:   true,
+			ReconnectDelay:  10,
+			DCCEnabled:      true,
+			PreviewsEnabled: true,
+			MaxDCCFileSize:  0,
 		},
 		Commands: Commands{
 			Exec: Exec{
