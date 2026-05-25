@@ -183,6 +183,8 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | **Away status** | `/away` and `/back` toggle an **away** badge in the input bar; `away-notify` tracks other users |
 | **Ignore list** | Per-server `ignore = [...]` in config silently drops messages from unwanted nicks |
 | **DCC file transfer** | Receive: inline Accept/Decline prompt in DM buffer, downloads to `~/Downloads` with progress. Send: drag a file onto any open DM window |
+| **DCC Chat** | `/dcc chat <nick>` to initiate; incoming offers show Accept/Decline (💬); messages route over a direct TCP connection, bypassing the server |
+| **Hide nick / hide userlist** | ‹/› pill left of nick hides your nick in the input bar; ◂/▸ in the buffer header hides the nicklist — both persist across restarts |
 | **CTCP stack** | `/version`, `/ping` (shows RTT in ms), `/time`, `/finger`, `/clientinfo`, `/ctcp` — all tab-completable; auto-replies to inbound requests |
 | **Message search** | Ctrl+F opens an in-buffer search bar; matching messages stay bright, others dim |
 | **Keyboard shortcuts** | Alt+↑↓ navigate channels, Alt+←→ switch servers, Ctrl+F search, Escape close |

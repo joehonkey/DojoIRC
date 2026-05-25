@@ -112,6 +112,19 @@ Send and receive files peer-to-peer (no server relay).
 
 ---
 
+## DCC Chat
+
+Direct TCP chat with another user — messages bypass the IRC server entirely.
+
+| Action | How |
+|---|---|
+| **Initiate** | `/dcc chat <nick>` — sends a DCC CHAT offer, waits 30s for them to accept |
+| **Receive** | An inline 💬 Accept/Decline prompt appears in the DM buffer |
+| **Chatting** | Once connected, messages typed in the DM window go directly over TCP — not through the server |
+| **Status** | "DCC Chat established" and "DCC Chat closed" lines appear in the buffer |
+
+---
+
 ## Tab completion
 
 Press **Tab** while typing to complete:

@@ -1984,6 +1984,16 @@ channels = ["#linux"]</code></pre>
         <p><b>Sending a file:</b> drag a file from your file manager and drop it onto an open DM or query window. The transfer starts automatically and the recipient gets the accept/decline prompt.</p>
         <p><b>Note:</b> outgoing DCC requires the recipient to connect directly to your IP. If you are behind NAT without port forwarding, the recipient will not be able to connect. Receiving always works since you connect outward.</p>
 
+        <h2>DCC Chat</h2>
+        <p>DCC Chat opens a direct TCP chat session with another user, bypassing the IRC server entirely.</p>
+        <p><b>Initiating:</b> open a DM with the user, then type:</p>
+        <pre><code>/dcc chat &lt;nick&gt;</code></pre>
+        <p>DojoIRC sends them a DCC CHAT offer and waits up to 30 seconds for them to accept.</p>
+        <p><b>Receiving:</b> incoming DCC CHAT offers appear as an inline prompt in your DM buffer:</p>
+        <pre><code>💬 alice wants to open a DCC Chat   [Accept] [Decline]</code></pre>
+        <p>Click <b>Accept</b> — the session connects and a status line confirms it. From that point, messages you type in the DM window go directly over the TCP connection, not through the IRC server. Incoming messages appear as normal chat lines.</p>
+        <p>When either side closes the connection a "DCC Chat closed" line appears in the buffer.</p>
+
         <h2>CTCP Commands</h2>
         <p>CTCP (Client-To-Client Protocol) lets you query another user's client information directly. All replies appear in the server buffer.</p>
         <table class="docs-table">
@@ -2100,6 +2110,8 @@ channels = ["#linux"]</code></pre>
         <h2>Sidebar &amp; Panels</h2>
         <p>Drag the handle between the sidebar and chat area to resize the sidebar. Drag the handle between chat and the nick list to resize the nick list. Both widths are remembered across restarts.</p>
         <p>Click a server name to view the server buffer (MOTD and connection messages). Click a channel name to switch to it. The topic bar under the channel name can be toggled with the <b>Topic</b> pill button.</p>
+        <p><b>Hide nick:</b> click the <b>‹</b> pill button to the left of your nick in the input bar to collapse it. Click <b>›</b> to restore it. Setting persists across restarts.</p>
+        <p><b>Hide userlist:</b> click the <b>◂</b> pill button in the buffer header (next to the channel modes) to hide the nick list. Click <b>▸</b> to show it again. Setting persists across restarts.</p>
 
         <h2>Windows Notes</h2>
         <p><b>Open Config</b> opens the config in Notepad. To use a different editor, set the <code>EDITOR</code> or <code>VISUAL</code> environment variable before launching DojoIRC (e.g. <code>set EDITOR=code</code> for VS Code).</p>
