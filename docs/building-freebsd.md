@@ -465,10 +465,11 @@ cd /home/joe/dojoirc
 export GOROOT=/usr/local/go126
 export PATH=/usr/local/go126/bin:/usr/local/lib/node_modules/corepack/shims:/home/joe/go/bin:$PATH
 
-GONOSUMDB='*' GOFLAGS="-mod=mod" wails build -tags webkit2_41 -ldflags "-X main.Version=$(git describe --tags --abbrev=0)" 2>&1
+rm -rf frontend/dist
+GONOSUMDB='*' GOFLAGS="-mod=mod" wails build -tags webkit2_41 -ldflags "-X main.Version=v0.4.19" 2>&1
 ```
 
-The version is read from the nearest git tag — no more hardcoding. Make sure you have fetched tags first (`git fetch --tags`).
+Update the version string when bumping a release. The `rm -rf frontend/dist` ensures Wails rebuilds the JS bundle from source rather than embedding a cached older build. FreeBSD's default csh does not support `$(...)` command substitution — always hardcode the version string here.
 
 Build time was approximately 1m11s on this machine.
 
@@ -550,5 +551,5 @@ Accessibility bus (AT-SPI) is not running. Non-critical.
 - When Wails releases a new version, check if any of the patched files have changed upstream before re-applying. The patch surface is well-defined: look for anything with `//go:build linux` in the `linux/` frontend package and the `webview/` package.
 - `go126` and `webkit2-gtk_41` must both be installed. Neither is pulled in by the default `go` meta-package.
 - The build command must always include `-tags webkit2_41`. Without it, Wails defaults to the webkit2gtk-4.0 pkg-config name which is not installed.
-- The version string is embedded automatically via `-ldflags "-X main.Version=$(git describe --tags --abbrev=0)"`. Run `git fetch --tags` before building to ensure the latest tag is present. It appears in the About panel.
+- The version string must be hardcoded in the build command: `-ldflags "-X main.Version=vX.Y.Z"`. FreeBSD's csh does not support `$(...)` substitution. Always run `rm -rf frontend/dist` before building to avoid embedding a stale cached frontend bundle.
 - Tested on: FreeBSD 15.0-RELEASE-p9 amd64, KDE Plasma 6 / X11, SDDM, kwin_x11, WebKit2GTK 4.1 (2.46.6_7). All features confirmed working.
