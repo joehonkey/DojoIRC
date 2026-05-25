@@ -293,11 +293,11 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 6px 8px;
+  gap: 1px;
+  padding: 3px 5px;
   background: var(--bg-input);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   opacity: 0.85;
   z-index: 10;
@@ -305,10 +305,10 @@ html, body {
 #scroll-btn:hover { opacity: 1; background: var(--bg-hover); }
 .chv {
   display: block;
-  width: 10px;
-  height: 10px;
-  border-right: 2px solid var(--accent);
-  border-bottom: 2px solid var(--accent);
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--accent);
+  border-bottom: 1.5px solid var(--accent);
   transform: rotate(45deg);
 }
 
@@ -401,10 +401,13 @@ html, body {
 
 /* ── Typing indicator ─────────────────────────────────────── */
 #typing-bar {
-  padding: 0 16px 3px;
+  padding: 0 16px;
   font-size: var(--font-size-typing);
   color: var(--text-dim);
-  min-height: 16px;
+  height: calc(var(--font-size-typing) + 8px);
+  line-height: calc(var(--font-size-typing) + 8px);
+  overflow: hidden;
+  flex-shrink: 0;
   font-style: italic;
 }
 
