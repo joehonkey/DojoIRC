@@ -950,6 +950,7 @@ function handleTab(input) {
 
 // ── Render ─────────────────────────────────────────────────
 let _renderPending = false;
+let _forceScrollBottom = false;
 function render() {
   if (_renderPending) return;
   _renderPending = true;
@@ -964,8 +965,9 @@ function doRender() {
   const prevKey = prevMsgs?.dataset.channel;
   const curKey  = state.activeServer + '/' + state.activeChannel;
   // Scroll to bottom if: no previous buffer, channel switched, or user was already at the bottom
-  const atBottom = !prevMsgs || prevKey !== curKey ||
+  const atBottom = _forceScrollBottom || !prevMsgs || prevKey !== curKey ||
     prevMsgs.scrollTop + prevMsgs.clientHeight >= prevMsgs.scrollHeight - 60;
+  _forceScrollBottom = false;
 
   const prevInput = document.getElementById('message-input');
   const savedInput = prevInput ? prevInput.value : '';
@@ -1673,6 +1675,7 @@ function sendMessage(text) {
   }
 
   addMsg(ch,{ time: timestamp(), nick: myNick(state.activeServer), text: converted, type: 'message' });
+  _forceScrollBottom = true;
   render();
 }
 
