@@ -166,7 +166,7 @@ html, body {
 
 #buffer-title { font-weight: 700; font-size: var(--font-size-buffer-title); }
 
-#topic-toggle {
+#topic-toggle, #nicklist-toggle {
   background: none;
   border: 1px solid var(--border);
   border-radius: 3px;
@@ -179,8 +179,8 @@ html, body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-#topic-toggle:hover { color: var(--text); border-color: var(--accent); }
-#topic-toggle.active { color: var(--accent); border-color: var(--accent); }
+#topic-toggle:hover, #nicklist-toggle:hover { color: var(--text); border-color: var(--accent); }
+#topic-toggle.active, #nicklist-toggle.active { color: var(--accent); border-color: var(--accent); }
 
 #buffer-modes {
   font-size: var(--font-size-modes);
@@ -390,6 +390,20 @@ html, body {
   background: var(--bg-input);
   flex-shrink: 0;
 }
+
+#nick-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 10px;
+  padding: 1px 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  line-height: 1;
+}
+#nick-toggle:hover { color: var(--text); border-color: var(--accent); }
 
 #input-nick {
   font-size: var(--font-size-input-nick);

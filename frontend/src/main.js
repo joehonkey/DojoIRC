@@ -33,6 +33,7 @@ const state = {
   searchMatchIdx: 0,
   scrollback: 5000,
   nicklistHidden: localStorage.getItem('nicklistHidden') === 'true',
+  nickHidden: localStorage.getItem('nickHidden') === 'true',
   dccChats: {},
 };
 
@@ -882,7 +883,8 @@ function render() {
       </div>
       <div id="typing-bar"></div>
       <div id="input-bar">
-        <span id="input-nick">${state.nick}${state.awayServer === state.activeServer ? '<span class="away-badge">away</span>' : ''}</span>
+        <button id="nick-toggle" title="${state.nickHidden ? 'Show nick' : 'Hide nick'}">${state.nickHidden ? '›' : '‹'}</button>
+        ${state.nickHidden ? '' : `<span id="input-nick">${state.nick}${state.awayServer === state.activeServer ? '<span class="away-badge">away</span>' : ''}</span>`}
         <input id="message-input" type="text" placeholder="${state.activeChannel ? 'Message ' + state.activeChannel : 'Not connected'}" autocomplete="off" />
         <button id="emoji-btn" title="Emoji">😊</button>
       </div>
@@ -1432,6 +1434,20 @@ function bindEvents() {
   // Topic toggle
   document.getElementById('topic-toggle')?.addEventListener('click', () => {
     state.topicVisible = !state.topicVisible;
+    render();
+  });
+
+  // Nicklist toggle
+  document.getElementById('nicklist-toggle')?.addEventListener('click', () => {
+    state.nicklistHidden = !state.nicklistHidden;
+    localStorage.setItem('nicklistHidden', state.nicklistHidden);
+    render();
+  });
+
+  // Nick hide toggle
+  document.getElementById('nick-toggle')?.addEventListener('click', () => {
+    state.nickHidden = !state.nickHidden;
+    localStorage.setItem('nickHidden', state.nickHidden);
     render();
   });
 
