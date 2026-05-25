@@ -189,6 +189,7 @@ function showEmojiPicker(anchorEl) {
 const typingNicks = {};       // "server\0channel" → Set<nick>
 const typingClearTimers = {}; // "server\0channel\0nick" → timerId
 let outgoingTypingTimer = null;
+let outgoingTypingActiveTimer = null; // rate-limits the 'active' send to once per 3s
 
 // Bot nick tracking — populated when MODE <nick> +B is seen
 const botNicks = {}; // "server\0nick" → true
@@ -1230,6 +1231,8 @@ function bindEvents() {
         const val = input.value.trim();
         input.value = '';
         clearTimeout(outgoingTypingTimer);
+        clearTimeout(outgoingTypingActiveTimer);
+        outgoingTypingActiveTimer = null;
         if (val && state.activeChannel && state.activeChannel !== 'server') {
           SendTyping(state.activeServer, state.activeChannel, 'done').catch(() => {});
         }
@@ -1239,7 +1242,11 @@ function bindEvents() {
       // Send typing indicator (debounced, channels and DMs only)
       if (state.activeChannel && state.activeChannel !== 'server' && !e.ctrlKey && !e.metaKey) {
         clearTimeout(outgoingTypingTimer);
-        SendTyping(state.activeServer, state.activeChannel, 'active').catch(() => {});
+        // 'active' is rate-limited to one send per 3s to avoid flooding
+        if (!outgoingTypingActiveTimer) {
+          SendTyping(state.activeServer, state.activeChannel, 'active').catch(() => {});
+          outgoingTypingActiveTimer = setTimeout(() => { outgoingTypingActiveTimer = null; }, 3000);
+        }
         outgoingTypingTimer = setTimeout(() => {
           SendTyping(state.activeServer, state.activeChannel, 'paused').catch(() => {});
         }, 5000);
