@@ -1,6 +1,6 @@
 # DojoIRC Changelog
 
-## Session 32 — 2026-05-25 (v0.4.20 — security & reliability hardening)
+## Session 32 — 2026-05-25 (v0.4.21 — security & reliability hardening)
 
 ### What Was Added
 - **CI pipeline** — `.github/workflows/ci.yml` runs `go vet`, `go test`, `go test -race`, frontend build, and `govulncheck` on every push to `main` and every PR
