@@ -54,7 +54,7 @@ func (c *Client) isIgnored(nick string) bool {
 }
 
 func (c *Client) dial() error {
-	addr := fmt.Sprintf("%s:%d", c.server.Host, c.server.Port)
+	addr := net.JoinHostPort(c.server.Host, strconv.Itoa(c.server.Port))
 	var err error
 	if c.server.TLS {
 		c.conn, err = tls.Dial("tcp", addr, &tls.Config{ServerName: c.server.Host})
