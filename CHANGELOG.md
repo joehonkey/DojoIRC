@@ -1,5 +1,17 @@
 # DojoIRC Changelog
 
+## Session 29 — 2026-05-25 (v0.4.16 — hide nick / hide userlist toggles)
+
+### What Was Added
+- **Hide nick button** — a small ‹/› pill button sits to the left of your nick in the input bar. Click to collapse the nick; click again to restore it. State persists across restarts via localStorage.
+- **Hide userlist button** — ◂/▸ pill button in the buffer header (next to the +nt modes pill) hides and shows the nicklist. State persists via localStorage. (Button now styled consistently with the modes pill — was a plain browser button before.)
+
+### Files Changed
+- `frontend/src/main.js` — `nickHidden` state, render toggle buttons, click handlers in `afterRender`
+- `frontend/src/style.css` — `#nick-toggle` styles; `#nicklist-toggle` folded into shared pill rule with `#topic-toggle`
+
+---
+
 ## Session 28 — 2026-05-25 (v0.4.15 — DCC Chat)
 
 ### What Was Added

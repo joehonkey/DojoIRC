@@ -103,6 +103,8 @@
 - [x] Unified input bar (full-width color strip with inline nick prefix + vertical separator)
 - [x] Bot icon alignment (inline flex layout — icon sits next to nick text, not at edge)
 - [x] Font size manager — Hamburger → Font Sizes opens a panel with live +/− controls for 14 UI zones (sidebar header, hamburger button, server names, channel names, buffer title, channel modes, topic button, topic text, chat messages, timestamps, nick list, typing indicator, input nick prefix, input field). Changes apply instantly and persist via localStorage.
+- [x] Hide nick toggle — ‹/› pill button left of the nick in the input bar hides/shows your nick; persists across restarts
+- [x] Hide userlist toggle — ◂/▸ pill button in the buffer header hides/shows the nicklist; persists across restarts
 
 ## Stage 5 — Power Features
 - [x] Bouncer support (ZNC, soju) — `password` field sends `PASS` before registration
@@ -117,6 +119,7 @@
 - [ ] Flood protection (message queue + rate limiting)
 - [ ] Script aliases (/music, /sysinfo, custom /exec aliases)
 - [ ] Plugin/script hooks (shell scripts on events)
+- [ ] Memory usage optimization — audit and reduce per-buffer message footprint, DOM node churn, and Go-side allocations
 
 ## Stage 6 — Platform Polish
 - [x] FreeBSD build confirmed working — system tray, WebKit frontend, all features (requires patched Wails v2; see docs/building.md)
