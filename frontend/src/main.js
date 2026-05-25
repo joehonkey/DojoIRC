@@ -683,10 +683,16 @@ function handleSlash(text) {
     case 'back':
       SendRaw(state.activeServer, 'AWAY').catch(console.error);
       break;
-    case 'topic':
-      if (args.length && state.activeChannel)
-        SendRaw(state.activeServer, `TOPIC ${state.activeChannel} :${args.join(' ')}`).catch(console.error);
+    case 'topic': {
+      if (args.length) {
+        const isChannel = /^[#&!+]/.test(args[0]);
+        const topicChannel = isChannel ? args[0] : (state.activeChannel || '');
+        const topicText = isChannel ? args.slice(1).join(' ') : args.join(' ');
+        if (topicChannel && topicText)
+          SendRaw(state.activeServer, `TOPIC ${topicChannel} :${topicText}`).catch(console.error);
+      }
       break;
+    }
     case 'kick':
       if (args[0] && state.activeChannel)
         SendRaw(state.activeServer, `KICK ${state.activeChannel} ${args[0]}${args[1] ? ' :' + args.slice(1).join(' ') : ''}`).catch(console.error);

@@ -463,6 +463,21 @@ func (c *Client) handle(client *ircp.Client, msg *ircp.Message) {
 
 	case "323": // RPL_LISTEND
 		c.emit(Event{Server: srv, Type: "list_end", Channel: "server", Time: now})
+
+	default:
+		// Surface unhandled error/info numerics (4xx, 5xx) in the server buffer
+		// so the user sees rejection messages (e.g. 482 not channel op, 481 not oper)
+		if len(msg.Command) == 3 {
+			if msg.Command[0] == '4' || msg.Command[0] == '5' {
+				text := ""
+				if len(msg.Params) > 0 {
+					text = msg.Params[len(msg.Params)-1]
+				}
+				if text != "" {
+					c.emit(Event{Server: srv, Type: "server", Channel: "server", Text: msg.Command + " " + text, Time: now})
+				}
+			}
+		}
 	}
 }
 
