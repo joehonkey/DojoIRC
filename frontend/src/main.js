@@ -995,6 +995,21 @@ function renderTypingBar() {
 }
 
 // ── Context menu ────────────────────────────────────────────
+function nickCtxItems(server, nick) {
+  const ch = activeChannel();
+  const inChannel = ch && ch.name.startsWith('#');
+  const items = [
+    { label: 'Message',     action: () => openQuery(server, nick) },
+    { label: 'Whois',       action: () => SendWhois(server, nick).catch(console.error) },
+    { label: 'Version',     action: () => SendCTCP(server, nick, 'VERSION', '').catch(console.error) },
+    { label: 'Ping',        action: () => { pingTimes[nick] = Date.now(); SendCTCP(server, nick, 'PING', String(Date.now())).catch(console.error); } },
+  ];
+  if (inChannel) {
+    items.push({ label: 'Invite to ' + ch.name, action: () => SendRaw(server, `INVITE ${nick} ${ch.name}`).catch(console.error) });
+  }
+  return items;
+}
+
 function showCtxMenu(x, y, items) {
   removeCtxMenu();
 
@@ -1207,10 +1222,7 @@ function bindEvents() {
     el.addEventListener('contextmenu', e => {
       e.preventDefault();
       e.stopPropagation();
-      showCtxMenu(e.clientX, e.clientY, [
-        { label: 'Message', action: () => openQuery(server, nick) },
-        { label: 'Whois',   action: () => SendWhois(server, nick).catch(console.error) },
-      ]);
+      showCtxMenu(e.clientX, e.clientY, nickCtxItems(server, nick));
     });
   });
 
@@ -1222,10 +1234,7 @@ function bindEvents() {
     el.addEventListener('contextmenu', e => {
       e.preventDefault();
       e.stopPropagation();
-      showCtxMenu(e.clientX, e.clientY, [
-        { label: 'Message', action: () => openQuery(server, nick) },
-        { label: 'Whois',   action: () => SendWhois(server, nick).catch(console.error) },
-      ]);
+      showCtxMenu(e.clientX, e.clientY, nickCtxItems(server, nick));
     });
   });
 
@@ -2088,10 +2097,7 @@ function rebindMessageNicks() {
     el.addEventListener('contextmenu', e => {
       e.preventDefault();
       e.stopPropagation();
-      showCtxMenu(e.clientX, e.clientY, [
-        { label: 'Message', action: () => openQuery(server, nick) },
-        { label: 'Whois',   action: () => SendWhois(server, nick).catch(console.error) },
-      ]);
+      showCtxMenu(e.clientX, e.clientY, nickCtxItems(server, nick));
     });
   });
 }
@@ -2146,8 +2152,7 @@ function boot() {
   // DCC progress/done/error events from Go backend
   try {
     EventsOn('dcc:progress', d => {
-      const ch = findChannel(d.server, d.nick);
-      if (!ch) return;
+      const ch = ensureChannel(d.server, d.nick);
       const key = d.nick + ':' + d.file;
       const pct = d.total > 0 ? Math.round(d.bytes * 100 / d.total) : 0;
       const text = `${d.file}: ${pct}% (${formatBytes(d.bytes)} / ${formatBytes(d.total)})`;
@@ -2160,20 +2165,17 @@ function boot() {
       if (d.server === state.activeServer && d.nick === state.activeChannel) render();
     });
     EventsOn('dcc:done', d => {
-      const ch = findChannel(d.server, d.nick);
-      if (ch) {
-        const key = d.nick + ':' + d.file;
-        ch.messages = ch.messages.filter(m => !(m.dccKey === key && m.type === 'dcc_progress'));
-        ch.messages.push({ time: timestamp(), nick: '', text: `✓ Downloaded "${d.file}" → ${d.path}`, type: 'server' });
-      }
+      const ch = ensureChannel(d.server, d.nick);
+      const key = d.nick + ':' + d.file;
+      ch.messages = ch.messages.filter(m => !(m.dccKey === key && m.type === 'dcc_progress'));
+      ch.messages.push({ time: timestamp(), nick: '', text: `✓ Downloaded "${d.file}" → ${d.path}`, type: 'server' });
       render();
     });
     EventsOn('dcc:error', d => {
-      const ch = d.nick ? findChannel(d.server, d.nick) : null;
-      const target = ch || ensureChannel(d.server, 'server');
+      const ch = ensureChannel(d.server, d.nick || 'server');
       const key = (d.nick || '') + ':' + d.file;
-      target.messages = target.messages.filter(m => !(m.dccKey === key && m.type === 'dcc_progress'));
-      target.messages.push({ time: timestamp(), nick: '', text: `✗ DCC error: ${d.error}`, type: 'server' });
+      ch.messages = ch.messages.filter(m => !(m.dccKey === key && m.type === 'dcc_progress'));
+      ch.messages.push({ time: timestamp(), nick: '', text: `✗ DCC failed: ${d.error}`, type: 'server' });
       render();
     });
     EventsOn('dcc:sending', d => {
