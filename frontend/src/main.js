@@ -320,6 +320,14 @@ function escapeAttr(str) {
 
 // After render(), find all .msg-link elements and wire click + lazy-load previews
 function bindLinkPreviews() {
+  // Wire click handlers on inline preview cards (rendered directly into HTML)
+  document.querySelectorAll('.url-preview[data-preview-url]').forEach(card => {
+    if (card._clickBound) return;
+    card._clickBound = true;
+    const url = card.dataset.previewUrl;
+    card.addEventListener('click', () => BrowserOpen(url).catch(() => {}));
+  });
+
   document.querySelectorAll('a.msg-link').forEach(a => {
     const url = a.dataset.url;
     a.addEventListener('click', e => {
@@ -346,6 +354,15 @@ function bindLinkPreviews() {
       });
     }).catch(() => {});
   });
+}
+
+function previewCardHTML(url, p) {
+  if (!p || (!p.title && !p.image)) return '';
+  if (p.isImage || (p.image && !p.title)) {
+    return `<div class="url-preview" data-preview-url="${escapeAttr(url)}"><img class="preview-img-only" src="${escapeAttr(p.isImage ? url : p.image)}" alt="" loading="lazy"></div>`;
+  }
+  const thumb = p.image ? `<img class="preview-thumb" src="${escapeAttr(p.image)}" alt="" loading="lazy">` : '';
+  return `<div class="url-preview" data-preview-url="${escapeAttr(url)}">${thumb}<div class="preview-body"><div class="preview-domain">${escapeHtml(p.domain || '')}</div>${p.title ? `<div class="preview-title">${escapeHtml(p.title)}</div>` : ''}${p.description ? `<div class="preview-desc">${escapeHtml(p.description)}</div>` : ''}</div></div>`;
 }
 
 function injectPreview(msgEl, url, p) {
@@ -1040,12 +1057,19 @@ function renderMessages() {
     const searchCls = query
       ? ((m.text.toLowerCase().includes(query) || (m.nick && m.nick.toLowerCase().includes(query))) ? ' search-match' : ' search-miss')
       : '';
+    // Inline cached preview cards so images survive re-renders without flicker
+    const urls = extractURLs(m.text || '');
+    const inlinePreviews = urls.map(url => {
+      if (!previewCache.has(url)) return '';
+      return previewCardHTML(url, previewCache.get(url));
+    }).join('');
+    const previewAttr = inlinePreviews ? ` data-preview-done="${escapeAttr(urls[0])}"` : '';
     return `
-    <div class="message ${m.type || ''}${m.mention ? ' mention' : ''}${searchCls}">
+    <div class="message ${m.type || ''}${m.mention ? ' mention' : ''}${searchCls}"${previewAttr}>
       <span class="msg-time">${m.time}</span>
       ${nickDisplay}
       <span class="${textClass}">${renderText(m.text)}</span>
-    </div>`;
+    </div>${inlinePreviews}`;
   }).join('');
 }
 
