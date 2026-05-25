@@ -256,6 +256,17 @@ function addMsg(ch, msg) {
   ch.messages.push(msg);
   if (ch.messages.length > 500) ch.messages = ch.messages.slice(-500);
   scheduleSave(ch.server, ch.name, ch.messages);
+  // DEBUG: confirm addMsg fired and DOM is reachable
+  if (ch.server === state.activeServer && ch.name === state.activeChannel) {
+    const _d = document.getElementById('messages');
+    if (_d) {
+      const _r = document.createElement('div');
+      _r.className = 'message server';
+      _r.style.color = 'lime';
+      _r.textContent = `[debug] addMsg fired — ${ch.messages.length} msg(s) in buffer`;
+      _d.appendChild(_r);
+    }
+  }
 }
 
 function escapeRegex(str) {
