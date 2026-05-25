@@ -25,6 +25,14 @@ jobs:
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.12.0
 
+      - name: Frontend install
+        working-directory: frontend
+        run: npm ci
+
+      - name: Frontend build
+        working-directory: frontend
+        run: npm run build
+
       - name: go vet
         run: go vet -tags webkit2_41 ./...
 
@@ -33,14 +41,6 @@ jobs:
 
       - name: go test (race detector)
         run: go test -race -tags webkit2_41 ./internal/...
-
-      - name: Frontend install
-        working-directory: frontend
-        run: npm ci
-
-      - name: Frontend build
-        working-directory: frontend
-        run: npm run build
 
       - name: govulncheck
         run: |
