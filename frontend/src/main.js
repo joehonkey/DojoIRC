@@ -256,17 +256,6 @@ function addMsg(ch, msg) {
   ch.messages.push(msg);
   if (ch.messages.length > 500) ch.messages = ch.messages.slice(-500);
   scheduleSave(ch.server, ch.name, ch.messages);
-  // DEBUG: confirm addMsg fired and DOM is reachable
-  if (ch.server === state.activeServer && ch.name === state.activeChannel) {
-    const _d = document.getElementById('messages');
-    if (_d) {
-      const _r = document.createElement('div');
-      _r.className = 'message server';
-      _r.style.color = 'lime';
-      _r.textContent = `[debug] addMsg fired — ${ch.messages.length} msg(s) in buffer`;
-      _d.appendChild(_r);
-    }
-  }
 }
 
 function escapeRegex(str) {
@@ -971,14 +960,6 @@ function render() {
 
 function doRender() {
   _renderPending = false;
-  try { _doRenderInner(); } catch(err) {
-    console.error('doRender threw:', err);
-    const msgs = document.getElementById('messages');
-    if (msgs) msgs.insertAdjacentHTML('beforeend',
-      `<div class="message server"><span class="msg-text" style="color:red">⚠ render error: ${String(err)}</span></div>`);
-  }
-}
-function _doRenderInner() {
   const prevMsgs = document.getElementById('messages');
   const prevKey = prevMsgs?.dataset.channel;
   const curKey  = state.activeServer + '/' + state.activeChannel;
@@ -1034,7 +1015,7 @@ function _doRenderInner() {
     a.addEventListener('click', e => { e.preventDefault(); BrowserOpen(a.dataset.url).catch(() => {}); });
   });
   renderTypingBar();
-} // end _doRenderInner
+}
 
 function renderSidebar() {
   if (!state.servers.length) {
