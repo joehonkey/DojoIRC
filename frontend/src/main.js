@@ -253,7 +253,7 @@ function scheduleSave(server, channel, messages) {
 }
 
 function addMsg(ch, msg) {
-  addMsg(ch,msg);
+  ch.messages.push(msg);
   if (ch.messages.length > 500) ch.messages = ch.messages.slice(-500);
   scheduleSave(ch.server, ch.name, ch.messages);
 }
