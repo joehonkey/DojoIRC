@@ -186,6 +186,7 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | **DCC Chat** | `/dcc chat <nick>` to initiate; incoming offers show Accept/Decline (💬); messages route over a direct TCP connection, bypassing the server |
 | **Hide nick / hide userlist** | ‹/› pill left of nick hides your nick in the input bar; ◂/▸ in the buffer header hides the nicklist — both persist across restarts |
 | **CTCP stack** | `/version`, `/ping` (shows RTT in ms), `/time`, `/finger`, `/clientinfo`, `/ctcp` — all tab-completable; auto-replies to inbound requests |
+| **IRC operator commands** | `/oper`, `/kill`, `/kline`, `/unkline`, `/dline`, `/undline`, `/rehash`, `/wallops` — full oper toolkit, tab-completable |
 | **Message search** | Ctrl+F opens an in-buffer search bar; matching messages stay bright, others dim |
 | **Keyboard shortcuts** | Alt+↑↓ navigate channels, Alt+←→ switch servers, Ctrl+F search, Escape close |
 | **Scrollback limit** | Configurable per session (`scrollback` in `[behaviour]`); default 5000 messages per buffer |

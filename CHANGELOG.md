@@ -1,5 +1,26 @@
 # DojoIRC Changelog
 
+## Session 30 — 2026-05-25 (v0.4.17 — oper commands, bug fixes, perf)
+
+### What Was Added
+- **IRC operator commands** — `/oper`, `/kill`, `/kline`, `/unkline`, `/dline`, `/undline`, `/rehash`, `/wallops` — all tab-completable, listed in `/help`
+- **Server error numerics surfaced** — 4xx/5xx replies (e.g. 482 not channel op, 481 not oper) now appear in the server buffer instead of being silently dropped
+
+### What Was Fixed
+- **Excess Flood disconnect** — typing indicator was sending one TAGMSG per keystroke; now rate-limited to one per 3 seconds
+- **Quit/nick messages in wrong channels** — shown in every channel on the server; now scoped to channels where the nick was actually present
+- **Per-server nick tracking** — `state.nick` was global; switching servers showed the wrong nick in the input bar and fired wrong mentions; now per-server via `state.nicks[server]`
+- **/topic channel arg** — `/topic #chan text` now works correctly (channel name no longer doubled)
+- **rAF render batching** — full app DOM was rebuilt on every event; now coalesced to one repaint per animation frame, reducing flicker on busy channels
+
+### Files Changed
+- `internal/irc/client.go` — 4xx/5xx catch-all
+- `frontend/src/main.js` — all of the above
+- `docs/commands.md`, `README.md` — oper commands documented
+- In-app docs — IRC Operator Commands section added
+
+---
+
 ## Session 29 — 2026-05-25 (v0.4.16 — hide nick / hide userlist toggles)
 
 ### What Was Added

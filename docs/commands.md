@@ -125,6 +125,23 @@ Direct TCP chat with another user — messages bypass the IRC server entirely.
 
 ---
 
+## IRC Operator commands
+
+Requires `/oper` authentication first. All oper responses appear in the server buffer.
+
+| Command | Description |
+|---|---|
+| `/oper <user> <pass>` | Authenticate as an IRC operator |
+| `/kill <nick> <reason>` | Disconnect a user from the server |
+| `/kline <duration> <mask> <reason>` | Ban a user mask from the server (e.g. `/kline 1h *!*@bad.host spamming`) |
+| `/unkline <mask>` | Remove a K-line |
+| `/dline <duration> <ip> <reason>` | Ban an IP address from the server |
+| `/undline <ip>` | Remove a D-line |
+| `/rehash` | Reload the server config (opers only) |
+| `/wallops <text>` | Send a message to all connected IRC operators |
+
+---
+
 ## Tab completion
 
 Press **Tab** while typing to complete:

@@ -2083,6 +2083,20 @@ channels = ["#linux"]</code></pre>
 /ctcp alice ACTION</code></pre>
         <p>DojoIRC auto-replies to inbound VERSION, PING, TIME, FINGER, and CLIENTINFO requests from other users.</p>
 
+        <h2>IRC Operator Commands</h2>
+        <p>Use <code>/oper &lt;user&gt; &lt;pass&gt;</code> to authenticate as an IRC operator first. All responses appear in the server buffer.</p>
+        <table class="docs-table">
+          <tr><th>Command</th><th>What it does</th></tr>
+          <tr><td>/oper &lt;user&gt; &lt;pass&gt;</td><td>Authenticate as an IRC operator</td></tr>
+          <tr><td>/kill &lt;nick&gt; &lt;reason&gt;</td><td>Disconnect a user from the server</td></tr>
+          <tr><td>/kline &lt;duration&gt; &lt;mask&gt; &lt;reason&gt;</td><td>Ban a user mask from the server (e.g. 1h *!*@bad.host spamming)</td></tr>
+          <tr><td>/unkline &lt;mask&gt;</td><td>Remove a K-line</td></tr>
+          <tr><td>/dline &lt;duration&gt; &lt;ip&gt; &lt;reason&gt;</td><td>Ban an IP address from the server</td></tr>
+          <tr><td>/undline &lt;ip&gt;</td><td>Remove a D-line</td></tr>
+          <tr><td>/rehash</td><td>Reload the server config (opers only)</td></tr>
+          <tr><td>/wallops &lt;text&gt;</td><td>Send a message to all connected IRC operators</td></tr>
+        </table>
+
         <h2>Keyboard Shortcuts</h2>
         <table class="docs-table">
           <tr><th>Shortcut</th><th>Action</th></tr>
@@ -2154,6 +2168,14 @@ channels = ["#linux"]</code></pre>
           <tr><td>/finger &lt;nick&gt;</td><td>Send a CTCP FINGER request</td></tr>
           <tr><td>/clientinfo &lt;nick&gt;</td><td>Ask which CTCP commands a client supports</td></tr>
           <tr><td>/ctcp &lt;nick&gt; &lt;cmd&gt; [param]</td><td>Send an arbitrary CTCP request</td></tr>
+          <tr><td>/oper &lt;user&gt; &lt;pass&gt;</td><td>Authenticate as an IRC operator</td></tr>
+          <tr><td>/kill &lt;nick&gt; &lt;reason&gt;</td><td>Disconnect a user from the server (opers only)</td></tr>
+          <tr><td>/kline &lt;duration&gt; &lt;mask&gt; &lt;reason&gt;</td><td>Ban a mask from the server (opers only)</td></tr>
+          <tr><td>/unkline &lt;mask&gt;</td><td>Remove a K-line (opers only)</td></tr>
+          <tr><td>/dline &lt;duration&gt; &lt;ip&gt; &lt;reason&gt;</td><td>Ban an IP from the server (opers only)</td></tr>
+          <tr><td>/undline &lt;ip&gt;</td><td>Remove a D-line (opers only)</td></tr>
+          <tr><td>/rehash</td><td>Reload server config (opers only)</td></tr>
+          <tr><td>/wallops &lt;text&gt;</td><td>Message to all connected IRC operators</td></tr>
         </table>
 
         <h2>Font Sizes</h2>
