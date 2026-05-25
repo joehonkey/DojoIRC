@@ -10,9 +10,10 @@
 - **Channel-switch lag** — re-rendering 5 000 messages per click was slow. Render cap + in-memory cap cuts this to a fixed ceiling.
 - **Image preview flicker** — preview cards were destroyed and re-injected on every render. Now embedded directly in the message HTML so images survive DOM replacement without flashing.
 - **About dialog tagline** — was "IRC client for LinuxDojo.org"; now "DojoIRC is an IRCv3-capable, cross-platform IRC client".
+- **Invite menu shown for nicks already in channel** — right-clicking a nick who is already present in the current channel no longer shows the pointless "Invite to #channel" option. Invite only appears when the nick is not already there.
 
 ### Files Changed
-- `frontend/src/main.js` — persistence helpers, addMsg(), ensureChannel() restore, render cap, About tagline
+- `frontend/src/main.js` — persistence helpers, addMsg(), ensureChannel() restore, render cap, About tagline, invite fix
 
 ---
 
