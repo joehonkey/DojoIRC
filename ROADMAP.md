@@ -48,7 +48,7 @@
 - [x] Away status (305/306 numerics + away badge in input bar)
 - [x] DCC SEND — file transfer (peer-to-peer TCP); Go backend opens listener, negotiates via CTCP, streams file to recipient's ~/Downloads
 - [x] DCC SEND drag-and-drop — drag a file onto a DM/query window to initiate DCC SEND; file lands in recipient's ~/Downloads
-- [ ] DCC chat (basic)
+- [x] DCC chat (basic) — Accept/Decline UI, `/dcc chat <nick>` initiate, live TCP message routing
 - [x] Channel list (/LIST — streaming overlay panel with filter)
 - [x] Ignore list (per-server ignore = [...] in config)
 

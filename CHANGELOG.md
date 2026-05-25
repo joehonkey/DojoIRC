@@ -1,5 +1,25 @@
 # DojoIRC Changelog
 
+## Session 28 — 2026-05-25 (v0.4.15 — DCC Chat)
+
+### What Was Added
+- **DCC Chat** — both sides of the protocol are now implemented:
+  - `/dcc chat <nick>` — initiates an outgoing DCC CHAT offer; waits 30s for the peer to connect
+  - Incoming DCC CHAT offers show an Accept/Decline button in the query window (💬 icon)
+  - Accepting opens a live TCP session; messages typed in that query window route through `DCCChatSend` automatically
+  - `dcc_chat:connected` / `dcc_chat:closed` show status lines in the query buffer
+  - `dcc_chat:message` delivers incoming DCC chat lines as regular messages with nick color + notifications
+  - `dcc_chat:error` surfaces failures inline
+
+### Files Changed
+- `internal/dcc/dcc.go` — `ChatSender`, `NewChatSender`, `ChatDial`
+- `internal/irc/client.go` — DCC CHAT CTCP parsing → `dcc_chat_offer` event
+- `app.go` — `dccChats` map, `dccChatMu`, `dccChatReadLoop`, `DCCChatAccept`, `DCCChatSend`, `DCCChatInitiate`
+- `frontend/src/main.js` — render, click handlers, event listeners, message routing
+- `frontend/wailsjs/go/main/App.d.ts` + `App.js` — auto-generated bindings
+
+---
+
 ## Session 27 — 2026-05-25 (DCC public IP fix)
 
 ### What Was Fixed
