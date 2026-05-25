@@ -762,6 +762,37 @@ function handleSlash(text) {
     case 'quit':
       SendRaw(state.activeServer, `QUIT :${args.join(' ') || 'DojoIRC'}`).catch(console.error);
       break;
+    case 'oper':
+      if (args.length >= 2)
+        SendRaw(state.activeServer, `OPER ${args[0]} ${args[1]}`).catch(console.error);
+      break;
+    case 'kill':
+      if (args.length >= 2)
+        SendRaw(state.activeServer, `KILL ${args[0]} :${args.slice(1).join(' ')}`).catch(console.error);
+      break;
+    case 'kline':
+      if (args.length >= 3)
+        SendRaw(state.activeServer, `KLINE ${args[0]} ${args[1]} :${args.slice(2).join(' ')}`).catch(console.error);
+      break;
+    case 'unkline':
+      if (args[0])
+        SendRaw(state.activeServer, `UNKLINE ${args[0]}`).catch(console.error);
+      break;
+    case 'dline':
+      if (args.length >= 3)
+        SendRaw(state.activeServer, `DLINE ${args[0]} ${args[1]} :${args.slice(2).join(' ')}`).catch(console.error);
+      break;
+    case 'undline':
+      if (args[0])
+        SendRaw(state.activeServer, `UNDLINE ${args[0]}`).catch(console.error);
+      break;
+    case 'rehash':
+      SendRaw(state.activeServer, 'REHASH').catch(console.error);
+      break;
+    case 'wallops':
+      if (args.length)
+        SendRaw(state.activeServer, `WALLOPS :${args.join(' ')}`).catch(console.error);
+      break;
     case 'help': {
       const helpCh = activeChannel();
       if (helpCh) {
@@ -788,6 +819,14 @@ function handleSlash(text) {
           '/finger <nick>            — query CTCP FINGER',
           '/clientinfo <nick>        — query CTCP CLIENTINFO',
           '/ctcp <nick> <cmd> [p]    — send arbitrary CTCP request',
+          '/oper <user> <pass>       — authenticate as IRC operator',
+          '/kill <nick> <reason>     — disconnect a user from the server',
+          '/kline <dur> <mask> <rsn> — ban a mask from the server',
+          '/unkline <mask>           — remove a K-line',
+          '/dline <dur> <ip> <rsn>   — ban an IP from the server',
+          '/undline <ip>             — remove a D-line',
+          '/rehash                   — reload server config (opers)',
+          '/wallops <text>           — send a message to all opers',
         ].forEach(line => helpCh.messages.push({ time: timestamp(), nick: '', text: line, type: 'server' }));
         render();
       }
@@ -803,8 +842,9 @@ function handleSlash(text) {
 
 // ── Tab completion ──────────────────────────────────────────
 const SLASH_COMMANDS = [
-  'away','back','clear','clientinfo','ctcp','finger','help','invite','j','join','kick','list',
-  'me','mode','msg','nick','part','ping','query','quit','raw','time','topic','version','whois',
+  'away','back','clear','clientinfo','ctcp','dline','finger','help','invite','j','join','kick',
+  'kill','kline','list','me','mode','msg','nick','oper','part','ping','query','quit','raw',
+  'rehash','time','topic','undline','unkline','version','wallops','whois',
 ];
 
 let tabComp = null;
