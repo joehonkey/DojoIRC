@@ -954,6 +954,8 @@ function render() {
   if (_renderPending) return;
   _renderPending = true;
   requestAnimationFrame(doRender);
+  // Fallback for WebKit builds where rAF callbacks may not fire (e.g. FreeBSD)
+  setTimeout(() => { if (_renderPending) doRender(); }, 50);
 }
 
 function doRender() {
