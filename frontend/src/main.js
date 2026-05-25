@@ -1167,7 +1167,9 @@ function nickCtxItems(server, nick) {
     { label: 'Ping',        action: () => { pingTimes[nick] = Date.now(); SendCTCP(server, nick, 'PING', String(Date.now())).catch(console.error); } },
   ];
   if (inChannel) {
-    items.push({ label: 'Invite to ' + ch.name, action: () => SendRaw(server, `INVITE ${nick} ${ch.name}`).catch(console.error) });
+    const alreadyHere = ch.nicks && ch.nicks.some(n => n.replace(/^[@+~&]/, '') === nick);
+    if (!alreadyHere)
+      items.push({ label: 'Invite to ' + ch.name, action: () => SendRaw(server, `INVITE ${nick} ${ch.name}`).catch(console.error) });
   }
   return items;
 }
@@ -2096,7 +2098,7 @@ channels = ["#linux"]</code></pre>
           <tr><td>Whois</td><td>Look up their info — shown in the server buffer</td></tr>
           <tr><td>Version</td><td>Send a CTCP VERSION request — reply shows their client</td></tr>
           <tr><td>Ping</td><td>Send a CTCP PING — reply shows round-trip time in ms</td></tr>
-          <tr><td>Invite to #channel</td><td>Invite them to your current channel (only shown when you are in a channel)</td></tr>
+          <tr><td>Invite to #channel</td><td>Invite them to your current channel (only shown when they are not already in it)</td></tr>
         </table>
         <p>Example: right-click <b>alice</b> in #linux → <b>Ping</b> → server buffer shows <code>[CTCP] PING reply from alice: 42ms</code></p>
 
