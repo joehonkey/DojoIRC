@@ -960,6 +960,14 @@ function render() {
 
 function doRender() {
   _renderPending = false;
+  try { _doRenderInner(); } catch(err) {
+    console.error('doRender threw:', err);
+    const msgs = document.getElementById('messages');
+    if (msgs) msgs.insertAdjacentHTML('beforeend',
+      `<div class="message server"><span class="msg-text" style="color:red">⚠ render error: ${String(err)}</span></div>`);
+  }
+}
+function _doRenderInner() {
   const prevMsgs = document.getElementById('messages');
   const prevKey = prevMsgs?.dataset.channel;
   const curKey  = state.activeServer + '/' + state.activeChannel;
@@ -1015,7 +1023,7 @@ function doRender() {
     a.addEventListener('click', e => { e.preventDefault(); BrowserOpen(a.dataset.url).catch(() => {}); });
   });
   renderTypingBar();
-}
+} // end _doRenderInner
 
 function renderSidebar() {
   if (!state.servers.length) {
