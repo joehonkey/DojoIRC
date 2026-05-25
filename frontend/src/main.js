@@ -32,7 +32,7 @@ const state = {
   searchOpen: false,
   searchQuery: '',
   searchMatchIdx: 0,
-  scrollback: 5000,
+  scrollback: 200,
   nicklistHidden: localStorage.getItem('nicklistHidden') === 'true',
   nickHidden: localStorage.getItem('nickHidden') === 'true',
   dccChats: {},
@@ -222,10 +222,40 @@ function ensureChannel(serverName, channelName) {
   }
   let ch = srv.channels.find(c => c.name === channelName);
   if (!ch) {
-    ch = { name: channelName, active: false, unread: 0, mentions: 0, messages: [] };
+    ch = { name: channelName, server: serverName, active: false, unread: 0, mentions: 0, messages: loadMessages(serverName, channelName) };
     srv.channels.push(ch);
   }
   return ch;
+}
+
+// ── Message persistence ────────────────────────────────────
+function loadMessages(server, channel) {
+  try {
+    const raw = localStorage.getItem(`dojoirc:msgs:${server}:${channel}`);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+function saveMessages(server, channel, messages) {
+  try {
+    const toSave = messages
+      .filter(m => m.type !== 'dcc_offer' && m.type !== 'dcc_chat_offer' && m.type !== 'dcc_progress')
+      .slice(-200);
+    localStorage.setItem(`dojoirc:msgs:${server}:${channel}`, JSON.stringify(toSave));
+  } catch(e) {}
+}
+
+const _savePending = {};
+function scheduleSave(server, channel, messages) {
+  const key = `${server}\0${channel}`;
+  clearTimeout(_savePending[key]);
+  _savePending[key] = setTimeout(() => saveMessages(server, channel, messages), 800);
+}
+
+function addMsg(ch, msg) {
+  addMsg(ch,msg);
+  if (ch.messages.length > 500) ch.messages = ch.messages.slice(-500);
+  scheduleSave(ch.server, ch.name, ch.messages);
 }
 
 function escapeRegex(str) {
@@ -405,7 +435,7 @@ function handleEvent(ev) {
     case 'server':
     case 'whois': {
       const ch = ensureChannel(ev.server, 'server');
-      ch.messages.push({ time: ev.time, nick: '', text: ev.text, type: 'server' });
+      addMsg(ch,{ time: ev.time, nick: '', text: ev.text, type: 'server' });
       if (ev.server !== state.activeServer || state.activeChannel !== 'server') ch.unread++;
       render();
       break;
@@ -423,7 +453,7 @@ function handleEvent(ev) {
         const re = new RegExp(`(?:^|\\W)${escapeRegex(myN)}(?:\\W|$)`, 'i');
         isMention = re.test(ev.text);
       }
-      ch.messages.push({ time: ev.time, nick: ev.nick, text: ev.text, type: ev.type, mention: isMention });
+      addMsg(ch,{ time: ev.time, nick: ev.nick, text: ev.text, type: ev.type, mention: isMention });
       if (ev.server !== state.activeServer || ev.channel !== state.activeChannel) {
         ch.unread++;
         if (isMention) ch.mentions++;
@@ -435,7 +465,7 @@ function handleEvent(ev) {
     }
     case 'join': {
       const ch = ensureChannel(ev.server, ev.channel);
-      ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} joined`, type: 'server' });
+      addMsg(ch,{ time: ev.time, nick: '', text: `${ev.nick} joined`, type: 'server' });
       if (!state.activeChannel || state.activeChannel === 'server') {
         state.activeServer  = ev.server;
         state.activeChannel = ev.channel;
@@ -452,7 +482,7 @@ function handleEvent(ev) {
     case 'part': {
       const ch = findChannel(ev.server, ev.channel);
       if (ch) {
-        ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} left${ev.text ? ': ' + ev.text : ''}`, type: 'server' });
+        addMsg(ch,{ time: ev.time, nick: '', text: `${ev.nick} left${ev.text ? ': ' + ev.text : ''}`, type: 'server' });
         if (ch.nicks) ch.nicks = ch.nicks.filter(n => n.replace(/^[@+~&]/, '') !== ev.nick);
       }
       render();
@@ -462,7 +492,7 @@ function handleEvent(ev) {
       const qsrv = state.servers.find(s => s.name === ev.server);
       if (qsrv) qsrv.channels.forEach(ch => {
         if (!ch.nicks || !ch.nicks.some(n => n.replace(/^[@+~&]/, '') === ev.nick)) return;
-        ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} quit${ev.text ? ': ' + ev.text : ''}`, type: 'server' });
+        addMsg(ch,{ time: ev.time, nick: '', text: `${ev.nick} quit${ev.text ? ': ' + ev.text : ''}`, type: 'server' });
         ch.nicks = ch.nicks.filter(n => n.replace(/^[@+~&]/, '') !== ev.nick);
       });
       render();
@@ -471,7 +501,7 @@ function handleEvent(ev) {
     case 'kick': {
       const ch = findChannel(ev.server, ev.channel);
       if (ch) {
-        ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} was kicked${ev.text ? ': ' + ev.text : ''}`, type: 'server' });
+        addMsg(ch,{ time: ev.time, nick: '', text: `${ev.nick} was kicked${ev.text ? ': ' + ev.text : ''}`, type: 'server' });
         if (ch.nicks) ch.nicks = ch.nicks.filter(n => n.replace(/^[@+~&]/, '') !== ev.nick);
       }
       render();
@@ -487,7 +517,7 @@ function handleEvent(ev) {
         if (!ch.nicks) return;
         const idx = ch.nicks.findIndex(n => n.replace(/^[@+~&]/, '') === ev.nick);
         if (idx === -1) return;
-        ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} is now known as ${ev.text}`, type: 'server' });
+        addMsg(ch,{ time: ev.time, nick: '', text: `${ev.nick} is now known as ${ev.text}`, type: 'server' });
         const prefix = ch.nicks[idx].match(/^[@+~&]/)?.[0] || '';
         ch.nicks[idx] = prefix + ev.text;
         sortNicks(ch.nicks);
@@ -509,19 +539,19 @@ function handleEvent(ev) {
         ch.modes = ch.modeSet.size ? '+' + [...ch.modeSet].sort().join('') : '';
       }
       const displayCh = ch || findChannel(ev.server, 'server');
-      if (displayCh) displayCh.messages.push({ time: ev.time, nick: '', text: `${ev.nick || 'server'} sets mode ${ev.text}`, type: 'server' });
+      if (displayCh) addMsg(displayCh, { time: ev.time, nick: '', text: `${ev.nick || 'server'} sets mode ${ev.text}`, type: 'server' });
       render();
       break;
     }
     case 'notice': {
       const ch = ensureChannel(ev.server, ev.channel.startsWith('#') ? ev.channel : 'server');
-      ch.messages.push({ time: ev.time, nick: ev.nick, text: ev.text, type: 'notice' });
+      addMsg(ch,{ time: ev.time, nick: ev.nick, text: ev.text, type: 'notice' });
       render();
       break;
     }
     case 'ctcp': {
       const ch = ensureChannel(ev.server, 'server');
-      ch.messages.push({ time: ev.time, nick: '', text: `[CTCP] ${ev.text}`, type: 'server' });
+      addMsg(ch,{ time: ev.time, nick: '', text: `[CTCP] ${ev.text}`, type: 'server' });
       render();
       break;
     }
@@ -536,7 +566,7 @@ function handleEvent(ev) {
           displayText = `[CTCP] PING reply from ${ev.nick}: ${rtt}ms`;
         }
       }
-      ch.messages.push({ time: ev.time, nick: ev.nick, text: displayText, type: 'notice' });
+      addMsg(ch,{ time: ev.time, nick: ev.nick, text: displayText, type: 'notice' });
       render();
       break;
     }
@@ -544,7 +574,7 @@ function handleEvent(ev) {
       const ch = findChannel(ev.server, ev.channel);
       if (ch) {
         ch.topic = ev.text;
-        ch.messages.push({ time: ev.time, nick: '', text: `Topic: ${ev.text}`, type: 'server' });
+        addMsg(ch,{ time: ev.time, nick: '', text: `Topic: ${ev.text}`, type: 'server' });
       }
       render();
       break;
@@ -558,7 +588,7 @@ function handleEvent(ev) {
       if (dsrv) {
         dsrv.connected = false;
         dsrv.channels.forEach(ch => {
-          ch.messages.push({ time: ev.time, nick: '', text: 'Disconnected from server', type: 'server' });
+          addMsg(ch,{ time: ev.time, nick: '', text: 'Disconnected from server', type: 'server' });
         });
       }
       render();
@@ -567,14 +597,14 @@ function handleEvent(ev) {
     case 'away_on': {
       state.awayServer = ev.server;
       const ch = ensureChannel(ev.server, 'server');
-      ch.messages.push({ time: ev.time, nick: '', text: ev.text, type: 'server' });
+      addMsg(ch,{ time: ev.time, nick: '', text: ev.text, type: 'server' });
       render();
       break;
     }
     case 'away_off': {
       if (state.awayServer === ev.server) state.awayServer = '';
       const ch = ensureChannel(ev.server, 'server');
-      ch.messages.push({ time: ev.time, nick: '', text: ev.text, type: 'server' });
+      addMsg(ch,{ time: ev.time, nick: '', text: ev.text, type: 'server' });
       render();
       break;
     }
@@ -585,7 +615,7 @@ function handleEvent(ev) {
         const text = ev.text ? `${ev.nick} is away: ${ev.text}` : `${ev.nick} is back`;
         asrv.channels.forEach(ch => {
           if (ch.nicks && ch.nicks.some(n => n.replace(/^[@+~&]/, '') === ev.nick)) {
-            ch.messages.push({ time: ev.time, nick: '', text, type: 'server' });
+            addMsg(ch,{ time: ev.time, nick: '', text, type: 'server' });
           }
         });
       }
@@ -607,7 +637,7 @@ function handleEvent(ev) {
     case 'dcc_offer': {
       const ch = ensureChannel(ev.server, ev.nick);
       const key = ev.nick + ':' + ev.dcc_file;
-      ch.messages.push({
+      addMsg(ch,{
         time: ev.time,
         nick: ev.nick,
         text: `wants to send "${ev.dcc_file}" (${formatBytes(ev.dcc_size)})`,
@@ -627,7 +657,7 @@ function handleEvent(ev) {
     }
     case 'dcc_chat_offer': {
       const ch = ensureChannel(ev.server, ev.nick);
-      ch.messages.push({
+      addMsg(ch,{
         time: ev.time,
         nick: ev.nick,
         text: 'wants to open a DCC Chat',
@@ -674,7 +704,7 @@ function handleSlash(text) {
         const meText = args.join(' ');
         SendAction(state.activeServer, state.activeChannel, meText).catch(console.error);
         const ch = activeChannel();
-        if (ch) ch.messages.push({ time: timestamp(), nick: myNick(state.activeServer), text: meText, type: 'action' });
+        if (ch) addMsg(ch,{ time: timestamp(), nick: myNick(state.activeServer), text: meText, type: 'action' });
         render();
       }
       break;
@@ -683,7 +713,7 @@ function handleSlash(text) {
         const target = args[0];
         const msgText = args.slice(1).join(' ');
         SendMessage(state.activeServer, target, msgText).catch(console.error);
-        ensureChannel(state.activeServer, target).messages.push({ time: timestamp(), nick: myNick(state.activeServer), text: msgText, type: 'message' });
+        addMsg(ensureChannel(state.activeServer, target), { time: timestamp(), nick: myNick(state.activeServer), text: msgText, type: 'message' });
         render();
       }
       break;
@@ -763,7 +793,7 @@ function handleSlash(text) {
       break;
     case 'clear': {
       const clrCh = activeChannel();
-      if (clrCh) { clrCh.messages = []; render(); }
+      if (clrCh) { clrCh.messages = []; try { localStorage.removeItem(`dojoirc:msgs:${clrCh.server}:${clrCh.name}`); } catch(e) {} render(); }
       break;
     }
     case 'sysinfo':
@@ -771,7 +801,7 @@ function handleSlash(text) {
         if (!info || !state.activeServer || !state.activeChannel || state.activeChannel === 'server') return;
         SendMessage(state.activeServer, state.activeChannel, info).catch(console.error);
         const ch = activeChannel();
-        if (ch) { ch.messages.push({ time: timestamp(), nick: myNick(state.activeServer), text: info, type: 'message' }); render(); }
+        if (ch) { addMsg(ch,{ time: timestamp(), nick: myNick(state.activeServer), text: info, type: 'message' }); render(); }
       }).catch(console.error);
       break;
     case 'list':
@@ -850,14 +880,14 @@ function handleSlash(text) {
           '/undline <ip>             — remove a D-line',
           '/rehash                   — reload server config (opers)',
           '/wallops <text>           — send a message to all opers',
-        ].forEach(line => helpCh.messages.push({ time: timestamp(), nick: '', text: line, type: 'server' }));
+        ].forEach(line => addMsg(helpCh, { time: timestamp(), nick: '', text: line, type: 'server' }));
         render();
       }
       break;
     }
     default: {
       const ch = activeChannel();
-      if (ch) ch.messages.push({ time: timestamp(), nick: '', text: `Unknown command: /${cmd}`, type: 'server' });
+      if (ch) addMsg(ch,{ time: timestamp(), nick: '', text: `Unknown command: /${cmd}`, type: 'server' });
       render();
     }
   }
@@ -1638,7 +1668,7 @@ function sendMessage(text) {
       .catch(err => console.error('send failed:', err));
   }
 
-  ch.messages.push({ time: timestamp(), nick: myNick(state.activeServer), text: converted, type: 'message' });
+  addMsg(ch,{ time: timestamp(), nick: myNick(state.activeServer), text: converted, type: 'message' });
   render();
 }
 
@@ -2386,7 +2416,7 @@ function boot() {
       if (existing) {
         existing.text = text;
       } else {
-        ch.messages.push({ time: timestamp(), nick: '', text, type: 'dcc_progress', dccKey: key });
+        addMsg(ch,{ time: timestamp(), nick: '', text, type: 'dcc_progress', dccKey: key });
       }
       if (d.server === state.activeServer && d.nick === state.activeChannel) render();
     });
@@ -2394,20 +2424,20 @@ function boot() {
       const ch = ensureChannel(d.server, d.nick);
       const key = d.nick + ':' + d.file;
       ch.messages = ch.messages.filter(m => !(m.dccKey === key && m.type === 'dcc_progress'));
-      ch.messages.push({ time: timestamp(), nick: '', text: `✓ Downloaded "${d.file}" → ${d.path}`, type: 'server' });
+      addMsg(ch,{ time: timestamp(), nick: '', text: `✓ Downloaded "${d.file}" → ${d.path}`, type: 'server' });
       render();
     });
     EventsOn('dcc:error', d => {
       const ch = ensureChannel(d.server, d.nick || 'server');
       const key = (d.nick || '') + ':' + d.file;
       ch.messages = ch.messages.filter(m => !(m.dccKey === key && m.type === 'dcc_progress'));
-      ch.messages.push({ time: timestamp(), nick: '', text: `✗ DCC failed: ${d.error}`, type: 'server' });
+      addMsg(ch,{ time: timestamp(), nick: '', text: `✗ DCC failed: ${d.error}`, type: 'server' });
       render();
     });
     EventsOn('dcc:sending', d => {
       const ch = ensureChannel(d.server, d.nick);
       const key = d.nick + ':' + d.file;
-      ch.messages.push({ time: timestamp(), nick: '', text: `📤 Sending "${d.file}" to ${d.nick}…`, type: 'dcc_progress', dccKey: key });
+      addMsg(ch,{ time: timestamp(), nick: '', text: `📤 Sending "${d.file}" to ${d.nick}…`, type: 'dcc_progress', dccKey: key });
       render();
     });
     EventsOn('dcc:sent', d => {
@@ -2415,19 +2445,19 @@ function boot() {
       if (ch) {
         const key = d.nick + ':' + d.file;
         ch.messages = ch.messages.filter(m => !(m.dccKey === key && m.type === 'dcc_progress'));
-        ch.messages.push({ time: timestamp(), nick: '', text: `✓ Sent "${d.file}" to ${d.nick}`, type: 'server' });
+        addMsg(ch,{ time: timestamp(), nick: '', text: `✓ Sent "${d.file}" to ${d.nick}`, type: 'server' });
       }
       render();
     });
     EventsOn('dcc_chat:connected', d => {
       state.dccChats[d.server + '\0' + d.nick] = true;
       const ch = ensureChannel(d.server, d.nick);
-      ch.messages.push({ time: timestamp(), nick: '', text: `DCC Chat with ${d.nick} established`, type: 'server' });
+      addMsg(ch,{ time: timestamp(), nick: '', text: `DCC Chat with ${d.nick} established`, type: 'server' });
       render();
     });
     EventsOn('dcc_chat:message', d => {
       const ch = ensureChannel(d.server, d.nick);
-      ch.messages.push({ time: timestamp(), nick: d.nick, text: d.text, type: 'message' });
+      addMsg(ch,{ time: timestamp(), nick: d.nick, text: d.text, type: 'message' });
       if (d.server !== state.activeServer || d.nick !== state.activeChannel) ch.unread++;
       fireNotification(d.server, d.nick, d.nick, d.text);
       render();
@@ -2435,12 +2465,12 @@ function boot() {
     EventsOn('dcc_chat:closed', d => {
       delete state.dccChats[d.server + '\0' + d.nick];
       const ch = findChannel(d.server, d.nick);
-      if (ch) ch.messages.push({ time: timestamp(), nick: '', text: `DCC Chat with ${d.nick} closed`, type: 'server' });
+      if (ch) addMsg(ch,{ time: timestamp(), nick: '', text: `DCC Chat with ${d.nick} closed`, type: 'server' });
       render();
     });
     EventsOn('dcc_chat:error', d => {
       const ch = ensureChannel(d.server, d.nick || 'server');
-      ch.messages.push({ time: timestamp(), nick: '', text: `✗ DCC Chat error: ${d.error}`, type: 'server' });
+      addMsg(ch,{ time: timestamp(), nick: '', text: `✗ DCC Chat error: ${d.error}`, type: 'server' });
       render();
     });
   } catch (_) {}
@@ -2451,7 +2481,7 @@ function boot() {
       if (!paths || !paths.length) return;
       if (!state.activeChannel || !state.activeServer || !isDm(state.activeChannel)) {
         const ch = activeChannel();
-        if (ch) { ch.messages.push({ time: timestamp(), nick: '', text: 'DCC SEND only works in DM windows — open a query with the recipient first (/query <nick>)', type: 'server' }); render(); }
+        if (ch) { addMsg(ch,{ time: timestamp(), nick: '', text: 'DCC SEND only works in DM windows — open a query with the recipient first (/query <nick>)', type: 'server' }); render(); }
         return;
       }
       DCCSend(state.activeServer, state.activeChannel, paths[0]).catch(console.error);
