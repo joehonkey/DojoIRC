@@ -47,8 +47,12 @@ func main() {
 	// webkit2gtk 2.52.x fails to spawn a GPU process on some AMD/Mesa setups,
 	// leaving the webview blank. Disabling the DMA-BUF renderer and compositing
 	// mode forces software compositing which renders correctly.
+	// Disabling the memory pressure handler prevents WebKit from killing/suspending
+	// the web process after the window has been hidden for a long time (e.g. overnight
+	// in the system tray), which would otherwise cause a ~3-minute blank screen on restore.
 	os.Setenv("WEBKIT_DISABLE_DMABUF_RENDERER", "1")
 	os.Setenv("WEBKIT_DISABLE_COMPOSITING_MODE", "1")
+	os.Setenv("WEBKIT_DISABLE_MEMORY_PRESSURE_HANDLER", "1")
 
 	app := NewApp()
 
@@ -58,6 +62,7 @@ func main() {
 				runtime.WindowShow(app.ctx)
 				restoreWinPos(app.ctx)
 				tray.SetVisible(true)
+				runtime.EventsEmit(app.ctx, "window:shown")
 			}
 		},
 		OnHide: func() {

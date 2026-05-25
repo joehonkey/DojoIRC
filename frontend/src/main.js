@@ -995,6 +995,7 @@ function doRender() {
       ${ch?.topic && state.topicVisible ? `<div id="buffer-topic">${renderText(ch.topic)}</div>` : ''}
       <div id="content">
         <div id="messages" data-channel="${state.activeServer}/${state.activeChannel}">${renderMessages()}</div>
+        <button id="scroll-btn" title="Scroll to bottom" style="display:none"><span class="chv"></span><span class="chv"></span><span class="chv"></span></button>
       </div>
       <div id="typing-bar"></div>
       <div id="input-bar">
@@ -1467,6 +1468,18 @@ function bindEvents() {
       render();
     }
   });
+
+  // Scroll-to-bottom button visibility
+  const scrollBtn = document.getElementById('scroll-btn');
+  const msgsEl = document.getElementById('messages');
+  function updateScrollBtn() {
+    if (!scrollBtn || !msgsEl) return;
+    const nearBottom = msgsEl.scrollTop + msgsEl.clientHeight >= msgsEl.scrollHeight - 60;
+    scrollBtn.style.display = nearBottom ? 'none' : 'flex';
+  }
+  msgsEl?.addEventListener('scroll', updateScrollBtn, { passive: true });
+  scrollBtn?.addEventListener('click', () => { scrollToBottom(); scrollBtn.style.display = 'none'; });
+  updateScrollBtn();
 
   // Right-click selected text in message area → copy
   document.getElementById('messages')?.addEventListener('contextmenu', e => {
@@ -2415,6 +2428,16 @@ function showNickSetup(onDone) {
 
 function boot() {
   try { EventsOn('irc:event', handleEvent); } catch (_) {}
+
+  // After a long hide (e.g. overnight in the system tray), WebKit may suspend
+  // the web process. This event fires when the tray restores the window so we
+  // can kick the renderer back to life even if the process was throttled.
+  try {
+    EventsOn('window:shown', () => {
+      document.body.getBoundingClientRect(); // flush layout
+      render();
+    });
+  } catch (_) {}
 
   // DCC progress/done/error events from Go backend
   try {

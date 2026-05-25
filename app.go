@@ -550,7 +550,7 @@ func (a *App) GetSysInfo() string {
 	cpu := sysInfoCPU()
 	ram := sysInfoRAM()
 	kernel := sysInfoKernel()
-	return fmt.Sprintf("[sysinfo] OS: %s | Kernel: %s | CPU: %s | RAM: %s", os, kernel, cpu, ram)
+	return fmt.Sprintf("OS: %s | Kernel: %s | CPU: %s | RAM: %s", os, kernel, cpu, ram)
 }
 
 func sysInfoOS() string {
