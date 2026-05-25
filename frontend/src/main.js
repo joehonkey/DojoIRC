@@ -443,8 +443,9 @@ function handleEvent(ev) {
     case 'quit': {
       const qsrv = state.servers.find(s => s.name === ev.server);
       if (qsrv) qsrv.channels.forEach(ch => {
+        if (!ch.nicks || !ch.nicks.some(n => n.replace(/^[@+~&]/, '') === ev.nick)) return;
         ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} quit${ev.text ? ': ' + ev.text : ''}`, type: 'server' });
-        if (ch.nicks) ch.nicks = ch.nicks.filter(n => n.replace(/^[@+~&]/, '') !== ev.nick);
+        ch.nicks = ch.nicks.filter(n => n.replace(/^[@+~&]/, '') !== ev.nick);
       });
       render();
       break;
@@ -465,15 +466,13 @@ function handleEvent(ev) {
       }
       const nsrv = state.servers.find(s => s.name === ev.server);
       if (nsrv) nsrv.channels.forEach(ch => {
+        if (!ch.nicks) return;
+        const idx = ch.nicks.findIndex(n => n.replace(/^[@+~&]/, '') === ev.nick);
+        if (idx === -1) return;
         ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} is now known as ${ev.text}`, type: 'server' });
-        if (ch.nicks) {
-          const idx = ch.nicks.findIndex(n => n.replace(/^[@+~&]/, '') === ev.nick);
-          if (idx !== -1) {
-            const prefix = ch.nicks[idx].match(/^[@+~&]/)?.[0] || '';
-            ch.nicks[idx] = prefix + ev.text;
-            sortNicks(ch.nicks);
-          }
-        }
+        const prefix = ch.nicks[idx].match(/^[@+~&]/)?.[0] || '';
+        ch.nicks[idx] = prefix + ev.text;
+        sortNicks(ch.nicks);
       });
       render();
       break;
