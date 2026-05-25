@@ -489,6 +489,16 @@ func openInEditor(path string) {
 	case "darwin":
 		exec.Command("open", path).Start()
 		return
+	case "freebsd":
+		// On FreeBSD + KDE, xdg-open routes to the user's default app (kate, etc.)
+		if err := exec.Command("xdg-open", path).Start(); err == nil {
+			return
+		}
+		// Fallback: try kate directly
+		if p, err := exec.LookPath("kate"); err == nil {
+			exec.Command(p, path).Start()
+		}
+		return
 	}
 
 	// 1. Honor $VISUAL / $EDITOR if set.
@@ -558,49 +568,71 @@ func sysInfoOS() string {
 
 func sysInfoCPU() string {
 	data, err := os.ReadFile("/proc/cpuinfo")
+	if err == nil {
+		name := ""
+		threads := 0
+		for _, line := range strings.Split(string(data), "\n") {
+			if strings.HasPrefix(line, "model name") && name == "" {
+				parts := strings.SplitN(line, ":", 2)
+				if len(parts) == 2 {
+					name = strings.TrimSpace(parts[1])
+				}
+			}
+			if strings.HasPrefix(line, "processor") {
+				threads++
+			}
+		}
+		if name != "" {
+			return fmt.Sprintf("%s (%d threads)", name, threads)
+		}
+	}
+	// FreeBSD / other: use sysctl
+	model, err := exec.Command("sysctl", "-n", "hw.model").Output()
 	if err != nil {
 		return "Unknown"
 	}
-	name := ""
-	threads := 0
-	for _, line := range strings.Split(string(data), "\n") {
-		if strings.HasPrefix(line, "model name") && name == "" {
-			parts := strings.SplitN(line, ":", 2)
-			if len(parts) == 2 {
-				name = strings.TrimSpace(parts[1])
-			}
-		}
-		if strings.HasPrefix(line, "processor") {
-			threads++
-		}
+	ncpu, _ := exec.Command("sysctl", "-n", "hw.ncpu").Output()
+	name := strings.TrimSpace(string(model))
+	if len(ncpu) > 0 {
+		return fmt.Sprintf("%s (%s threads)", name, strings.TrimSpace(string(ncpu)))
 	}
-	if name == "" {
-		return "Unknown"
-	}
-	return fmt.Sprintf("%s (%d threads)", name, threads)
+	return name
 }
 
 func sysInfoRAM() string {
 	data, err := os.ReadFile("/proc/meminfo")
+	if err == nil {
+		var total, available uint64
+		for _, line := range strings.Split(string(data), "\n") {
+			fields := strings.Fields(line)
+			if len(fields) < 2 {
+				continue
+			}
+			val, _ := strconv.ParseUint(fields[1], 10, 64)
+			switch fields[0] {
+			case "MemTotal:":
+				total = val
+			case "MemAvailable:":
+				available = val
+			}
+		}
+		if total > 0 {
+			used := total - available
+			return fmt.Sprintf("%.1f/%.0fGB", float64(used)/1024/1024, float64(total)/1024/1024)
+		}
+	}
+	// FreeBSD / other: use sysctl
+	physmem, err := exec.Command("sysctl", "-n", "hw.physmem").Output()
 	if err != nil {
 		return "Unknown"
 	}
-	var total, available uint64
-	for _, line := range strings.Split(string(data), "\n") {
-		fields := strings.Fields(line)
-		if len(fields) < 2 {
-			continue
-		}
-		val, _ := strconv.ParseUint(fields[1], 10, 64)
-		switch fields[0] {
-		case "MemTotal:":
-			total = val
-		case "MemAvailable:":
-			available = val
-		}
-	}
-	used := total - available
-	return fmt.Sprintf("%.1f/%.0fGB", float64(used)/1024/1024, float64(total)/1024/1024)
+	total, _ := strconv.ParseUint(strings.TrimSpace(string(physmem)), 10, 64)
+	freePages, _ := exec.Command("sysctl", "-n", "vm.stats.vm.v_free_count").Output()
+	pageSize, _ := exec.Command("sysctl", "-n", "hw.pagesize").Output()
+	free, _ := strconv.ParseUint(strings.TrimSpace(string(freePages)), 10, 64)
+	pgsz, _ := strconv.ParseUint(strings.TrimSpace(string(pageSize)), 10, 64)
+	used := total - free*pgsz
+	return fmt.Sprintf("%.1f/%.0fGB", float64(used)/1024/1024/1024, float64(total)/1024/1024/1024)
 }
 
 func sysInfoKernel() string {
