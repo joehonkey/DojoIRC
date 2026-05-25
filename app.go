@@ -655,16 +655,7 @@ func (a *App) DCCSend(server, nick, filePath string) {
 			})
 			return
 		}
-		localIP, err := dcc.LocalIP()
-		if err != nil {
-			sender.Close()
-			runtime.EventsEmit(a.ctx, "dcc:error", map[string]interface{}{
-				"server": server, "nick": nick, "file": filepath.Base(filePath),
-				"error": "cannot determine local IP: " + err.Error(),
-			})
-			return
-		}
-		param, err := sender.CTCPParam(localIP)
+		param, err := sender.CTCPParam(dcc.PublicIP())
 		if err != nil {
 			sender.Close()
 			runtime.EventsEmit(a.ctx, "dcc:error", map[string]interface{}{

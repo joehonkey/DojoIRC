@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // ParseSend parses a "SEND filename ipuint32 port size" DCC param string.
@@ -78,6 +80,29 @@ func LocalIP() (string, error) {
 	defer conn.Close()
 	addr := conn.LocalAddr().(*net.UDPAddr)
 	return addr.IP.String(), nil
+}
+
+// PublicIP fetches the machine's public IPv4 from api.ipify.org.
+// Falls back to LocalIP if the request fails or times out.
+func PublicIP() string {
+	client := &http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Get("https://api.ipify.org")
+	if err == nil {
+		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		if err == nil {
+			ip := strings.TrimSpace(string(body))
+			if net.ParseIP(ip) != nil {
+				return ip
+			}
+		}
+	}
+	// fall back to LAN IP
+	local, err := LocalIP()
+	if err != nil {
+		return "0.0.0.0"
+	}
+	return local
 }
 
 // Receive downloads a file from the DCC sender at ip:port and saves it to dir.
