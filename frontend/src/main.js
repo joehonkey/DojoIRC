@@ -856,7 +856,15 @@ function handleTab(input) {
 }
 
 // ── Render ─────────────────────────────────────────────────
+let _renderPending = false;
 function render() {
+  if (_renderPending) return;
+  _renderPending = true;
+  requestAnimationFrame(doRender);
+}
+
+function doRender() {
+  _renderPending = false;
   const prevMsgs = document.getElementById('messages');
   const prevKey = prevMsgs?.dataset.channel;
   const curKey  = state.activeServer + '/' + state.activeChannel;
