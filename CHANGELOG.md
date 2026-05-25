@@ -1,5 +1,21 @@
 # DojoIRC Changelog
 
+## Session 31 — 2026-05-24 (v0.4.19 — message persistence, render cap, UI polish)
+
+### What Was Added
+- **Message persistence** — the last 200 messages per channel are saved to localStorage and restored on next launch. Open DojoIRC and you're right back where you left off, just like Halloy. `/clear` also wipes the stored history for that channel.
+- **Render cap** — messages buffer capped at 500 in memory, 200 rendered at a time. Eliminates the lag/stutter when clicking between busy channels.
+
+### What Was Fixed
+- **Channel-switch lag** — re-rendering 5 000 messages per click was slow. Render cap + in-memory cap cuts this to a fixed ceiling.
+- **Image preview flicker** — preview cards were destroyed and re-injected on every render. Now embedded directly in the message HTML so images survive DOM replacement without flashing.
+- **About dialog tagline** — was "IRC client for LinuxDojo.org"; now "DojoIRC is an IRCv3-capable, cross-platform IRC client".
+
+### Files Changed
+- `frontend/src/main.js` — persistence helpers, addMsg(), ensureChannel() restore, render cap, About tagline
+
+---
+
 ## Session 30 — 2026-05-25 (v0.4.17 — oper commands, bug fixes, perf)
 
 ### What Was Added

@@ -2253,6 +2253,10 @@ channels = ["#linux"]</code></pre>
         </table>
         <p>Use <b>Reset to Defaults</b> in the Font Sizes panel to restore all zones at once. The main chat font size also responds to <code>font_size</code> in <code>config.toml</code>, but the Font Sizes panel always takes precedence.</p>
 
+        <h2>Message History</h2>
+        <p>DojoIRC saves the last 200 messages per channel to local storage and restores them on next launch — open the app and you're right back where you left off. Use <b>/clear</b> to wipe a channel's stored history.</p>
+        <p>Up to 500 messages are kept in memory during a session; only the most recent 200 are rendered at a time for smooth channel switching.</p>
+
         <h2>Sidebar &amp; Panels</h2>
         <p>Drag the handle between the sidebar and chat area to resize the sidebar. Drag the handle between chat and the nick list to resize the nick list. Both widths are remembered across restarts.</p>
         <p>Click a server name to view the server buffer (MOTD and connection messages). Click a channel name to switch to it. The topic bar under the channel name can be toggled with the <b>Topic</b> pill button.</p>
