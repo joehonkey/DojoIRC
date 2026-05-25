@@ -550,5 +550,5 @@ Accessibility bus (AT-SPI) is not running. Non-critical.
 - When Wails releases a new version, check if any of the patched files have changed upstream before re-applying. The patch surface is well-defined: look for anything with `//go:build linux` in the `linux/` frontend package and the `webview/` package.
 - `go126` and `webkit2-gtk_41` must both be installed. Neither is pulled in by the default `go` meta-package.
 - The build command must always include `-tags webkit2_41`. Without it, Wails defaults to the webkit2gtk-4.0 pkg-config name which is not installed.
-- The version string embedded via `-ldflags "-X main.Version=vX.Y.Z"` should match the git tag being built. It appears in the About panel.
+- The version string is embedded automatically via `-ldflags "-X main.Version=$(git describe --tags)"`. Run `git fetch --tags` before building to ensure the latest tag is present. It appears in the About panel.
 - Tested on: FreeBSD 15.0-RELEASE-p9 amd64, KDE Plasma 6 / X11, SDDM, kwin_x11, WebKit2GTK 4.1 (2.46.6_7). All features confirmed working.
