@@ -4,6 +4,22 @@ Type any of these in the message input box. Tab completes both command names and
 
 ---
 
+## Nick interactions
+
+You can interact with any user by right-clicking their nick in the nick list or in chat. The context menu provides:
+
+| Item | What it does |
+|---|---|
+| **Message** | Open a DM buffer with this user |
+| **Whois** | Look up their info — shown in the server buffer |
+| **Version** | Send a CTCP VERSION request — reply shows their client name and version |
+| **Ping** | Send a CTCP PING — reply shows round-trip time in ms |
+| **Invite to #channel** | Invite them to your current channel (only shown when you are in a channel) |
+
+Left-clicking a nick opens a DM buffer directly.
+
+---
+
 ## Channel commands
 
 | Command | Description |

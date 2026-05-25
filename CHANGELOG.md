@@ -1,5 +1,25 @@
 # DojoIRC Changelog
 
+## Session 26 — 2026-05-24 (nick context menu, DCC fixes, docs pass)
+
+### What Was Added
+- **Nick right-click context menu** — right-click any nick in the nick list or in a message to get: Message, Whois, Version (CTCP), Ping (CTCP with RTT), Invite to current channel. Shared `nickCtxItems()` helper used by all three bind sites (nicklist, message nicks, search rebind path).
+
+### What Was Fixed
+- **DCC message routing** — `dcc:progress`, `dcc:done`, and `dcc:error` events all used `findChannel` which silently dropped messages if the buffer was closed or nick case didn't match. Switched to `ensureChannel` so done/error always land somewhere visible.
+- **DCC drag-drop on non-DM buffers** — dragging a file onto a channel or server buffer now shows a clear error: `DCC SEND only works in DM windows` instead of silently doing nothing.
+
+### Documentation
+- Full pass: in-app docs, `docs/commands.md`, `README.md`, and BeeMO all updated with DCC, CTCP stack, and nick context menu coverage with examples.
+
+### Files Changed
+- `frontend/src/main.js` — `nickCtxItems()` helper, expanded context menus, DCC event routing fixes, drop error message, in-app docs (Nick Context Menu + DCC + CTCP sections)
+- `docs/commands.md` — Nick interactions section with context menu table
+- `README.md` — DM windows row updated, Stage 2 complete, DCC SEND + CTCP features added
+- `/home/joe/Projects/llama-irc-bot/gemma4-irc-bot.py` — version v0.4.13, nick context menu, CTCP stack, DCC info
+
+---
+
 ## Session 25 — 2026-05-24 (CTCP command stack)
 
 ### What Was Added

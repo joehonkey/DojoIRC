@@ -1872,11 +1872,22 @@ channels = ["#linux"]</code></pre>
         <h2>DM Windows</h2>
         <p>Open a private conversation with any user by:</p>
         <ul style="margin:4px 0 8px 20px;color:var(--text-dim)">
-          <li>Left-clicking or right-clicking their nick in the nick list</li>
-          <li>Left-clicking their nick in chat</li>
+          <li>Left-clicking their nick in the nick list or in chat</li>
           <li>Using <code>/query &lt;nick&gt;</code> or <code>/msg &lt;nick&gt; &lt;text&gt;</code></li>
         </ul>
-        <p>DM buffers appear in the sidebar under the server. Right-click to close them.</p>
+        <p>DM buffers appear in the sidebar under the server. Right-click a DM in the sidebar to close it.</p>
+
+        <h2>Nick Context Menu</h2>
+        <p>Right-click any nick — in the nick list or in a message — to get a context menu:</p>
+        <table class="docs-table">
+          <tr><th>Item</th><th>What it does</th></tr>
+          <tr><td>Message</td><td>Open a DM buffer with this user</td></tr>
+          <tr><td>Whois</td><td>Look up their info — shown in the server buffer</td></tr>
+          <tr><td>Version</td><td>Send a CTCP VERSION request — reply shows their client</td></tr>
+          <tr><td>Ping</td><td>Send a CTCP PING — reply shows round-trip time in ms</td></tr>
+          <tr><td>Invite to #channel</td><td>Invite them to your current channel (only shown when you are in a channel)</td></tr>
+        </table>
+        <p>Example: right-click <b>alice</b> in #linux → <b>Ping</b> → server buffer shows <code>[CTCP] PING reply from alice: 42ms</code></p>
 
         <h2>DCC File Transfer</h2>
         <p>DojoIRC supports peer-to-peer file transfers via DCC SEND. No server relay — files go directly between clients.</p>
