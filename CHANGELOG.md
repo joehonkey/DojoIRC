@@ -1,5 +1,16 @@
 # DojoIRC Changelog
 
+## Session 27 — 2026-05-25 (DCC public IP fix)
+
+### What Was Fixed
+- **Outgoing DCC SEND now advertises public IP** — previously DojoIRC used the LAN IP (e.g. `192.168.1.6`) in the DCC SEND offer, making it unreachable from the internet. Now fetches public IP from `api.ipify.org` (5s timeout) and falls back to LAN IP if the lookup fails. Recipients can now connect when the sender has a reachable IP with port forwarding.
+
+### Files Changed
+- `internal/dcc/dcc.go` — new `PublicIP()` function
+- `app.go` — `DCCSend` uses `dcc.PublicIP()` instead of `dcc.LocalIP()`
+
+---
+
 ## Session 26 — 2026-05-24 (nick context menu, DCC fixes, docs pass)
 
 ### What Was Added
