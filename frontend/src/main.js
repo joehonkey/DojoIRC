@@ -1782,7 +1782,7 @@ function showAbout() {
       <div class="docs-body">
         <div style="text-align:center;padding:16px 0 24px">
           <img src="${DOJOIRC_ICON}" alt="DojoIRC" style="width:80px;height:80px;border-radius:16px;display:block;margin:0 auto 10px">
-          <div style="font-size:12px;color:var(--text-dim)">Cross-platform IRC client for Linux, macOS, Windows, and FreeBSD</div>
+          <div style="font-size:12px;color:var(--text-dim)">DojoIRC is an IRCv3-capable, cross-platform IRC client</div>
           <div id="about-version" style="margin-top:16px;display:inline-block;background:var(--bg-sidebar);border:1px solid var(--border);border-radius:4px;padding:6px 18px;font-size:13px">
             Version <strong>…</strong>
           </div>
