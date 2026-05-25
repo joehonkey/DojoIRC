@@ -17,7 +17,8 @@ let DOJOIRC_ICON = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAA
 
 // ── State ──────────────────────────────────────────────────
 const state = {
-  nick: '',
+  nick: '',    // kept for legacy fallback; prefer nicks[server]
+  nicks: {},   // per-server nick map
   servers: [],
   activeServer: '',
   activeChannel: '',
@@ -36,6 +37,10 @@ const state = {
   nickHidden: localStorage.getItem('nickHidden') === 'true',
   dccChats: {},
 };
+
+function myNick(server) {
+  return state.nicks[server] || state.nick || '';
+}
 
 // ── Emoji data ──────────────────────────────────────────────
 const EMOJI_CATS = [
@@ -231,7 +236,7 @@ function isDm(name) {
 }
 
 function openQuery(server, nick) {
-  if (!server || !nick || nick === state.nick) return;
+  if (!server || !nick || nick === myNick(server)) return;
   const srv = state.servers.find(s => s.name === server);
   if (!srv) return;
   srv.channels.forEach(c => { c.active = false; });
@@ -371,7 +376,8 @@ function injectPreview(msgEl, url, p) {
 function handleEvent(ev) {
   switch (ev.type) {
     case 'connected': {
-      state.nick = ev.nick;
+      state.nicks[ev.server] = ev.nick;
+      state.nick = ev.nick; // legacy fallback
       const csrv = ensureChannel(ev.server, 'server');
       const cparent = state.servers.find(s => s.name === ev.server);
       if (cparent) cparent.connected = true;
@@ -394,8 +400,9 @@ function handleEvent(ev) {
     case 'action': {
       const ch = ensureChannel(ev.server, ev.channel);
       let isMention = false;
-      if (state.nick && ev.nick && ev.nick !== state.nick) {
-        const re = new RegExp(`(?:^|\\W)${escapeRegex(state.nick)}(?:\\W|$)`, 'i');
+      const myN = myNick(ev.server);
+      if (myN && ev.nick && ev.nick !== myN) {
+        const re = new RegExp(`(?:^|\\W)${escapeRegex(myN)}(?:\\W|$)`, 'i');
         isMention = re.test(ev.text);
       }
       ch.messages.push({ time: ev.time, nick: ev.nick, text: ev.text, type: ev.type, mention: isMention });
@@ -452,7 +459,10 @@ function handleEvent(ev) {
       break;
     }
     case 'nick': {
-      if (ev.nick === state.nick) state.nick = ev.text;
+      if (ev.nick === myNick(ev.server)) {
+        state.nicks[ev.server] = ev.text;
+        if (ev.server === state.activeServer) state.nick = ev.text;
+      }
       const nsrv = state.servers.find(s => s.name === ev.server);
       if (nsrv) nsrv.channels.forEach(ch => {
         ch.messages.push({ time: ev.time, nick: '', text: `${ev.nick} is now known as ${ev.text}`, type: 'server' });
@@ -647,7 +657,7 @@ function handleSlash(text) {
         const meText = args.join(' ');
         SendAction(state.activeServer, state.activeChannel, meText).catch(console.error);
         const ch = activeChannel();
-        if (ch) ch.messages.push({ time: timestamp(), nick: state.nick, text: meText, type: 'action' });
+        if (ch) ch.messages.push({ time: timestamp(), nick: myNick(state.activeServer), text: meText, type: 'action' });
         render();
       }
       break;
@@ -656,7 +666,7 @@ function handleSlash(text) {
         const target = args[0];
         const msgText = args.slice(1).join(' ');
         SendMessage(state.activeServer, target, msgText).catch(console.error);
-        ensureChannel(state.activeServer, target).messages.push({ time: timestamp(), nick: state.nick, text: msgText, type: 'message' });
+        ensureChannel(state.activeServer, target).messages.push({ time: timestamp(), nick: myNick(state.activeServer), text: msgText, type: 'message' });
         render();
       }
       break;
@@ -738,7 +748,7 @@ function handleSlash(text) {
         if (!info || !state.activeServer || !state.activeChannel || state.activeChannel === 'server') return;
         SendMessage(state.activeServer, state.activeChannel, info).catch(console.error);
         const ch = activeChannel();
-        if (ch) { ch.messages.push({ time: timestamp(), nick: state.nick, text: info, type: 'message' }); render(); }
+        if (ch) { ch.messages.push({ time: timestamp(), nick: myNick(state.activeServer), text: info, type: 'message' }); render(); }
       }).catch(console.error);
       break;
     case 'list':
@@ -884,7 +894,7 @@ function render() {
       <div id="typing-bar"></div>
       <div id="input-bar">
         <button id="nick-toggle" title="${state.nickHidden ? 'Show nick' : 'Hide nick'}">${state.nickHidden ? '›' : '‹'}</button>
-        ${state.nickHidden ? '' : `<span id="input-nick">${state.nick}${state.awayServer === state.activeServer ? '<span class="away-badge">away</span>' : ''}</span>`}
+        ${state.nickHidden ? '' : `<span id="input-nick">${myNick(state.activeServer)}${state.awayServer === state.activeServer ? '<span class="away-badge">away</span>' : ''}</span>`}
         <input id="message-input" type="text" placeholder="${state.activeChannel ? 'Message ' + state.activeChannel : 'Not connected'}" autocomplete="off" />
         <button id="emoji-btn" title="Emoji">😊</button>
       </div>
@@ -1544,7 +1554,7 @@ function sendMessage(text) {
       .catch(err => console.error('send failed:', err));
   }
 
-  ch.messages.push({ time: timestamp(), nick: state.nick, text: converted, type: 'message' });
+  ch.messages.push({ time: timestamp(), nick: myNick(state.activeServer), text: converted, type: 'message' });
   render();
 }
 
