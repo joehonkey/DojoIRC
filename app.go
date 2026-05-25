@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/url"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -17,9 +18,11 @@ import (
 	goruntime "runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
+	"github.com/joehonkey/dojoirc/internal/cache"
 	"github.com/joehonkey/dojoirc/internal/config"
 	"github.com/joehonkey/dojoirc/internal/dcc"
 	"github.com/joehonkey/dojoirc/internal/irc"
@@ -38,17 +41,18 @@ type App struct {
 	clients      map[string]*irc.Client
 	mu           sync.RWMutex
 	nicklist     map[string]map[string][]string // server → channel → nicks
-	previewCache sync.Map                        // url → preview.Result
-	quitting     bool                            // set true when tray Quit is used
+	previewCache *cache.LRU[preview.Result]       // url → preview.Result (max 500, 1h TTL)
+	quitting     atomic.Bool                     // set true when tray Quit is used
 	dccChats     map[string]net.Conn             // "server\x00nick" → active DCC chat connection
 	dccChatMu    sync.RWMutex
 }
 
 func NewApp() *App {
 	return &App{
-		clients:  make(map[string]*irc.Client),
-		nicklist: make(map[string]map[string][]string),
-		dccChats: make(map[string]net.Conn),
+		clients:      make(map[string]*irc.Client),
+		nicklist:     make(map[string]map[string][]string),
+		dccChats:     make(map[string]net.Conn),
+		previewCache: cache.New[preview.Result](500, 60*time.Minute),
 	}
 }
 
@@ -61,7 +65,7 @@ func (a *App) startup(ctx context.Context) {
 	// Bootstrap config on first launch so users get linuxdojo.org pre-configured.
 	cfgPath := filepath.Join(config.Dir(), "config.toml")
 	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
-		os.WriteFile(cfgPath, configExample, 0o644)
+		os.WriteFile(cfgPath, configExample, 0o600)
 	}
 
 	cfg, err := config.Load()
@@ -214,18 +218,25 @@ func (a *App) GetNick(server string) string {
 
 // FetchURLPreview fetches og:/twitter card metadata for a URL with in-memory caching.
 func (a *App) FetchURLPreview(rawURL string) preview.Result {
-	if v, ok := a.previewCache.Load(rawURL); ok {
-		return v.(preview.Result)
+	if a.cfg != nil && !a.cfg.Behaviour.PreviewsEnabled {
+		return preview.Result{URL: rawURL}
+	}
+	if v, ok := a.previewCache.Get(rawURL); ok {
+		return v
 	}
 	r := preview.Fetch(rawURL)
-	a.previewCache.Store(rawURL, r)
+	a.previewCache.Set(rawURL, r)
 	return r
 }
 
 // BrowserOpen opens a URL in the system browser.
-func (a *App) BrowserOpen(url string) {
+func (a *App) BrowserOpen(raw string) {
+	u, err := url.Parse(raw)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") {
+		return
+	}
 	if a.ctx != nil {
-		runtime.BrowserOpenURL(a.ctx, url)
+		runtime.BrowserOpenURL(a.ctx, raw)
 	}
 }
 
@@ -378,7 +389,7 @@ func (a *App) SetNick(nick string) bool {
 		return false
 	}
 	updated := strings.ReplaceAll(string(data), `"yournick"`, fmt.Sprintf("%q", nick))
-	if err := os.WriteFile(path, []byte(updated), 0o644); err != nil {
+	if err := os.WriteFile(path, []byte(updated), 0o600); err != nil {
 		return false
 	}
 	for i := range a.cfg.Servers {
@@ -418,7 +429,7 @@ func (a *App) SaveTheme(name string) {
 	if !found {
 		lines = append([]string{newLine}, lines...)
 	}
-	os.WriteFile(path, []byte(strings.Join(lines, "\n")), 0o644)
+	os.WriteFile(path, []byte(strings.Join(lines, "\n")), 0o600)
 }
 
 // GetTheme loads and returns the active theme colors.
@@ -443,7 +454,7 @@ func (a *App) OpenConfig() {
 	// Bootstrap from example if missing so the user has a documented starting point.
 	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
 		os.MkdirAll(config.Dir(), 0o755)
-		os.WriteFile(cfgPath, configExample, 0o644)
+		os.WriteFile(cfgPath, configExample, 0o600)
 	}
 
 	openInEditor(cfgPath)
@@ -652,6 +663,16 @@ func (a *App) ListChannels(server string) {
 
 // DCCAccept accepts an incoming DCC SEND offer and downloads the file to ~/Downloads.
 func (a *App) DCCAccept(server, nick, file, ip string, port int, size int64) {
+	if a.cfg != nil && !a.cfg.Behaviour.DCCEnabled {
+		return
+	}
+	if a.cfg != nil && a.cfg.Behaviour.MaxDCCFileSize > 0 && size > a.cfg.Behaviour.MaxDCCFileSize {
+		runtime.EventsEmit(a.ctx, "dcc:error", map[string]interface{}{
+			"server": server, "nick": nick, "file": file,
+			"error": fmt.Sprintf("file too large: %d bytes exceeds max_dcc_file_size %d", size, a.cfg.Behaviour.MaxDCCFileSize),
+		})
+		return
+	}
 	go func() {
 		dir := dcc.DownloadsDir()
 		var lastPct int64
@@ -684,6 +705,9 @@ func (a *App) DCCAccept(server, nick, file, ip string, port int, size int64) {
 // Note: outgoing DCC requires the recipient to be able to connect to the sender's IP.
 // This may not work behind NAT without port forwarding.
 func (a *App) DCCSend(server, nick, filePath string) {
+	if a.cfg != nil && !a.cfg.Behaviour.DCCEnabled {
+		return
+	}
 	go func() {
 		sender, err := dcc.NewSender(filePath)
 		if err != nil {
@@ -762,6 +786,9 @@ func (a *App) dccChatReadLoop(server, nick string, conn net.Conn) {
 
 // DCCChatAccept accepts an incoming DCC CHAT offer and establishes a direct chat session.
 func (a *App) DCCChatAccept(server, nick, ip string, port int) {
+	if a.cfg != nil && !a.cfg.Behaviour.DCCEnabled {
+		return
+	}
 	go func() {
 		conn, err := dcc.ChatDial(ip, port)
 		if err != nil {
@@ -787,6 +814,9 @@ func (a *App) DCCChatSend(server, nick, message string) {
 
 // DCCChatInitiate opens a listener, sends a DCC CHAT offer to nick, and waits for the connection.
 func (a *App) DCCChatInitiate(server, nick string) {
+	if a.cfg != nil && !a.cfg.Behaviour.DCCEnabled {
+		return
+	}
 	go func() {
 		sender, err := dcc.NewChatSender()
 		if err != nil {
@@ -843,7 +873,7 @@ func (a *App) ReadClipboard() string {
 
 // AppQuit gracefully disconnects and quits the application.
 func (a *App) AppQuit() {
-	a.quitting = true
+	a.quitting.Store(true)
 	go func() {
 		a.shutdown()
 		runtime.Quit(a.ctx)
@@ -858,7 +888,7 @@ func (a *App) RestartApp() {
 		return
 	}
 	exec.Command(exe, os.Args[1:]...).Start()
-	a.quitting = true
+	a.quitting.Store(true)
 	go func() {
 		a.shutdown()
 		runtime.Quit(a.ctx)

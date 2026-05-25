@@ -8,6 +8,13 @@ theme     = "default"       # theme name from themes/ (no .toml extension)
 font      = "IBM Plex Mono"
 font_size = 13
 
+# ── Behaviour ─────────────────────────────────────────────────────────────────
+
+[behaviour]
+dcc_enabled      = true   # set false to disable all DCC file transfer and chat
+previews_enabled = true   # set false to disable URL preview cards
+# max_dcc_file_size = 104857600  # reject incoming DCC files larger than this (bytes); 0 = unlimited
+
 # ── Servers ───────────────────────────────────────────────────────────────────
 # Add one [[server]] block per IRC network.
 

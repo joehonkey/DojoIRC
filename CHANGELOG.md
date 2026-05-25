@@ -1,5 +1,49 @@
 # DojoIRC Changelog
 
+## Session 32 — 2026-05-25 (v0.4.20 — security & reliability hardening)
+
+### What Was Added
+- **CI pipeline** — `.github/workflows/ci.yml` runs `go vet`, `go test`, `go test -race`, frontend build, and `govulncheck` on every push to `main` and every PR
+- **Dependabot** — weekly updates for Go modules, npm, and GitHub Actions
+- **SECURITY.md** — vulnerability reporting policy, scope, and security notes for users
+- **`internal/cache` package** — generic LRU cache with TTL (`cache.New[V](max, ttl)`); used by URL preview backend
+- **31 unit tests** — `internal/dcc` (ParseSend edge cases, IP round-trips, safeDest collision), `internal/preview` (private IP checks, parseMeta, bad schemes), `internal/config` (defaults, bad TOML, SASL parsing, behaviour overrides) — all pass clean under `-race`
+- **Release checksums** — `checksums.txt` (sha256sum of all platform artifacts) now included in every GitHub release
+- **New config options** in `[behaviour]`: `dcc_enabled` (toggle all DCC), `previews_enabled` (toggle URL previews), `max_dcc_file_size` (reject oversized incoming files, bytes; 0 = unlimited)
+- **DCC and URL preview privacy/security notes** added to `docs/configuration.md`
+
+### What Was Fixed / Hardened
+- **Config file permissions** — `config.toml` now written `0600` instead of `0644`; prevents other local users from reading IRC passwords on multi-user systems
+- **`BrowserOpen` URL validation** — backend now rejects non-`http`/`https` schemes before passing to Wails; defense-in-depth even if frontend validation is bypassed
+- **`a.quitting` race** — changed from `bool` to `sync/atomic.Bool`; eliminates the data race between `OnQuit` and `OnBeforeClose` callbacks running in different goroutines
+- **DCC `ParseSend`** — correctly handles quoted filenames with spaces; rejects empty filenames, negative/zero sizes, out-of-range ports
+- **DCC `Receive`** — `net.DialTimeout` (30s) replaces `net.Dial` with no timeout; 2-hour transfer deadline; stops reading exactly at advertised size; uses `safeDest` to avoid overwriting existing files (renames to `file (1).ext`, `file (2).ext`, etc.)
+- **DCC `Stream` (sender)** — 2-minute accept timeout; 2-hour transfer deadline; ACK read errors now checked instead of silently ignored
+- **URL preview cache** — replaced unbounded `sync.Map` with `cache.LRU` (500 entries, 60-minute TTL); frontend `Map` capped at 500 entries via `previewCacheSet` helper
+- **Scrollback docs/config** — config default corrected from 5000 to 500 (values above 500 were already a no-op); docs updated to describe the three-tier behavior: 500 in memory, 200 persisted, config controls the visible render slice
+- **Wails CLI pinned** — release workflow now uses `@v2.12.0` instead of `@latest`; prevents surprise build changes on tag push
+
+### Files Changed
+- `app.go` — quitting atomic, BrowserOpen validation, config permissions (×4 sites), DCC/preview toggles, max file size guard
+- `main.go` — quitting atomic
+- `internal/config/config.go` — new Behaviour fields (`dcc_enabled`, `previews_enabled`, `max_dcc_file_size`), corrected Scrollback default
+- `internal/dcc/dcc.go` — full hardening rewrite (ParseSend, safeDest, Receive, Stream)
+- `internal/cache/lru.go` — new generic LRU+TTL cache package
+- `internal/dcc/dcc_test.go` — new (15 tests)
+- `internal/preview/preview_test.go` — new (10 tests)
+- `internal/config/config_test.go` — new (6 tests)
+- `frontend/src/main.js` — preview cache bounded via `previewCacheSet`
+- `config.toml.example` — new `[behaviour]` section with DCC/preview toggles
+- `docs/configuration.md` — new config options table rows, DCC security note, URL preview privacy note
+- `ROADMAP.md` — new Security & Reliability and Testing & CI sections; items checked
+- `README.md` — scrollback description corrected
+- `SECURITY.md` — new file
+- `.github/workflows/ci.yml` — new CI workflow
+- `.github/workflows/release.yml` — Wails CLI pinned, checksums step added
+- `.github/dependabot.yml` — new file
+
+---
+
 ## Session 31 — 2026-05-24 (v0.4.19 — message persistence, render cap, UI polish)
 
 ### What Was Added

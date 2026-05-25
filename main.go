@@ -74,7 +74,7 @@ func main() {
 		},
 		OnQuit: func() {
 			if app.ctx != nil {
-				app.quitting = true
+				app.quitting.Store(true)
 				app.shutdown()
 				runtime.Quit(app.ctx)
 			}
@@ -90,7 +90,7 @@ func main() {
 		OnStartup:        app.startup,
 		DragAndDrop: &options.DragAndDrop{EnableFileDrop: true},
 		OnBeforeClose: func(ctx context.Context) bool {
-			if app.quitting {
+			if app.quitting.Load() {
 				return false
 			}
 			saveWinPos(ctx)
