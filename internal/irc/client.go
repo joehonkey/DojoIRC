@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strconv"
 	"strings"
 	"time"
 
@@ -573,7 +574,7 @@ func (c *Client) handleCTCPRequest(client *ircp.Client, from, payload, now, srv 
 	case "CLIENTINFO":
 		client.WriteMessage(&ircp.Message{
 			Command: "NOTICE",
-			Params:  []string{from, "\x01CLIENTINFO VERSION PING TIME FINGER CLIENTINFO DCC\x01"},
+			Params:  []string{from, "\x01CLIENTINFO VERSION PING TIME FINGER CLIENTINFO DCC CHAT\x01"},
 		})
 		c.emit(Event{Server: srv, Type: "ctcp", Channel: "server", Nick: from, Text: "CTCP CLIENTINFO from " + from, Time: now})
 	case "DCC":
@@ -594,6 +595,27 @@ func (c *Client) handleCTCPRequest(client *ircp.Client, from, payload, now, srv 
 				DCCSize: size,
 				Time:    now,
 			})
+		} else if strings.HasPrefix(param, "CHAT ") {
+			parts := strings.Fields(param) // ["CHAT", "chat", ipuint32, port]
+			if len(parts) >= 4 {
+				ipInt, e := strconv.ParseUint(parts[2], 10, 32)
+				if e != nil {
+					return
+				}
+				port, e := strconv.Atoi(parts[3])
+				if e != nil {
+					return
+				}
+				c.emit(Event{
+					Server:  srv,
+					Type:    "dcc_chat_offer",
+					Channel: from,
+					Nick:    from,
+					DCCIP:   dcc.IPFromUint32(uint32(ipInt)),
+					DCCPort: port,
+					Time:    now,
+				})
+			}
 		}
 	}
 }

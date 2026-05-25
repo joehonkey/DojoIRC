@@ -231,3 +231,34 @@ func (s *Sender) Close() {
 		s.ln.Close()
 	}
 }
+
+// ChatSender manages an outgoing DCC CHAT offer.
+type ChatSender struct {
+	Port int
+	ln   net.Listener
+}
+
+// NewChatSender opens a TCP listener for a DCC CHAT initiation.
+func NewChatSender() (*ChatSender, error) {
+	ln, err := net.Listen("tcp", ":0")
+	if err != nil {
+		return nil, fmt.Errorf("dcc chat: listen: %w", err)
+	}
+	return &ChatSender{Port: ln.Addr().(*net.TCPAddr).Port, ln: ln}, nil
+}
+
+// Accept waits for the remote peer to connect, with a deadline.
+func (s *ChatSender) Accept(timeout time.Duration) (net.Conn, error) {
+	if tl, ok := s.ln.(*net.TCPListener); ok {
+		tl.SetDeadline(time.Now().Add(timeout))
+	}
+	return s.ln.Accept()
+}
+
+// Close shuts down the listener.
+func (s *ChatSender) Close() { s.ln.Close() }
+
+// ChatDial connects to a remote DCC CHAT peer.
+func ChatDial(ip string, port int) (net.Conn, error) {
+	return net.DialTimeout("tcp", fmt.Sprintf("%s:%d", ip, port), 30*time.Second)
+}

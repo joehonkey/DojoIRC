@@ -18,6 +18,18 @@ export function DCCAccept(arg1, arg2, arg3, arg4, arg5, arg6) {
   return window['go']['main']['App']['DCCAccept'](arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
+export function DCCChatAccept(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['DCCChatAccept'](arg1, arg2, arg3, arg4);
+}
+
+export function DCCChatInitiate(arg1, arg2) {
+  return window['go']['main']['App']['DCCChatInitiate'](arg1, arg2);
+}
+
+export function DCCChatSend(arg1, arg2, arg3) {
+  return window['go']['main']['App']['DCCChatSend'](arg1, arg2, arg3);
+}
+
 export function DCCSend(arg1, arg2, arg3) {
   return window['go']['main']['App']['DCCSend'](arg1, arg2, arg3);
 }

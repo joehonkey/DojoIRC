@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	_ "embed"
 	"encoding/base64"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -38,12 +40,15 @@ type App struct {
 	nicklist     map[string]map[string][]string // server → channel → nicks
 	previewCache sync.Map                        // url → preview.Result
 	quitting     bool                            // set true when tray Quit is used
+	dccChats     map[string]net.Conn             // "server\x00nick" → active DCC chat connection
+	dccChatMu    sync.RWMutex
 }
 
 func NewApp() *App {
 	return &App{
 		clients:  make(map[string]*irc.Client),
 		nicklist: make(map[string]map[string][]string),
+		dccChats: make(map[string]net.Conn),
 	}
 }
 
@@ -695,6 +700,96 @@ func (a *App) DCCSend(server, nick, filePath string) {
 		runtime.EventsEmit(a.ctx, "dcc:sent", map[string]interface{}{
 			"server": server, "nick": nick, "file": filepath.Base(filePath),
 		})
+	}()
+}
+
+// dccChatReadLoop registers conn, emits connected, reads lines until EOF, then emits closed.
+func (a *App) dccChatReadLoop(server, nick string, conn net.Conn) {
+	key := server + "\x00" + nick
+	a.dccChatMu.Lock()
+	a.dccChats[key] = conn
+	a.dccChatMu.Unlock()
+	runtime.EventsEmit(a.ctx, "dcc_chat:connected", map[string]interface{}{
+		"server": server, "nick": nick,
+	})
+	scanner := bufio.NewScanner(conn)
+	for scanner.Scan() {
+		line := strings.TrimRight(scanner.Text(), "\r")
+		runtime.EventsEmit(a.ctx, "dcc_chat:message", map[string]interface{}{
+			"server": server, "nick": nick, "text": line,
+		})
+	}
+	a.dccChatMu.Lock()
+	delete(a.dccChats, key)
+	a.dccChatMu.Unlock()
+	conn.Close()
+	runtime.EventsEmit(a.ctx, "dcc_chat:closed", map[string]interface{}{
+		"server": server, "nick": nick,
+	})
+}
+
+// DCCChatAccept accepts an incoming DCC CHAT offer and establishes a direct chat session.
+func (a *App) DCCChatAccept(server, nick, ip string, port int) {
+	go func() {
+		conn, err := dcc.ChatDial(ip, port)
+		if err != nil {
+			runtime.EventsEmit(a.ctx, "dcc_chat:error", map[string]interface{}{
+				"server": server, "nick": nick, "error": err.Error(),
+			})
+			return
+		}
+		a.dccChatReadLoop(server, nick, conn)
+	}()
+}
+
+// DCCChatSend sends a line to an active DCC chat session with nick.
+func (a *App) DCCChatSend(server, nick, message string) {
+	key := server + "\x00" + nick
+	a.dccChatMu.RLock()
+	conn := a.dccChats[key]
+	a.dccChatMu.RUnlock()
+	if conn != nil {
+		fmt.Fprintf(conn, "%s\r\n", message)
+	}
+}
+
+// DCCChatInitiate opens a listener, sends a DCC CHAT offer to nick, and waits for the connection.
+func (a *App) DCCChatInitiate(server, nick string) {
+	go func() {
+		sender, err := dcc.NewChatSender()
+		if err != nil {
+			runtime.EventsEmit(a.ctx, "dcc_chat:error", map[string]interface{}{
+				"server": server, "nick": nick, "error": "listen: " + err.Error(),
+			})
+			return
+		}
+		defer sender.Close()
+
+		ip := dcc.PublicIP()
+		ipInt, err := dcc.IPToUint32(ip)
+		if err != nil {
+			runtime.EventsEmit(a.ctx, "dcc_chat:error", map[string]interface{}{
+				"server": server, "nick": nick, "error": "bad IP: " + err.Error(),
+			})
+			return
+		}
+
+		a.mu.RLock()
+		c, ok := a.clients[server]
+		a.mu.RUnlock()
+		if !ok {
+			return
+		}
+		c.SendCTCP(nick, "DCC", fmt.Sprintf("CHAT chat %d %d", ipInt, sender.Port))
+
+		conn, err := sender.Accept(30 * time.Second)
+		if err != nil {
+			runtime.EventsEmit(a.ctx, "dcc_chat:error", map[string]interface{}{
+				"server": server, "nick": nick, "error": "no answer within 30s",
+			})
+			return
+		}
+		a.dccChatReadLoop(server, nick, conn)
 	}()
 }
 
