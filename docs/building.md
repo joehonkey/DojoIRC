@@ -33,7 +33,7 @@ sudo dnf install gtk3-devel webkit2gtk4.1-devel
 ```bash
 git clone https://github.com/joehonkey/DojoIRC
 cd DojoIRC
-~/go/bin/wails build -tags webkit2_41 -ldflags "-X main.Version=v0.4.6"
+~/go/bin/wails build -tags webkit2_41 -ldflags "-X main.Version=v0.4.24"
 cp -r themes build/bin/
 ```
 
@@ -123,7 +123,7 @@ git clone https://github.com/joehonkey/DojoIRC
 cd DojoIRC
 export GOROOT=/usr/local/go126
 export PATH=/usr/local/go126/bin:/usr/local/lib/node_modules/corepack/shims:~/go/bin:$PATH
-GONOSUMDB='*' GOFLAGS="-mod=mod" wails build -tags webkit2_41 -ldflags "-X main.Version=v0.4.12"
+GONOSUMDB='*' GOFLAGS="-mod=mod" wails build -tags webkit2_41 -ldflags "-X main.Version=v0.4.24"
 cp -r themes build/bin/
 ```
 
@@ -195,7 +195,7 @@ The following changes are required to make Wails v2 build and run on FreeBSD. Th
 ```bash
 git clone https://github.com/joehonkey/DojoIRC
 cd DojoIRC
-~/go/bin/wails build -ldflags "-X main.Version=v0.4.6"
+~/go/bin/wails build -ldflags "-X main.Version=v0.4.24"
 cp -r themes build/bin/
 ```
 
@@ -214,7 +214,7 @@ Open a PowerShell terminal:
 ```powershell
 git clone https://github.com/joehonkey/DojoIRC
 cd DojoIRC
-wails build -ldflags "-X main.Version=v0.4.6"
+wails build -ldflags "-X main.Version=v0.4.24"
 Copy-Item -Recurse themes build\bin\
 ```
 
