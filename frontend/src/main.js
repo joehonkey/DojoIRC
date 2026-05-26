@@ -103,6 +103,9 @@ let inputDraft  = '';
 // ── Emoji button toggle ───────────────────────────────────────
 let emojiBtnEnabled = localStorage.getItem('emojiBtnEnabled') !== 'false';
 
+// ── Preview-in-DM toggle ──────────────────────────────────────
+let previewsInDMs = localStorage.getItem('previewsInDMs') !== 'false';
+
 // ── Emoji picker ─────────────────────────────────────────────
 function showEmojiPicker(anchorEl) {
   document.getElementById('emoji-picker')?.remove();
@@ -377,9 +380,11 @@ function bindLinkPreviews() {
     if (!msgEl || msgEl.dataset.previewDone === url) return;
 
     if (previewCache.has(url)) {
-      injectPreview(msgEl, url, previewCache.get(url));
+      if (!isDm(state.activeChannel) || previewsInDMs) injectPreview(msgEl, url, previewCache.get(url));
       return;
     }
+
+    if (isDm(state.activeChannel) && !previewsInDMs) return;
 
     previewCacheSet(url, null); // mark pending
     FetchURLPreview(url).then(p => {
@@ -1102,10 +1107,11 @@ function renderMessages() {
       : '';
     // Inline cached preview cards so images survive re-renders without flicker
     const urls = extractURLs(m.text || '');
-    const inlinePreviews = urls.map(url => {
+    const showPreviews = !isDm(state.activeChannel) || previewsInDMs;
+    const inlinePreviews = showPreviews ? urls.map(url => {
       if (!previewCache.has(url)) return '';
       return previewCardHTML(url, previewCache.get(url));
-    }).join('');
+    }).join('') : '';
     const previewAttr = inlinePreviews ? ` data-preview-done="${escapeAttr(urls[0])}"` : '';
     return `
     <div class="message ${m.type || ''}${m.mention ? ' mention' : ''}${searchCls}"${previewAttr}>
@@ -1562,6 +1568,11 @@ function bindEvents() {
           localStorage.setItem('emojiBtnEnabled', emojiBtnEnabled);
           const btn = document.getElementById('emoji-btn');
           if (btn) btn.style.display = emojiBtnEnabled ? '' : 'none';
+      }},
+      { label: previewsInDMs ? 'PM Previews: On ✓' : 'PM Previews: Off', action: () => {
+          previewsInDMs = !previewsInDMs;
+          localStorage.setItem('previewsInDMs', previewsInDMs);
+          render();
       }},
       { label: 'Open Config',   action: () => OpenConfig().catch(console.error) },
       { label: 'Reload Config', action: () =>
