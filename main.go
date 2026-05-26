@@ -5,6 +5,7 @@ import (
 	"embed"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/joehonkey/dojoirc/internal/tray"
 	"github.com/wailsapp/wails/v2"
@@ -18,6 +19,7 @@ var (
 	winX, winY   int
 	winPosSaved  bool
 	winPosMu     sync.Mutex
+	lastHideTime time.Time // zero value means never hidden
 )
 
 // Version is set at build time via -ldflags "-X main.Version=vX.Y.Z"
@@ -27,6 +29,7 @@ func saveWinPos(ctx context.Context) {
 	x, y := runtime.WindowGetPosition(ctx)
 	winPosMu.Lock()
 	winX, winY, winPosSaved = x, y, true
+	lastHideTime = time.Now()
 	winPosMu.Unlock()
 }
 
@@ -59,10 +62,22 @@ func main() {
 	go tray.Run(tray.Callbacks{
 		OnShow: func() {
 			if app.ctx != nil {
+				winPosMu.Lock()
+				hideDur := time.Since(lastHideTime)
+				neverHidden := lastHideTime.IsZero()
+				winPosMu.Unlock()
+
 				runtime.WindowShow(app.ctx)
 				restoreWinPos(app.ctx)
 				tray.SetVisible(true)
-				runtime.EventsEmit(app.ctx, "window:shown")
+				// After a long absence the WebKit web process may have been killed
+				// by the kernel OOM killer. Reload the app so JS re-initialises;
+				// Go-side IRC connections remain alive.
+				if !neverHidden && hideDur > 30*time.Minute {
+					runtime.WindowReloadApp(app.ctx)
+				} else {
+					runtime.EventsEmit(app.ctx, "window:shown")
+				}
 			}
 		},
 		OnHide: func() {
