@@ -1,5 +1,26 @@
 # DojoIRC Changelog
 
+## Session 33 — 2026-05-25 (v0.4.22 — context cancellation, UX fixes, security hardening)
+
+### What Was Added
+- **PM preview toggle** — Hamburger → "PM Previews: On/Off" suppresses URL fetches and preview cards in DM buffers; when off, no HTTP request is made so the user's IP is not exposed to link senders (persists in localStorage)
+
+### What Was Fixed
+- **Context cancellation** — IRC clients now accept a parent `context.Context`; dial and TLS handshake use `DialContext`/`HandshakeContext` so in-flight connections abort immediately on cancel; `runLoop` reconnect loop selects on `ctx.Done()`; `App` holds a shared `clientCtx` cancelled in `shutdown()` as a safety net
+- **Nick list stale after disconnect** — Go-side `nicklist[server]` is cleared on disconnect so the next NAMES batch starts fresh; JS clears `ch.nicks` immediately on disconnect so the UI shows an empty list instead of stale members
+- **Scroll-to-bottom button** — `ResizeObserver` on `#messages` now calls `updateScrollBtn()` whenever content height changes (image loads, injected preview cards), so the jump-to-bottom button appears without needing to nudge the scrollbar
+- **Preview image flicker** — removed `loading="lazy"` from all preview `<img>` tags so cached images render on the same frame as the card; added `min-height`/`background` to `.preview-img-only` to prevent layout-shift flash before image loads
+
+### What Was Hardened
+- **DCC backend validation** — `DCCAccept` and `DCCChatAccept` now reject private/loopback/link-local/CGNAT IPs (same CIDR set as the preview SSRF guard) and out-of-range ports before connecting; `DCCAccept` also rejects `size <= 0` and filenames containing path separators or null bytes
+
+### Files Changed
+- `app.go` — `clientCtx`/`cancel` fields, `NewApp` initialises client context, `onEvent` clears nicklist on disconnect, `DCCAccept`/`DCCChatAccept` validation, `shutdown` calls `cancel()`
+- `internal/irc/client.go` — replaced `quitCh` with `ctx`/`cancel`, context-aware dial/TLS, `runLoop` selects on `ctx.Done()`
+- `internal/dcc/dcc.go` — added `ValidateRemoteAddr` with private-IP CIDR blocklist
+- `frontend/src/main.js` — `previewsInDMs` toggle, nick list cleared on disconnect, `ResizeObserver` for scroll button, lazy-load removed from preview images
+- `frontend/src/style.css` — `.preview-img-only` min-height and background placeholder
+
 ## Session 32 — 2026-05-25 (v0.4.21 — security & reliability hardening)
 
 ### What Was Added
