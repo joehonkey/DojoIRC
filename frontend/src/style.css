@@ -615,9 +615,11 @@ a.msg-link:hover { color: var(--text); }
 .preview-img-only {
   max-width: 320px;
   max-height: 200px;
+  min-height: 80px;
   border-radius: 6px;
   display: block;
   object-fit: contain;
+  background: var(--bg-active);
 }
 .preview-body  { flex: 1; min-width: 0; }
 .preview-domain {

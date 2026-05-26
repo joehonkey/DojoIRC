@@ -396,9 +396,9 @@ function bindLinkPreviews() {
 function previewCardHTML(url, p) {
   if (!p || (!p.title && !p.image)) return '';
   if (p.isImage || (p.image && !p.title)) {
-    return `<div class="url-preview" data-preview-url="${escapeAttr(url)}"><img class="preview-img-only" src="${escapeAttr(p.isImage ? url : p.image)}" alt="" loading="lazy"></div>`;
+    return `<div class="url-preview" data-preview-url="${escapeAttr(url)}"><img class="preview-img-only" src="${escapeAttr(p.isImage ? url : p.image)}" alt=""></div>`;
   }
-  const thumb = p.image ? `<img class="preview-thumb" src="${escapeAttr(p.image)}" alt="" loading="lazy">` : '';
+  const thumb = p.image ? `<img class="preview-thumb" src="${escapeAttr(p.image)}" alt="">` : '';
   return `<div class="url-preview" data-preview-url="${escapeAttr(url)}">${thumb}<div class="preview-body"><div class="preview-domain">${escapeHtml(p.domain || '')}</div>${p.title ? `<div class="preview-title">${escapeHtml(p.title)}</div>` : ''}${p.description ? `<div class="preview-desc">${escapeHtml(p.description)}</div>` : ''}</div></div>`;
 }
 
@@ -411,9 +411,9 @@ function injectPreview(msgEl, url, p) {
   card.className = 'url-preview';
 
   if (p.isImage || (p.image && !p.title)) {
-    card.innerHTML = `<img class="preview-img-only" src="${escapeAttr(p.isImage ? url : p.image)}" alt="" loading="lazy">`;
+    card.innerHTML = `<img class="preview-img-only" src="${escapeAttr(p.isImage ? url : p.image)}" alt="">`;
   } else {
-    const thumb = p.image ? `<img class="preview-thumb" src="${escapeAttr(p.image)}" alt="" loading="lazy">` : '';
+    const thumb = p.image ? `<img class="preview-thumb" src="${escapeAttr(p.image)}" alt="">` : '';
     card.innerHTML = `
       ${thumb}
       <div class="preview-body">
@@ -1487,6 +1487,7 @@ function bindEvents() {
   }
   msgsEl?.addEventListener('scroll', updateScrollBtn, { passive: true });
   scrollBtn?.addEventListener('click', () => { scrollToBottom(); scrollBtn.style.display = 'none'; });
+  if (msgsEl) new ResizeObserver(updateScrollBtn).observe(msgsEl);
   updateScrollBtn();
 
   // Right-click selected text in message area → copy
