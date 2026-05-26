@@ -964,6 +964,34 @@ function handleTab(input) {
 // ── Render ─────────────────────────────────────────────────
 let _renderPending = false;
 let _forceScrollBottom = false;
+const _lastRendered = {}; // renderKey → {msg: last message object rendered}
+
+function patchSidebarUnread() {
+  document.querySelectorAll('.channel-item[data-server][data-channel]').forEach(el => {
+    const srv = state.servers.find(s => s.name === el.dataset.server);
+    const ch = srv?.channels.find(c => c.name === el.dataset.channel);
+    if (!ch) return;
+    const isActive = state.activeServer === el.dataset.server && state.activeChannel === el.dataset.channel;
+    const cls = isActive ? 'active' : ch.mentions > 0 ? 'mention' : ch.unread > 0 ? 'unread' : '';
+    el.className = 'channel-item' + (cls ? ' ' + cls : '');
+    const dot = el.querySelector('.ch-dot');
+    if (dot) dot.className = ch.mentions > 0 ? 'ch-dot mention-dot' : ch.unread > 0 ? 'ch-dot unread-dot' : 'ch-dot';
+  });
+}
+
+function bindNewMsgNicks() {
+  document.querySelectorAll('#messages .msg-nick[data-nick]:not([data-nb])').forEach(el => {
+    el.dataset.nb = '1';
+    const nick = el.dataset.nick, server = el.dataset.server;
+    el.addEventListener('click', () => openQuery(server, nick));
+    el.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      showCtxMenu(e.clientX, e.clientY, nickCtxItems(server, nick));
+    });
+  });
+}
+
 function render() {
   if (_renderPending) return;
   _renderPending = true;
@@ -977,6 +1005,38 @@ function doRender() {
   const prevMsgs = document.getElementById('messages');
   const prevKey = prevMsgs?.dataset.channel;
   const curKey  = state.activeServer + '/' + state.activeChannel;
+  const ch = activeChannel();
+  const renderKey = state.activeServer + '\0' + state.activeChannel;
+
+  // Surgical path: only new messages appended, channel unchanged, no search active
+  if (prevMsgs && prevKey === curKey && ch && !state.searchOpen && ch.messages.length > 0) {
+    const prev = _lastRendered[renderKey];
+    if (prev) {
+      const lastIdx = ch.messages.indexOf(prev.msg);
+      if (lastIdx >= 0 && lastIdx < ch.messages.length - 1) {
+        const newMsgs = ch.messages.slice(lastIdx + 1);
+        const atBottom = _forceScrollBottom ||
+          prevMsgs.scrollTop + prevMsgs.clientHeight >= prevMsgs.scrollHeight - 60;
+        _forceScrollBottom = false;
+        const excess = prevMsgs.children.length + newMsgs.length - state.scrollback;
+        for (let i = 0; i < excess; i++) prevMsgs.firstElementChild?.remove();
+        newMsgs.forEach(m => {
+          const tmp = document.createElement('div');
+          tmp.innerHTML = renderOneMsg(m, '');
+          while (tmp.firstElementChild) prevMsgs.appendChild(tmp.firstElementChild);
+        });
+        _lastRendered[renderKey] = { msg: ch.messages[ch.messages.length - 1] };
+        patchSidebarUnread();
+        bindNewMsgNicks();
+        bindLinkPreviews();
+        renderTypingBar();
+        if (atBottom) { scrollToBottom(); setTimeout(scrollToBottom, 0); }
+        return;
+      }
+    }
+  }
+
+  // Full render
   // Scroll to bottom if: no previous buffer, channel switched, or user was already at the bottom
   const atBottom = _forceScrollBottom || !prevMsgs || prevKey !== curKey ||
     prevMsgs.scrollTop + prevMsgs.clientHeight >= prevMsgs.scrollHeight - 60;
@@ -986,7 +1046,6 @@ function doRender() {
   const savedInput = prevInput ? prevInput.value : '';
   const savedSel   = prevInput ? [prevInput.selectionStart, prevInput.selectionEnd] : [0, 0];
 
-  const ch = activeChannel();
   const isServerBuf = state.activeChannel === 'server';
   document.querySelector('#app').innerHTML = `
     <div id="sidebar" style="width:${state.sidebarWidth}px">
@@ -1031,6 +1090,13 @@ function doRender() {
     a.addEventListener('click', e => { e.preventDefault(); BrowserOpen(a.dataset.url).catch(() => {}); });
   });
   renderTypingBar();
+  // Record last rendered message for surgical path on next render
+  if (ch && ch.messages.length > 0) {
+    _lastRendered[renderKey] = { msg: ch.messages[ch.messages.length - 1] };
+  } else {
+    delete _lastRendered[renderKey];
+  }
+  bindNewMsgNicks();
 }
 
 function renderSidebar() {
@@ -1061,65 +1127,67 @@ function renderSidebar() {
   `}).join('');
 }
 
+function renderOneMsg(m, query) {
+  if (m.type === 'dcc_offer') {
+    const searchCls = query
+      ? ((m.dccFile.toLowerCase().includes(query) || m.nick.toLowerCase().includes(query)) ? ' search-match' : ' search-miss')
+      : '';
+    const btns = m.dccState === 'pending'
+      ? `<button class="dcc-accept" data-dcc-key="${escapeAttr(m.dccKey)}" data-dcc-server="${escapeAttr(m.dccServer)}" data-dcc-nick="${escapeAttr(m.dccNick)}" data-dcc-file="${escapeAttr(m.dccFile)}" data-dcc-ip="${escapeAttr(m.dccIP)}" data-dcc-port="${m.dccPort}" data-dcc-size="${m.dccSize}">Accept</button> <button class="dcc-decline" data-dcc-key="${escapeAttr(m.dccKey)}">Decline</button>`
+      : m.dccState === 'accepted' ? '<span class="dcc-accepted">✓ Accepted</span>'
+      : '<span class="dcc-declined">✗ Declined</span>';
+    return `<div class="message dcc_offer${searchCls}">
+      <span class="msg-time">${m.time}</span>
+      <span class="msg-nick clickable" data-nick="${escapeAttr(m.nick)}" data-server="${escapeAttr(state.activeServer)}" style="color:${nickColor(m.nick)}">${escapeHtml(m.nick)}</span>
+      <span class="msg-text">📎 ${escapeHtml(m.text)} ${btns}</span>
+    </div>`;
+  }
+  if (m.type === 'dcc_chat_offer') {
+    const searchCls = query
+      ? (m.nick.toLowerCase().includes(query) ? ' search-match' : ' search-miss')
+      : '';
+    const btns = m.dccState === 'pending'
+      ? `<button class="dcc-chat-accept" data-dcc-key="${escapeAttr(m.dccKey)}" data-dcc-server="${escapeAttr(m.dccServer)}" data-dcc-nick="${escapeAttr(m.dccNick)}" data-dcc-ip="${escapeAttr(m.dccIP)}" data-dcc-port="${m.dccPort}">Accept</button> <button class="dcc-chat-decline" data-dcc-key="${escapeAttr(m.dccKey)}">Decline</button>`
+      : m.dccState === 'accepted' ? '<span class="dcc-accepted">✓ Chat open</span>'
+      : '<span class="dcc-declined">✗ Declined</span>';
+    return `<div class="message dcc_offer${searchCls}">
+      <span class="msg-time">${m.time}</span>
+      <span class="msg-nick clickable" data-nick="${escapeAttr(m.nick)}" data-server="${escapeAttr(state.activeServer)}" style="color:${nickColor(m.nick)}">${escapeHtml(m.nick)}</span>
+      <span class="msg-text">💬 ${escapeHtml(m.text)} ${btns}</span>
+    </div>`;
+  }
+  const color = m.nick ? `style="color:${nickColor(m.nick)}"` : '';
+  const clickable = m.nick && m.type !== 'server';
+  const nickAttrs = clickable ? ` data-nick="${escapeAttr(m.nick)}" data-server="${escapeAttr(state.activeServer)}"` : '';
+  const nickDisplay = m.type === 'action'
+    ? `<span class="msg-nick action-nick${clickable ? ' clickable' : ''}"${nickAttrs} ${color}>* ${escapeHtml(m.nick)}</span>`
+    : `<span class="msg-nick${clickable ? ' clickable' : ''}"${nickAttrs} ${color}>${m.nick ? escapeHtml(m.nick) : ''}</span>`;
+  const textClass = m.type === 'action' ? 'msg-text action-text' : 'msg-text';
+  const searchCls = query
+    ? ((m.text.toLowerCase().includes(query) || (m.nick && m.nick.toLowerCase().includes(query))) ? ' search-match' : ' search-miss')
+    : '';
+  // Inline cached preview cards so images survive re-renders without flicker
+  const urls = extractURLs(m.text || '');
+  const showPreviews = !isDm(state.activeChannel) || previewsInDMs;
+  const inlinePreviews = showPreviews ? urls.map(url => {
+    if (!previewCache.has(url)) return '';
+    return previewCardHTML(url, previewCache.get(url));
+  }).join('') : '';
+  const previewAttr = inlinePreviews ? ` data-preview-done="${escapeAttr(urls[0])}"` : '';
+  return `
+  <div class="message ${m.type || ''}${m.mention ? ' mention' : ''}${searchCls}"${previewAttr}>
+    <span class="msg-time">${m.time}</span>
+    ${nickDisplay}
+    <span class="${textClass}">${renderText(m.text)}</span>
+  </div>${inlinePreviews}`;
+}
+
 function renderMessages() {
   const ch = activeChannel();
   if (!ch?.messages.length) return '<div class="message server"><span class="msg-time"></span><span class="msg-nick"></span><span class="msg-text" style="opacity:0.4">No messages yet</span></div>';
   const msgs = ch.messages.slice(-state.scrollback);
   const query = state.searchOpen && state.searchQuery ? state.searchQuery.toLowerCase() : '';
-  return msgs.map(m => {
-    if (m.type === 'dcc_offer') {
-      const searchCls = query
-        ? ((m.dccFile.toLowerCase().includes(query) || m.nick.toLowerCase().includes(query)) ? ' search-match' : ' search-miss')
-        : '';
-      const btns = m.dccState === 'pending'
-        ? `<button class="dcc-accept" data-dcc-key="${escapeAttr(m.dccKey)}" data-dcc-server="${escapeAttr(m.dccServer)}" data-dcc-nick="${escapeAttr(m.dccNick)}" data-dcc-file="${escapeAttr(m.dccFile)}" data-dcc-ip="${escapeAttr(m.dccIP)}" data-dcc-port="${m.dccPort}" data-dcc-size="${m.dccSize}">Accept</button> <button class="dcc-decline" data-dcc-key="${escapeAttr(m.dccKey)}">Decline</button>`
-        : m.dccState === 'accepted' ? '<span class="dcc-accepted">✓ Accepted</span>'
-        : '<span class="dcc-declined">✗ Declined</span>';
-      return `<div class="message dcc_offer${searchCls}">
-        <span class="msg-time">${m.time}</span>
-        <span class="msg-nick clickable" data-nick="${escapeAttr(m.nick)}" data-server="${escapeAttr(state.activeServer)}" style="color:${nickColor(m.nick)}">${escapeHtml(m.nick)}</span>
-        <span class="msg-text">📎 ${escapeHtml(m.text)} ${btns}</span>
-      </div>`;
-    }
-    if (m.type === 'dcc_chat_offer') {
-      const searchCls = query
-        ? (m.nick.toLowerCase().includes(query) ? ' search-match' : ' search-miss')
-        : '';
-      const btns = m.dccState === 'pending'
-        ? `<button class="dcc-chat-accept" data-dcc-key="${escapeAttr(m.dccKey)}" data-dcc-server="${escapeAttr(m.dccServer)}" data-dcc-nick="${escapeAttr(m.dccNick)}" data-dcc-ip="${escapeAttr(m.dccIP)}" data-dcc-port="${m.dccPort}">Accept</button> <button class="dcc-chat-decline" data-dcc-key="${escapeAttr(m.dccKey)}">Decline</button>`
-        : m.dccState === 'accepted' ? '<span class="dcc-accepted">✓ Chat open</span>'
-        : '<span class="dcc-declined">✗ Declined</span>';
-      return `<div class="message dcc_offer${searchCls}">
-        <span class="msg-time">${m.time}</span>
-        <span class="msg-nick clickable" data-nick="${escapeAttr(m.nick)}" data-server="${escapeAttr(state.activeServer)}" style="color:${nickColor(m.nick)}">${escapeHtml(m.nick)}</span>
-        <span class="msg-text">💬 ${escapeHtml(m.text)} ${btns}</span>
-      </div>`;
-    }
-    const color = m.nick ? `style="color:${nickColor(m.nick)}"` : '';
-    const clickable = m.nick && m.type !== 'server';
-    const nickAttrs = clickable ? ` data-nick="${escapeAttr(m.nick)}" data-server="${escapeAttr(state.activeServer)}"` : '';
-    const nickDisplay = m.type === 'action'
-      ? `<span class="msg-nick action-nick${clickable ? ' clickable' : ''}"${nickAttrs} ${color}>* ${escapeHtml(m.nick)}</span>`
-      : `<span class="msg-nick${clickable ? ' clickable' : ''}"${nickAttrs} ${color}>${m.nick ? escapeHtml(m.nick) : ''}</span>`;
-    const textClass = m.type === 'action' ? 'msg-text action-text' : 'msg-text';
-    const searchCls = query
-      ? ((m.text.toLowerCase().includes(query) || (m.nick && m.nick.toLowerCase().includes(query))) ? ' search-match' : ' search-miss')
-      : '';
-    // Inline cached preview cards so images survive re-renders without flicker
-    const urls = extractURLs(m.text || '');
-    const showPreviews = !isDm(state.activeChannel) || previewsInDMs;
-    const inlinePreviews = showPreviews ? urls.map(url => {
-      if (!previewCache.has(url)) return '';
-      return previewCardHTML(url, previewCache.get(url));
-    }).join('') : '';
-    const previewAttr = inlinePreviews ? ` data-preview-done="${escapeAttr(urls[0])}"` : '';
-    return `
-    <div class="message ${m.type || ''}${m.mention ? ' mention' : ''}${searchCls}"${previewAttr}>
-      <span class="msg-time">${m.time}</span>
-      ${nickDisplay}
-      <span class="${textClass}">${renderText(m.text)}</span>
-    </div>${inlinePreviews}`;
-  }).join('');
+  return msgs.map(m => renderOneMsg(m, query)).join('');
 }
 
 function renderNicklist() {
@@ -1417,6 +1485,7 @@ function bindEvents() {
 
   // Nicks in messages: left-click → query, right-click → ctx menu
   document.querySelectorAll('.msg-nick[data-nick]').forEach(el => {
+    el.dataset.nb = '1';
     const nick   = el.dataset.nick;
     const server = el.dataset.server;
     el.addEventListener('click', () => openQuery(server, nick));

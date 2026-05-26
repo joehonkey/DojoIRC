@@ -1,5 +1,15 @@
 # DojoIRC Changelog
 
+## Session 35 — 2026-05-25 (v0.4.24 — surgical DOM rendering + resize handle fix)
+
+### What Was Changed
+- **Surgical DOM rendering** — messages are now appended directly to the DOM as individual nodes instead of rebuilding the entire app on every IRC event. Added `renderOneMsg()` to build one message element at a time, `_lastRendered` tracking to detect when to use the fast path, `patchSidebarUnread()` to update unread dots in-place, and `bindNewMsgNicks()` to bind nick events only on new elements. Full re-render is still used for channel switches, search, topic/nicklist toggles, and other structural changes. Benefits all 4 platforms equally.
+- **Resize handle hit area** — both the sidebar and nicklist handles were visually and functionally 1px wide (from v0.4.23), making them nearly impossible to grab — especially on FreeBSD. Fixed with a CSS `::after` pseudo-element that extends the pointer target to 9px (4px each side) while keeping the 1px visual line.
+
+### Files Changed
+- `frontend/src/main.js` — `renderOneMsg()`, `patchSidebarUnread()`, `bindNewMsgNicks()`, `_lastRendered`, surgical path in `doRender()`
+- `frontend/src/style.css` — `#sidebar-handle::after` and `#nicklist-handle::after` extended hit areas
+
 ## Session 34 — 2026-05-25 (v0.4.23 — thinner panel dividers)
 
 ### What Was Changed

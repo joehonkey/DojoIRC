@@ -70,6 +70,14 @@ html, body {
   background: var(--border);
   cursor: col-resize;
   transition: background 0.15s;
+  position: relative;
+}
+#sidebar-handle::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: -4px; right: -4px;
+  cursor: col-resize;
 }
 #sidebar-handle:hover { background: var(--accent); }
 
@@ -363,6 +371,14 @@ html, body {
   background: var(--border);
   cursor: col-resize;
   transition: background 0.15s;
+  position: relative;
+}
+#nicklist-handle::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: -4px; right: -4px;
+  cursor: col-resize;
 }
 #nicklist-handle:hover { background: var(--accent); }
 
