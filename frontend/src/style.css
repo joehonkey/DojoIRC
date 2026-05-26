@@ -65,7 +65,7 @@ html, body {
 }
 
 #sidebar-handle {
-  width: 4px;
+  width: 1px;
   flex-shrink: 0;
   background: var(--border);
   cursor: col-resize;
@@ -358,7 +358,7 @@ html, body {
 
 /* ── Nick list ────────────────────────────────────────────── */
 #nicklist-handle {
-  width: 4px;
+  width: 1px;
   flex-shrink: 0;
   background: var(--border);
   cursor: col-resize;

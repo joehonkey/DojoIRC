@@ -1,5 +1,10 @@
 # DojoIRC Changelog
 
+## Session 34 — 2026-05-25 (v0.4.23 — thinner panel dividers)
+
+### What Was Changed
+- **Panel dividers** — reduced sidebar and nick-list resize handles from 4px to 1px for a cleaner look
+
 ## Session 33 — 2026-05-25 (v0.4.22 — context cancellation, UX fixes, security hardening)
 
 ### What Was Added
