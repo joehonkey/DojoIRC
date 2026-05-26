@@ -1,6 +1,7 @@
 package irc
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
@@ -30,22 +31,24 @@ type Event struct {
 }
 
 type Client struct {
+	ctx         context.Context
+	cancel      context.CancelFunc
 	server      config.Server
 	conn        net.Conn
 	irc         *ircp.Client
 	emit        func(Event)
-	quitCh      chan struct{}
 	currentNick string
 	capAccum    string // accumulates CAP LS multiline lines
 	ignoreSet   map[string]struct{}
 }
 
-func NewClient(server config.Server, emit func(Event)) *Client {
+func NewClient(ctx context.Context, server config.Server, emit func(Event)) *Client {
+	ctx, cancel := context.WithCancel(ctx)
 	ig := make(map[string]struct{}, len(server.Ignore))
 	for _, n := range server.Ignore {
 		ig[strings.ToLower(n)] = struct{}{}
 	}
-	return &Client{server: server, emit: emit, quitCh: make(chan struct{}), ignoreSet: ig}
+	return &Client{ctx: ctx, cancel: cancel, server: server, emit: emit, ignoreSet: ig}
 }
 
 func (c *Client) isIgnored(nick string) bool {
@@ -55,14 +58,20 @@ func (c *Client) isIgnored(nick string) bool {
 
 func (c *Client) dial() error {
 	addr := net.JoinHostPort(c.server.Host, strconv.Itoa(c.server.Port))
-	var err error
-	if c.server.TLS {
-		c.conn, err = tls.Dial("tcp", addr, &tls.Config{ServerName: c.server.Host})
-	} else {
-		c.conn, err = net.Dial("tcp", addr)
-	}
+	d := &net.Dialer{}
+	rawConn, err := d.DialContext(c.ctx, "tcp", addr)
 	if err != nil {
 		return fmt.Errorf("dial: %w", err)
+	}
+	if c.server.TLS {
+		tlsConn := tls.Client(rawConn, &tls.Config{ServerName: c.server.Host})
+		if err := tlsConn.HandshakeContext(c.ctx); err != nil {
+			rawConn.Close()
+			return fmt.Errorf("tls: %w", err)
+		}
+		c.conn = tlsConn
+	} else {
+		c.conn = rawConn
 	}
 	c.capAccum = ""
 	// Kick off CAP negotiation before the library sends NICK/USER.
@@ -91,9 +100,8 @@ func (c *Client) runLoop() {
 	for {
 		err := c.irc.Run()
 
-		// Check if we quit intentionally before doing anything else.
 		select {
-		case <-c.quitCh:
+		case <-c.ctx.Done():
 			return
 		default:
 		}
@@ -108,12 +116,17 @@ func (c *Client) runLoop() {
 			c.emit(Event{Server: c.server.Name, Type: "server", Channel: "server",
 				Text: "Reconnecting in 10s..."})
 			select {
-			case <-c.quitCh:
+			case <-c.ctx.Done():
 				return
 			case <-time.After(10 * time.Second):
 			}
 
 			if err := c.dial(); err != nil {
+				select {
+				case <-c.ctx.Done():
+					return
+				default:
+				}
 				log.Printf("[%s] reconnect failed: %v", c.server.Name, err)
 				continue
 			}
@@ -526,12 +539,7 @@ func (c *Client) Quit(reason string) {
 	if reason == "" {
 		reason = "DojoIRC"
 	}
-	// Signal runLoop to stop reconnecting before closing the connection.
-	select {
-	case <-c.quitCh:
-	default:
-		close(c.quitCh)
-	}
+	c.cancel()
 	if c.conn == nil {
 		return
 	}

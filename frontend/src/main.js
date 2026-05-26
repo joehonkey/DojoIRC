@@ -595,6 +595,7 @@ function handleEvent(ev) {
       if (dsrv) {
         dsrv.connected = false;
         dsrv.channels.forEach(ch => {
+          ch.nicks = [];
           addMsg(ch,{ time: ev.time, nick: '', text: 'Disconnected from server', type: 'server' });
         });
       }

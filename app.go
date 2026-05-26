@@ -36,7 +36,9 @@ import (
 var configExample []byte
 
 type App struct {
-	ctx          context.Context
+	ctx          context.Context        // Wails runtime context
+	clientCtx    context.Context        // parent context for all IRC clients
+	cancel       context.CancelFunc     // cancels clientCtx
 	cfg          *config.Config
 	clients      map[string]*irc.Client
 	mu           sync.RWMutex
@@ -48,7 +50,10 @@ type App struct {
 }
 
 func NewApp() *App {
+	clientCtx, cancel := context.WithCancel(context.Background())
 	return &App{
+		clientCtx:    clientCtx,
+		cancel:       cancel,
 		clients:      make(map[string]*irc.Client),
 		nicklist:     make(map[string]map[string][]string),
 		dccChats:     make(map[string]net.Conn),
@@ -92,6 +97,11 @@ func (a *App) startup(ctx context.Context) {
 func (a *App) onEvent(ev irc.Event) {
 	if ev.Type == "names" {
 		a.updateNicklist(ev.Server, ev.Channel, ev.Text)
+	}
+	if ev.Type == "disconnected" {
+		a.mu.Lock()
+		delete(a.nicklist, ev.Server)
+		a.mu.Unlock()
 	}
 	switch ev.Type {
 	case "message", "action":
@@ -269,7 +279,7 @@ func (a *App) ConnectServer(name string) {
 			continue
 		}
 		s := srv
-		client := irc.NewClient(s, a.onEvent)
+		client := irc.NewClient(a.clientCtx, s, a.onEvent)
 		if err := client.Connect(); err != nil {
 			log.Printf("failed to connect to %s: %v", s.Name, err)
 			return
@@ -293,7 +303,9 @@ func (a *App) shutdown() {
 	for _, c := range clients {
 		c.Quit("")
 	}
-	// Give the server a moment to receive the QUIT before the socket closes
+	// Cancel the shared client context so any lingering goroutines exit.
+	a.cancel()
+	// Give the server a moment to receive the QUIT before the socket closes.
 	time.Sleep(300 * time.Millisecond)
 	logger.CloseAll()
 }
@@ -353,7 +365,7 @@ func (a *App) connectNewServers(cfg *config.Config) {
 			continue
 		}
 		s := srv
-		client := irc.NewClient(s, a.onEvent)
+		client := irc.NewClient(a.clientCtx, s, a.onEvent)
 		if err := client.Connect(); err != nil {
 			log.Printf("failed to connect to %s: %v", s.Name, err)
 			continue
