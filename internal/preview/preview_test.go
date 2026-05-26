@@ -22,6 +22,11 @@ func TestIsPrivateIP(t *testing.T) {
 		{"::1", true},
 		{"fc00::1", true},
 		{"fdff::1", true},
+		{"169.254.0.1", true},
+		{"169.254.169.254", true}, // cloud metadata service
+		{"fe80::1", true},
+		{"100.64.0.1", true},
+		{"100.127.255.255", true},
 		{"8.8.8.8", false},
 		{"1.1.1.1", false},
 		{"172.15.255.255", false},
@@ -115,6 +120,22 @@ func TestParseMeta_titleTruncation(t *testing.T) {
 	}
 	if !strings.HasSuffix(r.Title, "...") {
 		t.Errorf("truncated title should end with '...': %q", r.Title[len(r.Title)-5:])
+	}
+}
+
+func TestParseMeta_privateImage(t *testing.T) {
+	for _, imgURL := range []string{
+		"http://192.168.1.1/secret.png",
+		"http://169.254.169.254/latest/meta-data/",
+		"http://localhost/img.png",
+		"file:///etc/passwd",
+	} {
+		body := `<html><head><meta property="og:image" content="` + imgURL + `"></head></html>`
+		r := &Result{}
+		parseMeta(body, r)
+		if r.Image != "" {
+			t.Errorf("parseMeta: private/unsafe og:image %q should be suppressed, got %q", imgURL, r.Image)
+		}
 	}
 }
 

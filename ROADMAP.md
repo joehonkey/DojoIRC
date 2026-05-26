@@ -143,9 +143,9 @@
 - [x] DCC: add max receive file size setting in config
 - [x] Protect `a.quitting` with `sync/atomic.Bool`; guard all `a.clients` and `a.cfg` access consistently under `a.mu`
 - [ ] Add context cancellation to `App` and IRC clients to coordinate clean shutdown
-- [ ] Redact secrets in logs: suppress PASS, OPER, NickServ IDENTIFY, AUTHENTICATE, and SASL AUTHENTICATE lines before writing to disk
-- [ ] Expand private IP blocklist in URL preview: add link-local (169.254.0.0/16, fe80::/10), CGNAT (100.64.0.0/10), and cloud metadata service ranges
-- [ ] Validate og:image URLs returned by preview fetcher (may point to internal hosts)
+- [x] Redact secrets in logs: suppress PASS, OPER, NickServ IDENTIFY, AUTHENTICATE, and SASL AUTHENTICATE lines before writing to disk
+- [x] Expand private IP blocklist in URL preview: add link-local (169.254.0.0/16, fe80::/10), CGNAT (100.64.0.0/10), and cloud metadata service ranges
+- [x] Validate og:image URLs returned by preview fetcher (may point to internal hosts)
 - [ ] Add `enable_in_private_messages = false` config option for URL previews
 - [ ] Add backend input validation for `DCCAccept`, `DCCSend`, `DCCChatAccept` (defence-in-depth, not only `BrowserOpen`)
 - [ ] Hide `/raw` and operator commands (`/oper /kill /kline /dline /rehash /wallops`) from default `/help`; warn on first use

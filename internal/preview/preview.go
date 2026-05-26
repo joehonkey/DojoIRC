@@ -174,7 +174,7 @@ func parseMeta(body string, r *Result) {
 			}
 		case "og:image", "twitter:image":
 			if r.Image == "" || prop != "" {
-				r.Image = content
+				r.Image = safeImageURL(content)
 			}
 		}
 	}
@@ -188,23 +188,43 @@ func parseMeta(body string, r *Result) {
 	}
 }
 
-func isPrivateIP(ip net.IP) bool {
-	private := []net.IPNet{}
+var privateBlocks []*net.IPNet
+
+func init() {
 	for _, cidr := range []string{
 		"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16",
 		"127.0.0.0/8", "::1/128", "fc00::/7",
+		"169.254.0.0/16", // link-local IPv4 (includes cloud metadata 169.254.169.254)
+		"fe80::/10",      // link-local IPv6
+		"100.64.0.0/10",  // CGNAT
 	} {
 		_, block, _ := net.ParseCIDR(cidr)
 		if block != nil {
-			private = append(private, *block)
+			privateBlocks = append(privateBlocks, block)
 		}
 	}
-	for _, block := range private {
+}
+
+func isPrivateIP(ip net.IP) bool {
+	for _, block := range privateBlocks {
 		if block.Contains(ip) {
 			return true
 		}
 	}
 	return false
+}
+
+// safeImageURL returns the URL unchanged if it is a safe http/https URL pointing
+// to a non-private host, otherwise returns "".
+func safeImageURL(rawURL string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") {
+		return ""
+	}
+	if isPrivate(u.Hostname()) {
+		return ""
+	}
+	return rawURL
 }
 
 func isPrivate(host string) bool {

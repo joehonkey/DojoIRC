@@ -14,7 +14,23 @@ var (
 	handles = map[string]*os.File{}
 )
 
+// secretPrefixes are IRC/NickServ message bodies that contain credentials.
+var secretPrefixes = []string{"IDENTIFY ", "AUTHENTICATE ", "GHOST ", "RELEASE "}
+
+func isSecret(text string) bool {
+	upper := strings.ToUpper(strings.TrimSpace(text))
+	for _, p := range secretPrefixes {
+		if strings.HasPrefix(upper, p) {
+			return true
+		}
+	}
+	return false
+}
+
 func Log(baseDir, server, channel, nick, text string) {
+	if isSecret(text) {
+		return
+	}
 	mu.Lock()
 	defer mu.Unlock()
 
