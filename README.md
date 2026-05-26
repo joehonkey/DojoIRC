@@ -359,8 +359,7 @@ Tab-completes nicks and commands. Press Tab repeatedly to cycle through matches.
 ```bash
 git clone https://github.com/joehonkey/DojoIRC
 cd DojoIRC
-~/go/bin/wails build -tags webkit2_41   # Linux
-cp -r themes build/bin/
+make build   # Linux — auto-embeds version from CHANGELOG.md
 ```
 
 Binary lands at `build/bin/DojoIRC`.
