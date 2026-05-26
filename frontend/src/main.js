@@ -2119,6 +2119,7 @@ channels = ["#linux"]</code></pre>
 
         <h2>URL Previews</h2>
         <p>URLs in chat are clickable and open in your default browser. DojoIRC also fetches Open Graph metadata for links and shows a preview card below the message — title, description, and thumbnail when available. Plain image links (jpg, png, gif, webp) show inline. Previews are cached for the session so the same URL is only fetched once.</p>
+        <p>To disable previews in private messages (DMs) only, use <b>Hamburger → PM Previews</b>. The toggle persists across restarts. To disable all previews, set <code>previews_enabled = false</code> in <code>[behaviour]</code> in your config.</p>
 
         <h2>DM Windows</h2>
         <p>Open a private conversation with any user by:</p>

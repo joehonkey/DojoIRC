@@ -105,6 +105,7 @@
 - [x] Font size manager — Hamburger → Font Sizes opens a panel with live +/− controls for 14 UI zones (sidebar header, hamburger button, server names, channel names, buffer title, channel modes, topic button, topic text, chat messages, timestamps, nick list, typing indicator, input nick prefix, input field). Changes apply instantly and persist via localStorage.
 - [x] Hide nick toggle — ‹/› pill button left of the nick in the input bar hides/shows your nick; persists across restarts
 - [x] Hide userlist toggle — ◂/▸ pill button in the buffer header hides/shows the nicklist; persists across restarts
+- [x] PM Previews toggle — Hamburger → PM Previews: On/Off controls whether URL previews appear in DM buffers; persists via localStorage (default on)
 
 ## Stage 5 — Power Features
 - [x] Bouncer support (ZNC, soju) — `password` field sends `PASS` before registration
@@ -120,7 +121,8 @@
 - [ ] Script aliases (/music, /sysinfo, custom /exec aliases)
 - [ ] Plugin/script hooks (shell scripts on events)
 - [ ] Memory usage optimization — audit and reduce per-buffer message footprint, DOM node churn, and Go-side allocations
-- [ ] Explicit nick/channel state cleanup on PART, QUIT, KICK, disconnect, and channel close (prevent stale accumulation in long-running sessions)
+- [x] Nick list cleared on disconnect — Go-side server map entry deleted, JS-side channel nicks cleared; 353 NAMES repopulates on reconnect
+- [ ] Explicit nick/channel state cleanup on PART, QUIT, KICK, and channel close (prevent stale accumulation in long-running sessions)
 - [ ] `/memstats` debug command — print goroutine count, heap, per-buffer message counts, preview cache size, DCC state counts
 
 ## Stage 6 — Platform Polish
@@ -142,12 +144,12 @@
 - [x] DCC hardening: quoted filename parsing, port/size range checks, `DialTimeout`, read/write deadlines, stop at advertised size, no-overwrite (rename collisions)
 - [x] DCC: add max receive file size setting in config
 - [x] Protect `a.quitting` with `sync/atomic.Bool`; guard all `a.clients` and `a.cfg` access consistently under `a.mu`
-- [ ] Add context cancellation to `App` and IRC clients to coordinate clean shutdown
+- [x] Add context cancellation to `App` and IRC clients to coordinate clean shutdown
 - [x] Redact secrets in logs: suppress PASS, OPER, NickServ IDENTIFY, AUTHENTICATE, and SASL AUTHENTICATE lines before writing to disk
 - [x] Expand private IP blocklist in URL preview: add link-local (169.254.0.0/16, fe80::/10), CGNAT (100.64.0.0/10), and cloud metadata service ranges
 - [x] Validate og:image URLs returned by preview fetcher (may point to internal hosts)
-- [ ] Add `enable_in_private_messages = false` config option for URL previews
-- [ ] Add backend input validation for `DCCAccept`, `DCCSend`, `DCCChatAccept` (defence-in-depth, not only `BrowserOpen`)
+- [x] PM Previews toggle — Hamburger → PM Previews: On/Off toggles URL previews in DM buffers; localStorage persistence (default on); config option deferred to a later release
+- [x] Add backend input validation for `DCCAccept`, `DCCSend`, `DCCChatAccept` (defence-in-depth, not only `BrowserOpen`)
 - [ ] Hide `/raw` and operator commands (`/oper /kill /kline /dline /rehash /wallops`) from default `/help`; warn on first use
 - [x] Preview cache: add TTL and max-entry limit (backend `sync.Map` and frontend `Map` are currently unbounded)
 - [x] First-run safety: DCC and URL previews off-by-default until enabled in config

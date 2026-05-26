@@ -103,6 +103,8 @@ When URL previews are enabled, DojoIRC fetches metadata (title, description, ima
 
 Set `previews_enabled = false` in `[behaviour]` to disable all URL previews.
 
+To disable previews only in private messages (DMs), use **Hamburger → PM Previews** to toggle them off. This setting persists via `localStorage` and defaults to on.
+
 ---
 
 ## Server options

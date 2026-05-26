@@ -167,7 +167,7 @@ DojoIRC is a from-scratch IRC client written in Go using [Wails v2](https://wail
 | **System tray** | Close to tray, left-click to toggle, right-click to quit |
 | **Mentions & highlights** | Nick mentions highlighted in chat with red tint + OS desktop notification |
 | **Typing indicators** | IRCv3 `draft/typing` — outgoing debounced, incoming shown above input |
-| **URL previews** | Open Graph metadata cards and inline images loaded below links |
+| **URL previews** | Open Graph metadata cards and inline images loaded below links; toggle off for DM buffers via Hamburger → PM Previews |
 | **Nick colorization** | Consistent hash-based color per nick across all buffers |
 | **Tab completion** | Nicks (cycles, adds `: ` at line start), slash commands, `:emoji` shortcodes |
 | **Theme picker** | Scrollable A–Z list, live switching, choice persisted to config |
