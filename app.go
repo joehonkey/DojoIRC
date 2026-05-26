@@ -678,6 +678,21 @@ func (a *App) DCCAccept(server, nick, file, ip string, port int, size int64) {
 	if a.cfg != nil && !a.cfg.Behaviour.DCCEnabled {
 		return
 	}
+	if size <= 0 {
+		log.Printf("DCCAccept: invalid size %d from %s", size, nick)
+		return
+	}
+	if filepath.Base(file) != file || file == "" || strings.ContainsRune(file, 0) {
+		log.Printf("DCCAccept: unsafe filename %q from %s", file, nick)
+		return
+	}
+	if err := dcc.ValidateRemoteAddr(ip, port); err != nil {
+		log.Printf("DCCAccept: %v (from %s)", err, nick)
+		runtime.EventsEmit(a.ctx, "dcc:error", map[string]interface{}{
+			"server": server, "nick": nick, "file": file, "error": err.Error(),
+		})
+		return
+	}
 	if a.cfg != nil && a.cfg.Behaviour.MaxDCCFileSize > 0 && size > a.cfg.Behaviour.MaxDCCFileSize {
 		runtime.EventsEmit(a.ctx, "dcc:error", map[string]interface{}{
 			"server": server, "nick": nick, "file": file,
@@ -799,6 +814,13 @@ func (a *App) dccChatReadLoop(server, nick string, conn net.Conn) {
 // DCCChatAccept accepts an incoming DCC CHAT offer and establishes a direct chat session.
 func (a *App) DCCChatAccept(server, nick, ip string, port int) {
 	if a.cfg != nil && !a.cfg.Behaviour.DCCEnabled {
+		return
+	}
+	if err := dcc.ValidateRemoteAddr(ip, port); err != nil {
+		log.Printf("DCCChatAccept: %v (from %s)", err, nick)
+		runtime.EventsEmit(a.ctx, "dcc_chat:error", map[string]interface{}{
+			"server": server, "nick": nick, "error": err.Error(),
+		})
 		return
 	}
 	go func() {

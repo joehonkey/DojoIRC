@@ -19,6 +19,42 @@ const (
 	transferDeadline = 2 * time.Hour
 )
 
+var privateBlocks []*net.IPNet
+
+func init() {
+	for _, cidr := range []string{
+		"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16",
+		"127.0.0.0/8", "::1/128", "fc00::/7",
+		"169.254.0.0/16", // link-local / cloud metadata
+		"fe80::/10",
+		"100.64.0.0/10", // CGNAT
+	} {
+		_, block, _ := net.ParseCIDR(cidr)
+		if block != nil {
+			privateBlocks = append(privateBlocks, block)
+		}
+	}
+}
+
+// ValidateRemoteAddr returns an error if ip:port is not safe to connect to
+// for an incoming DCC offer. Rejects private/loopback/link-local addresses
+// and out-of-range ports.
+func ValidateRemoteAddr(ip string, port int) error {
+	if port < 1 || port > 65535 {
+		return fmt.Errorf("dcc: port out of range: %d", port)
+	}
+	parsed := net.ParseIP(ip)
+	if parsed == nil {
+		return fmt.Errorf("dcc: invalid IP address %q", ip)
+	}
+	for _, block := range privateBlocks {
+		if block.Contains(parsed) {
+			return fmt.Errorf("dcc: refusing connection to private address %s", ip)
+		}
+	}
+	return nil
+}
+
 // ParseSend parses a "SEND filename ipuint32 port size" DCC param string.
 // Handles quoted filenames containing spaces.
 func ParseSend(param string) (file, ip string, port int, size int64, err error) {
