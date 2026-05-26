@@ -225,40 +225,15 @@ function ensureChannel(serverName, channelName) {
   }
   let ch = srv.channels.find(c => c.name === channelName);
   if (!ch) {
-    ch = { name: channelName, server: serverName, active: false, unread: 0, mentions: 0, messages: loadMessages(serverName, channelName) };
+    ch = { name: channelName, server: serverName, active: false, unread: 0, mentions: 0, messages: [] };
     srv.channels.push(ch);
   }
   return ch;
 }
 
-// ── Message persistence ────────────────────────────────────
-function loadMessages(server, channel) {
-  try {
-    const raw = localStorage.getItem(`dojoirc:msgs:${server}:${channel}`);
-    return raw ? JSON.parse(raw) : [];
-  } catch(e) { return []; }
-}
-
-function saveMessages(server, channel, messages) {
-  try {
-    const toSave = messages
-      .filter(m => m.type !== 'dcc_offer' && m.type !== 'dcc_chat_offer' && m.type !== 'dcc_progress')
-      .slice(-200);
-    localStorage.setItem(`dojoirc:msgs:${server}:${channel}`, JSON.stringify(toSave));
-  } catch(e) {}
-}
-
-const _savePending = {};
-function scheduleSave(server, channel, messages) {
-  const key = `${server}\0${channel}`;
-  clearTimeout(_savePending[key]);
-  _savePending[key] = setTimeout(() => saveMessages(server, channel, messages), 800);
-}
-
 function addMsg(ch, msg) {
   ch.messages.push(msg);
   if (ch.messages.length > 500) ch.messages = ch.messages.slice(-500);
-  scheduleSave(ch.server, ch.name, ch.messages);
 }
 
 function escapeRegex(str) {
@@ -806,7 +781,7 @@ function handleSlash(text) {
       break;
     case 'clear': {
       const clrCh = activeChannel();
-      if (clrCh) { clrCh.messages = []; try { localStorage.removeItem(`dojoirc:msgs:${clrCh.server}:${clrCh.name}`); } catch(e) {} render(); }
+      if (clrCh) { clrCh.messages = []; render(); }
       break;
     }
     case 'sysinfo':
