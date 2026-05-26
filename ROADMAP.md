@@ -120,6 +120,8 @@
 - [ ] Script aliases (/music, /sysinfo, custom /exec aliases)
 - [ ] Plugin/script hooks (shell scripts on events)
 - [ ] Memory usage optimization — audit and reduce per-buffer message footprint, DOM node churn, and Go-side allocations
+- [ ] Explicit nick/channel state cleanup on PART, QUIT, KICK, disconnect, and channel close (prevent stale accumulation in long-running sessions)
+- [ ] `/memstats` debug command — print goroutine count, heap, per-buffer message counts, preview cache size, DCC state counts
 
 ## Stage 6 — Platform Polish
 - [x] FreeBSD build confirmed working — system tray, WebKit frontend, all features (requires patched Wails v2; see docs/building.md)
@@ -141,6 +143,12 @@
 - [x] DCC: add max receive file size setting in config
 - [x] Protect `a.quitting` with `sync/atomic.Bool`; guard all `a.clients` and `a.cfg` access consistently under `a.mu`
 - [ ] Add context cancellation to `App` and IRC clients to coordinate clean shutdown
+- [ ] Redact secrets in logs: suppress PASS, OPER, NickServ IDENTIFY, AUTHENTICATE, and SASL AUTHENTICATE lines before writing to disk
+- [ ] Expand private IP blocklist in URL preview: add link-local (169.254.0.0/16, fe80::/10), CGNAT (100.64.0.0/10), and cloud metadata service ranges
+- [ ] Validate og:image URLs returned by preview fetcher (may point to internal hosts)
+- [ ] Add `enable_in_private_messages = false` config option for URL previews
+- [ ] Add backend input validation for `DCCAccept`, `DCCSend`, `DCCChatAccept` (defence-in-depth, not only `BrowserOpen`)
+- [ ] Hide `/raw` and operator commands (`/oper /kill /kline /dline /rehash /wallops`) from default `/help`; warn on first use
 - [x] Preview cache: add TTL and max-entry limit (backend `sync.Map` and frontend `Map` are currently unbounded)
 - [x] First-run safety: DCC and URL previews off-by-default until enabled in config
 - [x] Add DCC security note and URL preview privacy note to docs
